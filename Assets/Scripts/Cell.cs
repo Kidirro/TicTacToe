@@ -25,6 +25,7 @@ public class Cell : MonoBehaviour
         _collider = GetComponent<BoxCollider2D>();
         _sprRend = GetComponent<SpriteRenderer>();
         _sprRend.sprite = _spriteList[0];
+        
     }
 
     public void ChangeSize(float s)
