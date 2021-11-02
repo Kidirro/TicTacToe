@@ -5,8 +5,13 @@ using UnityEngine;
 public class Cell : MonoBehaviour
 {
 
-    [Tooltip("–азмеры клетки в мировых координатах")]
+    public float CellSize
+    {
+        get { return _cellSize; }
+    }
     private float _cellSize;
+
+    public Vector3 Position;
 
     public Vector2 Id
     {
@@ -24,13 +29,13 @@ public class Cell : MonoBehaviour
     {
         _collider = GetComponent<BoxCollider2D>();
         _sprRend = GetComponent<SpriteRenderer>();
-        _sprRend.sprite = _spriteList[0];
-        
+        //_sprRend.sprite = _spriteList[1];
     }
 
     public void ChangeSize(float s)
     {
         
         _collider.size = new Vector2(s, s);
+        _cellSize = s;
     }
 }
