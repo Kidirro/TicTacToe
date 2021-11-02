@@ -6,9 +6,15 @@ public class Field : MonoBehaviour
 {
     [SerializeField] private bool _isNeedGizmos;
 
+
     [Space]
     [Space]
     [Space]
+    [Space]
+
+    [SerializeField] private GameObject _lineParent;
+    [SerializeField] private GameObject _cellParent;
+
     [Space]
 
     [SerializeField] private Vector2 _defaultScreenResolution;
@@ -30,7 +36,7 @@ public class Field : MonoBehaviour
 
     private void InitializeField()
     {
-        //_fieldSize = new Vector2Int(3, 3);
+        if (_fieldSize.x ==0 || _fieldSize.y==0)_fieldSize = new Vector2Int(3, 3);
         float StartPositionX = Camera.main.ScreenToWorldPoint(new Vector2(Camera.main.pixelWidth * ((_screenBorderX.x) / _defaultScreenResolution.x), 0)).x;
         float EndPositionX = Camera.main.ScreenToWorldPoint(new Vector2(Camera.main.pixelWidth * ((_defaultScreenResolution.x - _screenBorderX.y) / _defaultScreenResolution.x), 0)).x;
 
@@ -41,6 +47,7 @@ public class Field : MonoBehaviour
         float cellSizeX = ((EndPositionX - StartPositionX) / _fieldSize.x);
 
         float cellSize = (cellSizeY < cellSizeX) ? cellSizeY : cellSizeX;
+
         float RemainX = (EndPositionX - StartPositionX- _fieldSize.x * cellSize) / 2;
         float RemainY = (EndPositionY - StartPositionY - _fieldSize.y * cellSize) / 2;
 
@@ -60,14 +67,17 @@ public class Field : MonoBehaviour
                 Cell cell = newCellObject.GetComponent<Cell>();
                 newCellObject.transform.position = new Vector2(StartPositionMatrix.x + i * cellSize, StartPositionMatrix.y + j * cellSize);
                 newCellObject.name = "[" + i + "][" + j + "]cell";
+                cell.Position = newCellObject.transform.position;
                 cell.Id = new Vector2(i, j);
-                newCellObject.transform.SetParent(this.transform);
+                newCellObject.transform.SetParent(_cellParent.transform);
                 cell.ChangeSize(cellSize * (1 - _borderPercent));
                 newCellObject.transform.localScale = new Vector2(cellSize * (1 - _borderPercent), cellSize * (1 - _borderPercent));
 
                 _cellList[i].Add(cell);
             }
         }
+
+        InitializeLine();
     }
 
     private void InitializeLine()
@@ -75,9 +85,53 @@ public class Field : MonoBehaviour
         int i = 0;
         int j = 0;
 
-        int size
+        int verticalSize = Mathf.Max(_lineListVertical.Count, _cellList.Count-1);
+        int horizontalSize = Mathf.Max(_lineListHorizontal.Count, _cellList[0].Count-1);
 
-        while ()
+        while (i < verticalSize)
+        {
+            if (i >= _lineListVertical.Count)
+            {
+                GameObject newLine = new GameObject();
+                LineRenderer LR = newLine.AddComponent<LineRenderer>();
+                newLine.transform.position = Vector2.zero;
+                newLine.transform.parent = _lineParent.transform;
+                _lineListVertical.Add(LR);
+            }
+
+            if (i < _cellList.Count - 1)
+            {
+                Vector3[] points = new Vector3[2];
+                points[0] = new Vector2(_cellList[i][0].Position.x * 0.5f +  _cellList[i+1][0].Position.x * 0.5f, _cellList[i][0].Position.y - _cellList[0][0].CellSize/2);
+                points[1] = new Vector2(_cellList[i][_cellList[0].Count-1].Position.x * 0.5f + _cellList[i + 1][_cellList[0].Count - 1].Position.x * 0.5f, _cellList[i][_cellList[0].Count - 1].Position.y + _cellList[0][0].CellSize / 2);
+                _lineListVertical[i].positionCount = 2;
+                _lineListVertical[i].SetPositions(points);
+            }
+            i++;
+        }
+
+        while (j < horizontalSize)
+        {
+            if (j >= _lineListHorizontal.Count)
+            {
+                GameObject newLine = new GameObject();
+                LineRenderer LR = newLine.AddComponent<LineRenderer>();
+                newLine.transform.position = Vector2.zero;
+                newLine.transform.parent = _lineParent.transform;
+                _lineListHorizontal.Add(LR);
+            }
+
+            if (j < _cellList[0].Count - 1)
+            {
+                Vector3[] points = new Vector3[2];
+                points[0] = new Vector2(_cellList[0][j].Position.x- _cellList[0][0].CellSize / 2, _cellList[0][j].Position.y * 0.5f + _cellList[0][j+1].Position.y * 0.5f);
+                points[1] = new Vector2(_cellList[_cellList.Count - 1][j].Position.x + _cellList[0][0].CellSize / 2,_cellList[1][j].Position.y * 0.5f + _cellList[1][j+1].Position.y * 0.5f);
+                _lineListHorizontal[j].positionCount = 2;
+                _lineListHorizontal[j].SetPositions(points);
+            }
+            j++;
+        }
+
     }
 
     private void OnDrawGizmos()
