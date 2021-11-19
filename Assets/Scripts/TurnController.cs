@@ -1,10 +1,15 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System;
 
 public class TurnController : MonoBehaviour
 {
     static private int _currentPlayer = 1;
+    static public int CurrentPlayer
+    {
+        get { return _currentPlayer; }
+    }
 
     static public bool IsGamePlayimg
     {
@@ -35,13 +40,12 @@ public class TurnController : MonoBehaviour
 
             MasterChecker(id);
 
-            _currentPlayer = (_currentPlayer == 1) ? 2 : 1;
         }
     }
 
     static private void MasterChecker(Vector2Int turnId)
     {
-
+        bool lineFind = false;
         for (int x = 0; x < _cellStateCopy[0].Count; x++)
         {
             for(int y = 0; y < _cellStateCopy.Count; y++)
@@ -53,7 +57,7 @@ public class TurnController : MonoBehaviour
 
                 switch (x)
                 {
-                    case 0:
+                    case 2:
                         if (turnId.x <_cellStateCopy.Count-2)
                         {
                             flagX = true;
@@ -69,7 +73,7 @@ public class TurnController : MonoBehaviour
 
                         }
                         break;
-                    case 2:
+                    case 0:
                         if (turnId.x > 1)
                         {
                             flagX = true;
@@ -81,7 +85,7 @@ public class TurnController : MonoBehaviour
 
                 switch (y)
                 {
-                    case 0:
+                    case 2:
                         if (turnId.y < _cellStateCopy[0].Count - 2)
                         {
                             flagY = true;
@@ -97,7 +101,7 @@ public class TurnController : MonoBehaviour
 
                         }
                         break;
-                    case 2:
+                    case 0:
                         if (turnId.y > 1)
                         {
                             flagY = true;
@@ -109,18 +113,19 @@ public class TurnController : MonoBehaviour
 
                 if (flagX && flagY)
                 {
-                    Debug.Log(""+x +" "+y);
-                    CheckField(startX,startY, turnId);
+                    lineFind = CheckField(startX, startY, turnId) || lineFind;
                 }
 
             }
         }
+        if (!lineFind) NewTurn();
     }
 
-    static private void CheckField(int stepX, int stepY, Vector2Int turnId)
+    static private bool CheckField(int stepX, int stepY, Vector2Int turnId)
     {
         Vector4 DiagonalResult = Vector4.one;
         Vector4 LineResult = Vector4.one;
+        bool lineFind = false;
 
         while (DiagonalResult != Vector4.zero || LineResult != Vector4.zero)
         {
@@ -131,6 +136,7 @@ public class TurnController : MonoBehaviour
                 _isPossibilityOfMove = false;
                 Field.Instance.AddNewId(DiagonalResult);
                 ClearLine(new Vector2Int((int)DiagonalResult.x, (int)DiagonalResult.y), new Vector2Int((int)DiagonalResult.z, (int)DiagonalResult.w), turnId);
+                lineFind = true;
 
             }
             if (LineResult != Vector4.zero)
@@ -139,28 +145,51 @@ public class TurnController : MonoBehaviour
                 Field.Instance.AddNewId(LineResult);
 
                 ClearLine(new Vector2Int((int)LineResult.x, (int)LineResult.y), new Vector2Int((int)LineResult.z, (int)LineResult.w), turnId);
+                lineFind = true;
             }
         }
+        return lineFind;
     }
 
-    static private Vector4 CheckDiagonal(int StartX,int StartY)
+    static private Vector4 CheckDiagonal(int StartX, int StartY)
     {
-
         int DefValR = (int)_cellStateCopy[StartX][StartY];
-        bool toright = DefValR == 1 || DefValR==2;
+        bool toright = DefValR == 1 || DefValR == 2;
 
-        int DefValL = (int)_cellStateCopy[StartX+2][StartY];
+        int DefValL = (int)_cellStateCopy[StartX + 2][StartY];
         bool toleft = DefValL == 1 || DefValL == 2;
         int i = 0;
-        while (i<3 & (toleft || toright))
+        while (i < 3 & (toleft || toright))
         {
             toright = toright && (int)_cellStateCopy[StartX + i][StartY + i] == DefValR;
 
-            toleft = toleft && (int)_cellStateCopy[StartX + 2 - i][StartY + i] == DefValL;
+            toleft = toleft && (int)_cellStateCopy[StartX + i][StartY +2 - i] == DefValL;
             i++;
         }
-        if (toright) return new Vector4(StartX, StartY, StartX + i - 1, StartY + i - 1);
-        else if (toleft) return new Vector4(StartX + 2, StartY, StartX + 3 - i, StartY + i - 1);
+        if (toright)
+        {
+            i--;
+            while ((i + StartY <= _cellStateCopy[0].Count - 1) && (i + StartX <= _cellStateCopy.Count - 1) && toright)
+            {
+                toright = toright && (int)_cellStateCopy[StartX + i][StartY + i] == DefValR;
+                if (!toright) i -= 1;
+                else i++;
+            }
+            if (i + StartY == _cellStateCopy[0].Count || i + StartX == _cellStateCopy.Count) i--;
+            return new Vector4(StartX, StartY, StartX + i, StartY + i);
+        }
+        else if (toleft)
+        {
+            i--;
+            while ((i + StartX <= _cellStateCopy[0].Count - 1) && ( StartY+2-i >= 0) && toleft)
+            {
+                toleft = toleft && (int)_cellStateCopy[StartX + i][StartY + 2-i] == DefValL;
+                if (!toleft) i -= 1;
+                else i++;
+            }
+            if (i + StartX == _cellStateCopy[0].Count || StartY + 2 - i == -1) i--;
+            return new Vector4(StartX, StartY + 2, StartX + i , StartY + 2 -i);
+        }
         else return Vector4.zero;
                 
     }
@@ -185,8 +214,31 @@ public class TurnController : MonoBehaviour
 
                 j++;
             }
-            if (rowFlag) return new Vector4(StartX + i, StartY, StartX + i, StartY + 2);
-            else if (colFlag) return new Vector4(StartX, StartY + i, StartX + 2, StartY + i);
+            if (rowFlag)
+            {
+                j--;
+                while (j + StartY <= _cellStateCopy[0].Count - 1 && rowFlag)
+                {
+                    rowFlag = rowFlag && (int)_cellStateCopy[StartX + i][StartY + j] == DefValR;
+                    if (!rowFlag) j -= 1;
+                    else j++;
+                }
+                if (j + StartY == _cellStateCopy[0].Count) j--;
+                return new Vector4(StartX + i, StartY, StartX + i, StartY + j);
+
+            }
+            else if (colFlag)
+            {
+                j--;
+                while(j+StartX<=_cellStateCopy.Count-1 && colFlag)
+                {
+                    colFlag = colFlag && (int)_cellStateCopy[StartX + j][StartY + i] == DefValC;
+                    if (!colFlag) j -= 1;
+                    else j++;
+                }
+                if (j + StartX == _cellStateCopy.Count) j--;
+                return new Vector4(StartX, StartY + i, StartX + j, StartY + i);
+            }
 
             i++;
         }
@@ -196,12 +248,14 @@ public class TurnController : MonoBehaviour
 
    static private void ClearLine(Vector2Int id1,Vector2Int id2, Vector2Int idDefault)
     {
-        Vector2Int centralCell = new Vector2Int((id1.x + id2.x) / 2, (id1.y + id2.y) / 2);
-        Debug.Log(centralCell);
-        Debug.Log(idDefault);
-        Debug.Log(idDefault==centralCell);
+        
         if (id1 != idDefault)  _cellStateCopy[id1.x][id1.y]= 0;
-        if ( centralCell != idDefault ) _cellStateCopy[centralCell.x][centralCell.y] = 0;
+        Vector2Int nextValue = new Vector2Int(id1.x + (int) Math.Sign(id2.x - id1.x), id1.y + (int)Math.Sign(id2.y - id1.y));
+        while (nextValue != id2)
+        {
+            if (nextValue != idDefault) _cellStateCopy[nextValue.x][nextValue.y]=0;
+             nextValue = new Vector2Int(nextValue.x + (int)Math.Sign(id2.x - id1.x), nextValue.y + (int)Math.Sign(id2.y - id1.y));
+        }
         if (id2 != idDefault) _cellStateCopy[id2.x][id2.y] = 0;
     }
 
@@ -211,8 +265,10 @@ public class TurnController : MonoBehaviour
         _isGamePlaying = true;
     }
 
-    static public void UnlockTurn()
+    static public void NewTurn()
     {
         _isPossibilityOfMove = true;
+
+        _currentPlayer = (_currentPlayer == 1) ? 2 : 1;
     }
 }

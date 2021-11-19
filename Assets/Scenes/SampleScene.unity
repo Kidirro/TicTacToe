@@ -238,8 +238,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e35ea9044c85fed499f75c93488f84bc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _manaImageList: []
-  _RestartMenu: {fileID: 1168920432}
+  _playerOneScoreText: {fileID: 1907715549}
+  _playerTwoScorText: {fileID: 2075518843}
 --- !u!1 &519420028
 GameObject:
   m_ObjectHideFlags: 0
@@ -661,9 +661,9 @@ MonoBehaviour:
   _cellParent: {fileID: 1997239705}
   _defaultScreenResolution: {x: 1080, y: 1920}
   _screenBorderX: {x: 100, y: 100}
-  _screenBorderY: {x: 250, y: 250}
+  _screenBorderY: {x: 250, y: 150}
   _borderPercent: 0.3
-  _fieldSize: {x: 3, y: 4}
+  _fieldSize: {x: 5, y: 5}
   _cellPrefab: {fileID: 3685590108640045134, guid: b232398baab4bca4cbc0745b6592de8c, type: 3}
   _lineMaterial: {fileID: 10306, guid: 0000000000000000f000000000000000, type: 0}
   _lineWidthPercent: 0.5

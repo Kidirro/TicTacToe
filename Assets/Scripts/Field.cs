@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System;
 
 public class Field : MonoBehaviour
 {
@@ -243,18 +244,33 @@ public class Field : MonoBehaviour
         _lineFinish.endColor = cl;
     }
 
-    private void ClearCellOnLine(Vector2Int id1,Vector2Int id2)
+    private int ClearCellOnLine(Vector2Int id1, Vector2Int id2)
     {
-        _cellList[id1.x][id1.y].ChangeState(0);
-        _cellList[(id1.x+id2.x)/2][(id1.y+id2.y)/2].ChangeState(0);
-        _cellList[id2.x][id2.y].ChangeState(0);
+        int res = 0;
+        if (_cellList[id1.x][id1.y].State != 0)
+        {
+            _cellList[id1.x][id1.y].ChangeState(0);
+            res++;
+        }
+        Vector2Int nextValue = new Vector2Int(id1.x + (int)Math.Sign(id2.x - id1.x), id1.y + (int)Math.Sign(id2.y - id1.y));
+        while (nextValue != id2)
+        {
+            if (_cellList[nextValue.x][nextValue.y].State != 0) _cellList[nextValue.x][nextValue.y].ChangeState(0);
+            nextValue = new Vector2Int(nextValue.x + (int)Math.Sign(id2.x - id1.x), nextValue.y + (int)Math.Sign(id2.y - id1.y));
+            res++;
+        }
+        if (_cellList[id2.x][id2.y].State != 0)
+        {
+            _cellList[id2.x][id2.y].ChangeState(0);
+            res++;
+        }
+        return res;
     }
 
 
     public void AddNewId(Vector4 id)
     {
         _finishLineId.Add(id);
-        Debug.Log(_finishLineId.Count);
         if (_finishLineId.Count == 1) StartCoroutine(FinishLineCleaning());
     }
 
@@ -263,7 +279,6 @@ public class Field : MonoBehaviour
     {
         while(_finishLineId.Count>0)
         {
-            Debug.Log(_finishLineId[0]);
             Vector2Int id1 = new Vector2Int((int)_finishLineId[0].x, (int)_finishLineId[0].y);
             Vector2Int id2 = new Vector2Int((int)_finishLineId[0].z, (int)_finishLineId[0].w);
             Vector3[] points = new Vector3[2];
@@ -282,8 +297,7 @@ public class Field : MonoBehaviour
                 yield return new WaitForFixedUpdate();
             }
 
-            ClearCellOnLine(new Vector2Int((int)id1.x, (int)id1.y), new Vector2Int((int)id2.x, (int)id2.y));
-
+            UIController.AddScore(TurnController.CurrentPlayer, ClearCellOnLine(new Vector2Int((int)id1.x, (int)id1.y), new Vector2Int((int)id2.x, (int)id2.y)));
             while (j >0)
             {
                 j--;
@@ -294,6 +308,6 @@ public class Field : MonoBehaviour
             _finishLineId.Remove(_finishLineId[0]);
         }
 
-        TurnController.UnlockTurn();
+        TurnController.NewTurn();
     }
 }
