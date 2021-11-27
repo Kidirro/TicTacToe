@@ -34,8 +34,6 @@ public class Field : MonoBehaviour
 
     private List<List<Cell>> _cellList = new List<List<Cell>>();
 
-    private List<Vector4> _idClearList = new List<Vector4>();
-
     public List<List<Cell>> CellList
     {
         get { return _cellList; }
@@ -50,11 +48,18 @@ public class Field : MonoBehaviour
     [SerializeField] private Material _lineMaterial;
     [SerializeField] private float _lineWidthPercent;
 
+    private float _startPositionX;
+    private float _endPositionX;
+
+    private float _startPositionY;
+    private float _endPositionY;
+
     private List<Vector4> _finishLineId = new List<Vector4>();
 
     private void Awake()
     {
         _instance = this;
+
     }
 
     private void Start()
@@ -63,24 +68,33 @@ public class Field : MonoBehaviour
         InitializeLine();
     }
 
+    private void GetStartPosition()
+    {
+        _startPositionX = Camera.main.ScreenToWorldPoint(new Vector2(Camera.main.pixelWidth * ((_screenBorderX.x) / _defaultScreenResolution.x), 0)).x;
+        _endPositionX = Camera.main.ScreenToWorldPoint(new Vector2(Camera.main.pixelWidth * ((_defaultScreenResolution.x - _screenBorderX.y) / _defaultScreenResolution.x), 0)).x;
+
+        _startPositionY = Camera.main.ScreenToWorldPoint(new Vector2(0, Camera.main.pixelHeight * (_screenBorderY.x) / _defaultScreenResolution.y)).y;
+        _endPositionY = Camera.main.ScreenToWorldPoint(new Vector2(0, Camera.main.pixelHeight * (_defaultScreenResolution.y - _screenBorderY.y) / _defaultScreenResolution.y)).y;
+
+    }
+
+    private float GetCellSize(int x_size=3,int y_size=3)
+    {
+        float cellSizeY = ((_endPositionY - _startPositionY) / y_size);
+        float cellSizeX = ((_endPositionX - _startPositionX) / x_size);
+
+        return (cellSizeY < cellSizeX) ? cellSizeY : cellSizeX;
+    }
+
     public void InitializeField()
     {
-        if (_fieldSize.x ==0 || _fieldSize.y==0)_fieldSize = new Vector2Int(3, 3);
-        float StartPositionX = Camera.main.ScreenToWorldPoint(new Vector2(Camera.main.pixelWidth * ((_screenBorderX.x) / _defaultScreenResolution.x), 0)).x;
-        float EndPositionX = Camera.main.ScreenToWorldPoint(new Vector2(Camera.main.pixelWidth * ((_defaultScreenResolution.x - _screenBorderX.y) / _defaultScreenResolution.x), 0)).x;
+        GetStartPosition();
 
-        float StartPositionY = Camera.main.ScreenToWorldPoint(new Vector2(0, Camera.main.pixelHeight * (_screenBorderY.x) / _defaultScreenResolution.y)).y;
-        float EndPositionY = Camera.main.ScreenToWorldPoint(new Vector2(0, Camera.main.pixelHeight * (_defaultScreenResolution.y - _screenBorderY.y) / _defaultScreenResolution.y)).y;
+        float cellSize = GetCellSize(_fieldSize.x, _fieldSize.y);
+        float RemainX = (_endPositionX - _startPositionX- _fieldSize.x * cellSize) / 2;
+        float RemainY = (_endPositionY - _startPositionY - _fieldSize.y * cellSize) / 2;
 
-        float cellSizeY = ((EndPositionY - StartPositionY) / _fieldSize.y);
-        float cellSizeX = ((EndPositionX - StartPositionX) / _fieldSize.x);
-
-        float cellSize = (cellSizeY < cellSizeX) ? cellSizeY : cellSizeX;
-
-        float RemainX = (EndPositionX - StartPositionX- _fieldSize.x * cellSize) / 2;
-        float RemainY = (EndPositionY - StartPositionY - _fieldSize.y * cellSize) / 2;
-
-        Vector2 StartPositionMatrix = new Vector2(StartPositionX+RemainX+cellSize/2, StartPositionY + RemainY+ cellSize/2);
+        Vector2 StartPositionMatrix = new Vector2(_startPositionX+RemainX+cellSize/2, _startPositionY + RemainY+ cellSize/2);
         _cellList = new List<List<Cell>>();
 
         for (int i = 0; i < _fieldSize.x; i++)
@@ -90,12 +104,12 @@ public class Field : MonoBehaviour
             {
                 GameObject newCellObject = Instantiate(_cellPrefab);
                 Cell cell = newCellObject.GetComponent<Cell>();
-                newCellObject.transform.position = new Vector2(StartPositionMatrix.x + i * cellSize, StartPositionMatrix.y + j * cellSize);
+               cell.SetTransformPosition(StartPositionMatrix.x + i * cellSize, StartPositionMatrix.y + j * cellSize,false);
                 newCellObject.name = "[" + i + "][" + j + "]cell";
-                cell.Position = newCellObject.transform.position;
                 cell.Id = new Vector2Int(i, j);
                 newCellObject.transform.SetParent(_cellParent.transform);
-                newCellObject.transform.localScale = new Vector2(cellSize * (1 - _borderPercent), cellSize * (1 - _borderPercent));
+                cell.SetTransformSize(cellSize * (1 - _borderPercent),cellSize,true);
+                cell.SetColliderSize(1+_borderPercent*0.5f);
 
                 _cellList[i].Add(cell);
             }
@@ -115,7 +129,7 @@ public class Field : MonoBehaviour
         {
             for(int j = 0; j < _cellList[i].Count; j++)
             {
-                _cellList[i][j].ChangeState(0);
+                _cellList[i][j].SetState(0);
             }
         }
     }
@@ -201,7 +215,7 @@ public class Field : MonoBehaviour
             if (j < _cellList[0].Count - 1)
             {
                 Vector3[] points = new Vector3[2];
-                points[0] = new Vector2(_cellList[0][j].Position.x- _cellList[0][0].CellSize / 2, _cellList[0][j].Position.y * 0.5f + _cellList[0][j+1].Position.y * 0.5f);
+                points[0] = new Vector2(_cellList[0][j].Position.x - _cellList[0][0].CellSize / 2, _cellList[0][j].Position.y * 0.5f + _cellList[0][j + 1].Position.y * 0.5f);
                 points[1] = new Vector2(_cellList[_cellList.Count - 1][j].Position.x + _cellList[0][0].CellSize / 2,_cellList[1][j].Position.y * 0.5f + _cellList[1][j+1].Position.y * 0.5f);
 
                 _lineListHorizontal[j].SetWidth(_cellList[0][0].CellSize * _borderPercent * _lineWidthPercent, _cellList[0][0].CellSize * _borderPercent * _lineWidthPercent);
@@ -249,19 +263,19 @@ public class Field : MonoBehaviour
         int res = 0;
         if (_cellList[id1.x][id1.y].State != 0)
         {
-            _cellList[id1.x][id1.y].ChangeState(0);
+            _cellList[id1.x][id1.y].SetState(0);
             res++;
         }
         Vector2Int nextValue = new Vector2Int(id1.x + (int)Math.Sign(id2.x - id1.x), id1.y + (int)Math.Sign(id2.y - id1.y));
         while (nextValue != id2)
         {
-            if (_cellList[nextValue.x][nextValue.y].State != 0) _cellList[nextValue.x][nextValue.y].ChangeState(0);
+            if (_cellList[nextValue.x][nextValue.y].State != 0) _cellList[nextValue.x][nextValue.y].SetState(0);
             nextValue = new Vector2Int(nextValue.x + (int)Math.Sign(id2.x - id1.x), nextValue.y + (int)Math.Sign(id2.y - id1.y));
             res++;
         }
         if (_cellList[id2.x][id2.y].State != 0)
         {
-            _cellList[id2.x][id2.y].ChangeState(0);
+            _cellList[id2.x][id2.y].SetState(0);
             res++;
         }
         return res;
@@ -307,7 +321,5 @@ public class Field : MonoBehaviour
             }
             _finishLineId.Remove(_finishLineId[0]);
         }
-
-        TurnController.NewTurn();
     }
 }

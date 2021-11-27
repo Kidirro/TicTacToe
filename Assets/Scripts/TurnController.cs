@@ -25,8 +25,8 @@ public class TurnController : MonoBehaviour
     {
         if (Field.Instance.CellList[id.x][id.y].State == 0 && _isGamePlaying && _isPossibilityOfMove)
         {
-
-            Field.Instance.CellList[id.x][id.y].ChangeState(_currentPlayer);
+            _isPossibilityOfMove = false;
+            Field.Instance.CellList[id.x][id.y].SetState(_currentPlayer);
             _cellStateCopy = new List<List<CellState>>();
             for (int i =0;i<Field.Instance.CellList.Count;i++)
             {
@@ -118,7 +118,6 @@ public class TurnController : MonoBehaviour
 
             }
         }
-        if (!lineFind) NewTurn();
     }
 
     static private bool CheckField(int stepX, int stepY, Vector2Int turnId)

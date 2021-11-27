@@ -36,4 +36,9 @@ public class UIController : MonoBehaviour
 
         }
     }
+
+    public static void EndButtonPressed()
+    {
+        TurnController.NewTurn();
+    }
 }

@@ -1,0 +1,6 @@
+Russian:NewGame:Новая игра
+English:NewGame:New Game
+Russian:NewG ame: Новая игра
+Russian:ContiniuGame: Новая игра
+Russian:EndTurn:Закончить ход
+English:EndTurn:End Turn
