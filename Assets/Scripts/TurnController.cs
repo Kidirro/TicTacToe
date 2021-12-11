@@ -27,25 +27,28 @@ public class TurnController : MonoBehaviour
         {
             _isPossibilityOfMove = false;
             Field.Instance.CellList[id.x][id.y].SetState(_currentPlayer);
-            _cellStateCopy = new List<List<CellState>>();
-            for (int i =0;i<Field.Instance.CellList.Count;i++)
-            {
-                _cellStateCopy.Add(new List<CellState>());
-                for(int j = 0; j < Field.Instance.CellList[i].Count; j++)
-                {
-                    _cellStateCopy[i].Add(Field.Instance.CellList[i][j].State);
-                }
-            }
-
 
             MasterChecker(id);
-
         }
     }
 
-    static private void MasterChecker(Vector2Int turnId)
+    static public void MasterChecker(Vector2Int turnId,bool IsNeedUpdate = true)
     {
         bool lineFind = false;
+        if (IsNeedUpdate)
+        {
+            _cellStateCopy = new List<List<CellState>>();
+            for (int i = 0; i < Field.Instance.CellList.Count; i++)
+            {
+                _cellStateCopy.Add(new List<CellState>());
+                for (int j = 0; j < Field.Instance.CellList[i].Count; j++)
+                {
+                    _cellStateCopy[i].Add(Field.Instance.CellList[i][j].State);
+
+                }
+            }
+        }
+
         for (int x = 0; x < _cellStateCopy[0].Count; x++)
         {
             for(int y = 0; y < _cellStateCopy.Count; y++)
@@ -133,7 +136,7 @@ public class TurnController : MonoBehaviour
             if (DiagonalResult != Vector4.zero)
             {
                 _isPossibilityOfMove = false;
-                Field.Instance.AddNewId(DiagonalResult);
+                Field.Instance.AddNewFinishId(DiagonalResult);
                 ClearLine(new Vector2Int((int)DiagonalResult.x, (int)DiagonalResult.y), new Vector2Int((int)DiagonalResult.z, (int)DiagonalResult.w), turnId);
                 lineFind = true;
 
@@ -141,7 +144,7 @@ public class TurnController : MonoBehaviour
             if (LineResult != Vector4.zero)
             {
                 _isPossibilityOfMove = false;
-                Field.Instance.AddNewId(LineResult);
+                Field.Instance.AddNewFinishId(LineResult);
 
                 ClearLine(new Vector2Int((int)LineResult.x, (int)LineResult.y), new Vector2Int((int)LineResult.z, (int)LineResult.w), turnId);
                 lineFind = true;
@@ -180,13 +183,17 @@ public class TurnController : MonoBehaviour
         else if (toleft)
         {
             i--;
-            while ((i + StartX <= _cellStateCopy[0].Count - 1) && ( StartY+2-i >= 0) && toleft)
+            Debug.Log(StartX);
+            Debug.Log(_cellStateCopy.Count);
+
+            while ((i + StartX < _cellStateCopy.Count) && ( StartY+2-i >= 0) && toleft)
             {
                 toleft = toleft && (int)_cellStateCopy[StartX + i][StartY + 2-i] == DefValL;
                 if (!toleft) i -= 1;
                 else i++;
             }
-            if (i + StartX == _cellStateCopy[0].Count || StartY + 2 - i == -1) i--;
+
+            if (i + StartX == _cellStateCopy.Count || StartY + 2 - i == -1) i--;
             return new Vector4(StartX, StartY + 2, StartX + i , StartY + 2 -i);
         }
         else return Vector4.zero;
@@ -222,6 +229,7 @@ public class TurnController : MonoBehaviour
                     if (!rowFlag) j -= 1;
                     else j++;
                 }
+
                 if (j + StartY == _cellStateCopy[0].Count) j--;
                 return new Vector4(StartX + i, StartY, StartX + i, StartY + j);
 
@@ -247,7 +255,6 @@ public class TurnController : MonoBehaviour
 
    static private void ClearLine(Vector2Int id1,Vector2Int id2, Vector2Int idDefault)
     {
-        
         if (id1 != idDefault)  _cellStateCopy[id1.x][id1.y]= 0;
         Vector2Int nextValue = new Vector2Int(id1.x + (int) Math.Sign(id2.x - id1.x), id1.y + (int)Math.Sign(id2.y - id1.y));
         while (nextValue != id2)

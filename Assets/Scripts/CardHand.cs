@@ -39,23 +39,19 @@ public class CardHand : MonoBehaviour
         float EndPositionX = Camera.main.ScreenToWorldPoint(new Vector2(Camera.main.pixelWidth * ((_defaultScreenResolution.x - _screenBorderX.y) / _defaultScreenResolution.x), 0)).x;
         float StartPositionY = Camera.main.ScreenToWorldPoint(new Vector2(0, Camera.main.pixelHeight * (_screenBorderY.x) / _defaultScreenResolution.y)).y;
         float EndPositionY = Camera.main.ScreenToWorldPoint(new Vector2(0, Camera.main.pixelHeight * (_defaultScreenResolution.y - _screenBorderY.y) / _defaultScreenResolution.y)).y;
-
         float y_pos = (EndPositionY - StartPositionY)/2;
         float x_pos = (EndPositionX - StartPositionX)/(_cardList.Count+1);
 
         for (int i = 0; i < _cardList.Count; i++)
         {
             _cardList[i].transform.position = new Vector2(StartPositionX+x_pos * (i + 1), StartPositionY+ y_pos);
+            _cardList[i].GetComponent<Card>().HandPosition = new Vector2(StartPositionX + x_pos * (i + 1), StartPositionY + y_pos);
         }
     }
 
     public void Update()
     {
-        if (Input.GetKeyDown(KeyCode.W))
-        {
-            Debug.Log("added");
-            AddCard();
-        }
+        if (Input.GetKeyDown(KeyCode.W)) AddCard();
     }
 
     private Vector2 ConvertToWorld(Vector2 n) {
