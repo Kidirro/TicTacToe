@@ -1,7 +1,9 @@
 using System.Collections;
-using System.Collections.Generic;
+using UnityEngine.EventSystems;
 using UnityEngine;
 using UnityEngine.UI;
+using System.Diagnostics;
+using Debug = UnityEngine.Debug;
 
 public class Card : MonoBehaviour
 {
@@ -33,19 +35,38 @@ public class Card : MonoBehaviour
 
     private Transform _transform;
 
+    private Stopwatch stopWatch = new Stopwatch();
 
-
-    public void Clicked()
+    private Field _field = Field.Instance;
+ 
+    public void BeginDrag()
     {
-        Debug.Log("|");
-        SetTransformSize(_cardSize + 1,false);
+        stopWatch.Reset();
+        stopWatch.Start();
     }
 
-    public void Draged()
+    public void EndDraged()
     {
-        SetTransformSize(_cardSize - 1, false);
+        stopWatch.Stop();
+        Debug.Log(stopWatch.ElapsedMilliseconds);
+        if (stopWatch.ElapsedMilliseconds > 80 && _field.CheckInField(Position.y))
+        {
+            Info.ÑardAction.Invoke();
+            Destroy(gameObject);
+
+        }
+        else
+        {
+            Debug.Log("InfoShowed!");
+        }
+        SetTransformPosition(HandPosition.x, HandPosition.y, false);
     }
 
+    public void Draging()
+    {
+        Vector2 vector = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+        SetTransformPosition(vector.x, vector.y);
+    }
 
 
     public void SetTransformSize(float reals, bool instantly = true)
@@ -65,7 +86,6 @@ public class Card : MonoBehaviour
     private IEnumerator ScaleIEnumerator()
     {
         _isSizeCoroutineWork = true;
-        Field.Instance.CellAnimating = Field.Instance.CellAnimating + 1;
         float prevS = _cardSize;
         float step = (_cardSize - _transform.localScale.x) / 100f;
         int i = 0;
@@ -81,7 +101,6 @@ public class Card : MonoBehaviour
             i++;
             yield return null;
         }
-        Field.Instance.CellAnimating = Field.Instance.CellAnimating - 1;
         _isSizeCoroutineWork = false;
         yield break;
     }
@@ -89,7 +108,6 @@ public class Card : MonoBehaviour
     private IEnumerator PositionIEnumerator()
     {
         _isPositionCoroutineWork = true;
-        Field.Instance.CellAnimating = Field.Instance.CellAnimating + 1;
         Vector2 prevPos = _cardPosition;
 
         Vector2 currentPosition = _transform.position;
@@ -111,7 +129,6 @@ public class Card : MonoBehaviour
             yield return null;
         }
         _transform.position = _cardPosition;
-        Field.Instance.CellAnimating = Field.Instance.CellAnimating - 1;
         _isPositionCoroutineWork = false;
         yield break;
     }

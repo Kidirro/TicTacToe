@@ -9,7 +9,9 @@ public class Cell : MonoBehaviour
     {
         get { return _cellSize; }
     }
-    private float _cellSize; 
+    private float _cellSize;
+
+    private float _realSize;
     private bool _isSizeCoroutineWork = false;
 
     public Vector2 Position
@@ -60,7 +62,8 @@ public class Cell : MonoBehaviour
     public void SetTransformSize(float s,float reals,bool instantly = true)
     {
         _cellSize = reals;
-        if (instantly) _transform.localScale=new Vector2(s,s);
+        _realSize = s;
+        if (instantly) _transform.localScale=new Vector2(_realSize, _realSize);
         else if (!_isSizeCoroutineWork) StartCoroutine(ScaleIEnumerator());
     }
 
@@ -80,15 +83,15 @@ public class Cell : MonoBehaviour
     {
         _isSizeCoroutineWork = true;
         Field.Instance.CellAnimating = Field.Instance.CellAnimating + 1;
-        float prevS = _cellSize;
-        float step = (_cellSize - _transform.localScale.x) / 100f;
+        float prevS = _realSize;
+        float step = (_realSize - _transform.localScale.x) / 100f;
         int i = 0;
         while (i <= 100)
         {
-            if (prevS != _cellSize)
+            if (prevS != _realSize)
             {
-                 prevS = _cellSize;
-                 step = (_cellSize - _transform.localScale.x) / 100f;
+                 prevS = _realSize;
+                 step = (_realSize - _transform.localScale.x) / 100f;
                  i = 0;
             }
             _transform.localScale = _transform.localScale + new Vector3(step, step);

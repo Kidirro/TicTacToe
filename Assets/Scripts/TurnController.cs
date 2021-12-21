@@ -16,7 +16,14 @@ public class TurnController : MonoBehaviour
         get { return _isGamePlaying; }
     }
 
+    static public int EnableManaPoint
+    {
+        get { return _enableManaPoint; }
+    }
+    static private int _enableManaPoint;
+
     static private bool _isGamePlaying=true;
+    static private bool _isLogComplete = true;
     static private bool _isPossibilityOfMove = true;
 
     static private List<List<CellState>> _cellStateCopy = new List<List<CellState>>();
@@ -273,8 +280,10 @@ public class TurnController : MonoBehaviour
 
     static public void NewTurn()
     {
-        _isPossibilityOfMove = true;
 
+        _isPossibilityOfMove = true;
+        _enableManaPoint = 3;
         _currentPlayer = (_currentPlayer == 1) ? 2 : 1;
     }
+    
 }

@@ -244,7 +244,7 @@ public class Field : MonoBehaviour
         return (cellSizeY < cellSizeX) ? cellSizeY : cellSizeX;
     }
 
-    public void InitializeField()
+    private void InitializeField()
     {
         GetStartPosition();
         _cellList = new List<List<Cell>>();
@@ -326,6 +326,10 @@ public class Field : MonoBehaviour
         }
     }
 
+    public bool CheckInField(float s)
+    {
+        return s > _startPositionY;
+    }
 
     public void NewCellSize(Vector2Int VirtualfieldSize,bool instantly = true)
     {
@@ -426,9 +430,29 @@ public class Field : MonoBehaviour
         {
             SwapVerticalLines(0, 1);
         }
+        if (Input.GetKeyDown(KeyCode.V))
+        {
+            SwapHorizontalLines(0, 1);
+            
+            Debug.Log(_cellList[0][0].CellSize);
+        }
+        if (Input.GetKeyDown(KeyCode.B))
+        {
+            SwapHorizontalLines(0, 1,false);
+            Debug.Log(_cellList[0][0].CellSize);
+        }
+        if (Input.GetKeyDown(KeyCode.Minus))
+        {
+            NewCellSize(_fieldSize, false);
+        }
+
+        if (Input.GetKeyDown(KeyCode.Plus))
+        {
+            NewCellSize(_fieldSize, true);
+        }
     }
 
-    private void SwapVerticalLines(int fl, int sl)
+    public void SwapVerticalLines(int fl, int sl, bool instantly = true)
     {
         for (int i = 0; i < _fieldSize.y; i++)
         {
@@ -439,7 +463,7 @@ public class Field : MonoBehaviour
             _cellList[fl][i].Id = new Vector2Int(fl, i);
         }
 
-        NewCellSize(_fieldSize, false);
+        NewCellSize(_fieldSize, instantly);
 
         TurnController.MasterChecker(new Vector2Int(fl, 0));
         TurnController.MasterChecker(new Vector2Int(sl, 0),false);
@@ -447,6 +471,29 @@ public class Field : MonoBehaviour
         {
             TurnController.MasterChecker(new Vector2Int(fl, i),false);
             TurnController.MasterChecker(new Vector2Int(sl, i),false);
+        }
+
+    }
+
+    public void SwapHorizontalLines(int fl, int sl, bool instantly = true)
+    {
+        for (int i = 0; i < _fieldSize.x; i++)
+        {
+            var kk = _cellList[i][fl];
+            _cellList[i][fl] = _cellList[i][sl];
+            _cellList[i][sl] = kk;
+            _cellList[i][sl].Id = new Vector2Int(i,sl);
+            _cellList[i][fl].Id = new Vector2Int(i,fl);
+        }
+
+        NewCellSize(_fieldSize, instantly);
+
+        TurnController.MasterChecker(new Vector2Int(0, fl));
+        TurnController.MasterChecker(new Vector2Int(0, sl), false);
+        for (int i = 1; i < _fieldSize.x; i++)
+        {
+            TurnController.MasterChecker(new Vector2Int(i, fl), false);
+            TurnController.MasterChecker(new Vector2Int(i, sl), false);
         }
 
     }
