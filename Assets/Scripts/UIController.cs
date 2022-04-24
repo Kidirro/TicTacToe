@@ -5,6 +5,9 @@ using UnityEngine.UI;
 
 public class UIController : MonoBehaviour
 {
+    static public UIController Instance => _instance;
+    private static UIController _instance;
+
     [SerializeField] private bool _isNeedGizmos;
 
     [SerializeField] private Text _playerOneScoreText;
@@ -17,13 +20,13 @@ public class UIController : MonoBehaviour
 
 
     [Space]
-    [Header("Логирование")]
-    private List<TurnHistory> _listLog = new List<TurnHistory>();
+    [Header("LOGS")]
     [SerializeField] private TurnHistory _logPref;
     [SerializeField] private Transform _logParent;
     [SerializeField] private Vector2 _defaultScreenResolution;
     [SerializeField] private Vector2 _screenBorderX;
     [SerializeField] private Vector2 _screenBorderY;
+    private List<TurnHistory> _listLog = new List<TurnHistory>();
     private float _startPositionX;
     private float _endPositionX;
 
@@ -34,13 +37,12 @@ public class UIController : MonoBehaviour
 
     void Awake()
     {
+        _instance = this;
         _playerOneScoreStat = _playerOneScoreText;
         _playerOneScoreStat.text = "0";
         _playerTwoScoreStat = _playerTwoScorText;
         _playerTwoScoreStat.text = "0";
         InitializeLog();
-
-
     }
 
     private void InitializeLog()
@@ -149,7 +151,10 @@ public class UIController : MonoBehaviour
 
     public void EndButtonPressed()
     {
-        NewTurn(false);
-        TurnController.NewTurn();
+        if (TurnController.CheckCanTurn())
+        {
+            NewTurn(false);
+            TurnController.NewTurn();
+        }
     }
 }

@@ -5,6 +5,10 @@ using UnityEngine.UI;
 
 public class TurnHistory : MonoBehaviour
 {
+    const float _alphaSpeed = 4;
+    const float _positionSpeed = 4;
+    const float _scaleSpeed = 4;
+
     private  Image _sprt;
 
     [SerializeField]private List<Sprite> _spriteList;
@@ -86,15 +90,15 @@ public class TurnHistory : MonoBehaviour
         _isAlphaCoroutineWork = true;
         float prevS = _alpha;
         Color vr = _sprt.color;
-        float step = (prevS - vr.a) / 100f;
+        float step = (prevS - vr.a) / 100f * _alphaSpeed;
         int i = 0;
-        while (i <= 100)
+        while (i <= 100/ _alphaSpeed)
         {
             vr = _sprt.color;
             if (prevS != _alpha)
             {
                 prevS = _alpha;
-                step = (prevS - vr.a) / 100f;
+                step = (prevS - vr.a) / 100f * _alphaSpeed;
                 i = 0;
             }
             vr.a += step;
@@ -112,16 +116,16 @@ public class TurnHistory : MonoBehaviour
         Vector2 prevPos = _position;
 
         Vector2 currentPosition = _trns.position;
-        Vector2 step = (prevPos - currentPosition) / 100f;
+        Vector2 step = (prevPos - currentPosition) / 100f * _positionSpeed;
         int i = 0;
-        while (i <= 100)
+        while (i <= 100/ _positionSpeed)
         {
             currentPosition = _trns.position;
             if (prevPos != _position)
             {
                 prevPos = _position;
 
-                step = (prevPos - currentPosition) / 100f;
+                step = (prevPos - currentPosition) / 100f * _positionSpeed;
                 i = 0;
             }
 
@@ -138,14 +142,14 @@ public class TurnHistory : MonoBehaviour
     {
         _isSizeCoroutineWork = true;
         float prevS = _cellSize;
-        float step = (_cellSize - _trns.localScale.x) / 100f;
+        float step = (_cellSize - _trns.localScale.x) / 100f * _scaleSpeed;
         int i = 0;
-        while (i <= 100)
+        while (i <= 100/ _scaleSpeed)
         {
             if (prevS != _cellSize)
             {
                 prevS = _cellSize;
-                step = (_cellSize - _trns.localScale.x) / 100f;
+                step = (_cellSize - _trns.localScale.x) / 100f * _scaleSpeed;
                 i = 0;
             }
             _trns.localScale = _trns.localScale + new Vector3(step, step);
