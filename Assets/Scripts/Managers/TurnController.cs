@@ -4,15 +4,8 @@ using UnityEngine;
 using System;
 using Photon.Pun;
 
-public class TurnController : MonoBehaviour
+public static class TurnController
 {
-
-    static private int _currentPlayer = 1;
-    static public int CurrentPlayer
-    {
-        get { return _currentPlayer; }
-    }
-
     static public bool IsGamePlayimg
     {
         get { return _isGamePlaying; }
@@ -32,14 +25,13 @@ public class TurnController : MonoBehaviour
 
     static public void TurnProcess(Vector2Int id)
     {
-
         if (Field.Instance.CellList[id.x][id.y].State == 0 && _isGamePlaying && _isPossibilityOfMove)
         {
             //if (PhotonNetwork.PlayerList[_currentPlayer-1] == PhotonNetwork.LocalPlayer)
             //{
             //    NetworkEvent.RaiseEventCellState(id);
-                _isPossibilityOfMove = false;
-                Field.Instance.CellList[id.x][id.y].SetState(_currentPlayer);
+            _isPossibilityOfMove = false;
+                Field.Instance.CellList[id.x][id.y].SetState(PlayerManager.Instance.GetCurrentPlayer().SideId);
 
                 MasterChecker(id);
             //}
@@ -289,8 +281,15 @@ public class TurnController : MonoBehaviour
     {
 
         _isPossibilityOfMove = true;
-        _enableManaPoint = 3;
-        _currentPlayer = (_currentPlayer == 1) ? 2 : 1;
+        PlayerManager.Instance.NextPlayer();
+        Debug.Log(PlayerManager.Instance.GetCurrentPlayer().SideId);
+        Debug.Log(PlayerManager.Instance.GetCurrentPlayer().EntityType);
+        if (PlayerManager.Instance.GetCurrentPlayer().EntityType.Equals(PlayerType.AI))
+        {
+            TurnProcess(AIManager.Instance.GenerateNewTurn(Field.Instance.FieldSize));
+            UIController.Instance.EndButtonPressed();
+        }
+        //_enableManaPoint = 3;
         //if (IsEvent == false) NetworkEvent.RaiseEventEndTurn();
     }
 
@@ -299,8 +298,8 @@ public class TurnController : MonoBehaviour
         return _isGamePlaying;//&& CheckIsCurrentPlayer();
     }
     
-    static public bool CheckIsCurrentPlayer()
+/*    static public bool CheckIsCurrentPlayer()
     {
         return PhotonNetwork.PlayerList[_currentPlayer - 1] == PhotonNetwork.LocalPlayer;
-    }
+    }*/
 }

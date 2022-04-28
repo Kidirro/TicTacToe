@@ -52,7 +52,7 @@ public class NetworkEvent : MonoBehaviour, IOnEventCallback
                 break;
             case 3:
                 Vector2Int id = (Vector2Int)photonEvent.CustomData;
-                Field.Instance.CellList[id.x][id.y].SetState(TurnController.CurrentPlayer);
+                Field.Instance.CellList[id.x][id.y].SetState(PlayerManager.Instance.GetCurrentPlayer().SideId);
                 TurnController.MasterChecker(id);
                 break;
         }

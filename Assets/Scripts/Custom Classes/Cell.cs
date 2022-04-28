@@ -80,7 +80,6 @@ public class Cell : MonoBehaviour
 
     public void Clicked()
     {
-        //if ((!_isPositionCoroutineWork) & (!_isSizeCoroutineWork))
             TurnController.TurnProcess(_id);
     }
 

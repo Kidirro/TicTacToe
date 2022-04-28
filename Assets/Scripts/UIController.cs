@@ -3,10 +3,13 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class UIController : MonoBehaviour
+public class UIController : Singleton<UIController>
 {
-    static public UIController Instance => _instance;
-    private static UIController _instance;
+
+    /// <summary>
+    /// Требуется доработка и разбитие на класс карт!
+    /// 
+    /// </summary>
 
     [SerializeField] private bool _isNeedGizmos;
 
@@ -37,7 +40,6 @@ public class UIController : MonoBehaviour
 
     void Awake()
     {
-        _instance = this;
         _playerOneScoreStat = _playerOneScoreText;
         _playerOneScoreStat.text = "0";
         _playerTwoScoreStat = _playerTwoScorText;
@@ -60,7 +62,7 @@ public class UIController : MonoBehaviour
         int currentPlayer = ((int)_listLog.Count / 2) - 1;
         Debug.Log(currentPlayer);
         Debug.Log(_listLog[currentPlayer].CurrentState);
-        if (_listLog[currentPlayer].CurrentState != TurnController.CurrentPlayer-1)
+        if (_listLog[currentPlayer].CurrentState != PlayerManager.Instance.GetCurrentPlayer().SideId)
         {
             Debug.Log(currentPlayer);
         }
@@ -113,6 +115,7 @@ public class UIController : MonoBehaviour
 
     public static void AddScore(int player, int score)
     {
+        Debug.Log(player);
         switch (player)
         {
             case 1:

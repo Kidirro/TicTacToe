@@ -552,6 +552,7 @@ public class Field : MonoBehaviour
             yield return null;
         }
         _lineFinish.LineRend.positionCount = 2;
+        int current_player = PlayerManager.Instance.GetCurrentPlayer().SideId;
         while (_finishLineId.Count > 0)
         {
             Vector2Int id1 = new Vector2Int((int)_finishLineId[0].x, (int)_finishLineId[0].y);
@@ -571,7 +572,7 @@ public class Field : MonoBehaviour
                 yield return new WaitForFixedUpdate();
             }
 
-            UIController.AddScore(TurnController.CurrentPlayer, ClearCellOnLine(new Vector2Int((int)id1.x, (int)id1.y), new Vector2Int((int)id2.x, (int)id2.y)));
+            UIController.AddScore(current_player, ClearCellOnLine(new Vector2Int((int)id1.x, (int)id1.y), new Vector2Int((int)id2.x, (int)id2.y)));
             while (j > 0)
             {
                 j--;
