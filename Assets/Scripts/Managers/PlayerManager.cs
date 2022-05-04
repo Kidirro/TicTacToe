@@ -8,14 +8,6 @@ public class PlayerManager : Singleton<PlayerManager>
 
     private int _currentPlayer=0;
 
-
-    private void Awake()
-    {
-        AddPlayer(PlayerType.Human);
-        AddPlayer(PlayerType.AI);
-
-    }
-
     public void AddPlayer(PlayerType type)
     {
         PlayerInfo player = new PlayerInfo();
@@ -26,7 +18,14 @@ public class PlayerManager : Singleton<PlayerManager>
 
     public PlayerInfo GetCurrentPlayer()
     {
-        return _players[_currentPlayer];
+        try
+        {
+            return _players[_currentPlayer];
+        }
+        catch
+        {
+            return null;
+        }
     }
 
     public void NextPlayer()

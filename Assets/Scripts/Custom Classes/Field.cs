@@ -3,10 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using System;
 
-public class Field : MonoBehaviour
+public class Field : Singleton<Field>
 {
-    static public Field Instance => _instance;
-    private static Field _instance;
 
     [SerializeField] private bool _isNeedGizmos;
 
@@ -34,7 +32,7 @@ public class Field : MonoBehaviour
     {
         get { return _fieldSize; }
     }
-       
+
     private List<Line> _lineListHorizontal = new List<Line>();
     private List<Line> _lineListVertical = new List<Line>();
     private Line _lineFinish;
@@ -69,19 +67,14 @@ public class Field : MonoBehaviour
 
     private List<Vector4> _finishLineId = new List<Vector4>();
 
-    public int CellAnimating=0;
+    public int CellAnimating = 0;
 
-    private void Awake()
-    {
-        _instance = this;
 
-    }
-
-    private void Start()
+    public void Initialization()
     {
         InitializeField();
         InitializeLine();
-        NewCellSize(_fieldSize,false);
+        NewCellSize(_fieldSize, false);
     }
 
     private void GetStartPosition()
@@ -119,7 +112,7 @@ public class Field : MonoBehaviour
             _cellList[0][j].SetTransformPosition((_cellList[1][j].Position - new Vector2(_cellList[0][0].CellSize, 0)).x, _cellList[1][j].Position.y);
         }
 
-        for(int i = 0; i < _fieldSize.x; i++)
+        for (int i = 0; i < _fieldSize.x; i++)
         {
             for (int j = 0; j < _fieldSize.y; j++)
             {
@@ -128,7 +121,7 @@ public class Field : MonoBehaviour
                 _cellList[i][j].name = "[" + i + "][" + j + "]cell";
             }
         }
-        NewCellSize(_fieldSize,false);
+        NewCellSize(_fieldSize, false);
 
     }
 
@@ -142,7 +135,7 @@ public class Field : MonoBehaviour
         _lineListVertical.Add(LR);
         Vector2 newPosition1 = _lineListVertical[_lineListVertical.Count - 2].StartPoint + new Vector2(_cellList[0][0].CellSize, 0);
         Vector2 newPosition2 = _lineListVertical[_lineListVertical.Count - 2].EndPoint + new Vector2(_cellList[0][0].CellSize, 0);
-        _lineListVertical[_lineListVertical.Count-1].SetPositions(newPosition1, newPosition2);
+        _lineListVertical[_lineListVertical.Count - 1].SetPositions(newPosition1, newPosition2);
         _lineListVertical[_lineListVertical.Count - 1].SetWidth(0);
         for (int i = 0; i < _lineListVertical.Count; i++)
         {
@@ -155,7 +148,7 @@ public class Field : MonoBehaviour
             Cell cell = newCellObject.GetComponent<Cell>();
             newCellObject.transform.SetParent(_cellParent.transform);
             cell.SetColliderSize(1 + _borderPercent * 0.5f);
-            _cellList[_fieldSize.x-1].Add(cell);
+            _cellList[_fieldSize.x - 1].Add(cell);
             _cellList[_fieldSize.x - 1][j].SetTransformPosition((_cellList[_fieldSize.x - 2][j].Position - new Vector2(_cellList[0][0].CellSize, 0)).x, _cellList[_fieldSize.x - 2][j].Position.y);
         }
 
@@ -195,7 +188,7 @@ public class Field : MonoBehaviour
             newCellObject.transform.SetParent(_cellParent.transform);
             cell.SetColliderSize(1 + _borderPercent * 0.5f);
             _cellList[j].Add(cell);
-            _cellList[j][_fieldSize.y-1].SetTransformPosition(_cellList[j][_fieldSize.y - 2].Position .x, _cellList[j][_fieldSize.y - 2].Position.y + new Vector2(0, _cellList[0][0].CellSize).y);
+            _cellList[j][_fieldSize.y - 1].SetTransformPosition(_cellList[j][_fieldSize.y - 2].Position.x, _cellList[j][_fieldSize.y - 2].Position.y + new Vector2(0, _cellList[0][0].CellSize).y);
         }
 
         for (int i = 0; i < _fieldSize.x; i++)
@@ -217,7 +210,7 @@ public class Field : MonoBehaviour
         Line LR = newLine.GetComponent<Line>();
         newLine.transform.position = Vector2.zero;
         newLine.transform.parent = _lineParent.transform;
-        _lineListHorizontal.Insert(0,LR);
+        _lineListHorizontal.Insert(0, LR);
         Vector2 newPosition1 = _lineListHorizontal[1].StartPoint - new Vector2(0, _cellList[0][0].CellSize);
         Vector2 newPosition2 = _lineListHorizontal[1].EndPoint - new Vector2(0, _cellList[0][0].CellSize);
         _lineListHorizontal[0].SetPositions(newPosition1, newPosition2);
@@ -232,7 +225,7 @@ public class Field : MonoBehaviour
             Cell cell = newCellObject.GetComponent<Cell>();
             newCellObject.transform.SetParent(_cellParent.transform);
             cell.SetColliderSize(1 + _borderPercent * 0.5f);
-            _cellList[j].Insert(0,cell);
+            _cellList[j].Insert(0, cell);
             _cellList[j][0].SetTransformPosition(_cellList[j][1].Position.x, _cellList[j][1].Position.y - new Vector2(0, _cellList[0][0].CellSize).y);
         }
 
@@ -248,7 +241,7 @@ public class Field : MonoBehaviour
         NewCellSize(_fieldSize, false);
     }
 
-    private float GetCellSize(int x_size=3,int y_size=3)
+    private float GetCellSize(int x_size = 3, int y_size = 3)
     {
         float cellSizeY = ((_endPositionY - _startPositionY) / y_size);
         float cellSizeX = ((_endPositionX - _startPositionX) / x_size);
@@ -271,7 +264,7 @@ public class Field : MonoBehaviour
                 newCellObject.name = "[" + i + "][" + j + "]cell";
                 cell.Id = new Vector2Int(i, j);
                 newCellObject.transform.SetParent(_cellParent.transform);
-                cell.SetColliderSize(1+_borderPercent*0.5f);
+                cell.SetColliderSize(1 + _borderPercent * 0.5f);
 
                 _cellList[i].Add(cell);
             }
@@ -337,7 +330,7 @@ public class Field : MonoBehaviour
             j++;
         }
     }
-    public void NewCellSize(Vector2Int VirtualfieldSize,bool instantly = true)
+    public void NewCellSize(Vector2Int VirtualfieldSize, bool instantly = true)
     {
         float cellSize = GetCellSize(VirtualfieldSize.x, VirtualfieldSize.y);
         _remainX = (_endPositionX - _startPositionX - _fieldSize.x * cellSize) / 2;
@@ -352,7 +345,7 @@ public class Field : MonoBehaviour
             }
         }
 
-        for (int i =0; i < _lineListVertical.Count; i++)
+        for (int i = 0; i < _lineListVertical.Count; i++)
         {
             Vector3[] points = new Vector3[2];
             points[0] = new Vector2(_cellList[i][0].Position.x * 0.5f + _cellList[i + 1][0].Position.x * 0.5f, _cellList[i][0].Position.y - _cellList[0][0].CellSize / 2);
@@ -381,24 +374,24 @@ public class Field : MonoBehaviour
 
     private void ResetField()
     {
-        for(int i = 0; i < _cellList.Count; i++)
+        for (int i = 0; i < _cellList.Count; i++)
         {
-            for(int j = 0; j < _cellList[i].Count; j++)
+            for (int j = 0; j < _cellList[i].Count; j++)
             {
                 _cellList[i][j].SetState(0);
             }
         }
     }
 
-    public  void Update()
+    public void Update()
     {
         if (Input.GetKeyDown(KeyCode.L))
         {
-            NewCellSize(_fieldSize,false);
-        } 
+            NewCellSize(_fieldSize, false);
+        }
         if (Input.GetKeyDown(KeyCode.K))
         {
-            NewCellSize(_fieldSize+Vector2Int.one,false);
+            NewCellSize(_fieldSize + Vector2Int.one, false);
         }
         if (Input.GetKeyDown(KeyCode.LeftArrow))
         {
@@ -419,7 +412,7 @@ public class Field : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Space))
         {
             var kk = _cellList[0][0];
-            _cellList[0][0]=_cellList[0][1];
+            _cellList[0][0] = _cellList[0][1];
             _cellList[0][1] = kk;
 
             kk = _cellList[0][1];
@@ -434,12 +427,12 @@ public class Field : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Mouse1))
         {
             Debug.Log(GetIdFromPosition(Camera.main.ScreenToWorldPoint(Input.mousePosition), false));
-            Debug.Log(AreaManager.GetArea(GetIdFromPosition(Camera.main.ScreenToWorldPoint(Input.mousePosition), false), new Vector2Int(1,1)));
+            Debug.Log(AreaManager.GetArea(GetIdFromPosition(Camera.main.ScreenToWorldPoint(Input.mousePosition), false), new Vector2Int(1, 1)));
         }
 
         if (Input.GetKeyDown(KeyCode.Mouse0))
         {
-            Debug.Log(GetIdFromPosition(Camera.main.ScreenToWorldPoint(Input.mousePosition),false));
+            Debug.Log(GetIdFromPosition(Camera.main.ScreenToWorldPoint(Input.mousePosition), false));
         }
     }
 
@@ -457,11 +450,11 @@ public class Field : MonoBehaviour
         NewCellSize(_fieldSize, instantly);
 
         TurnController.MasterChecker(new Vector2Int(fl, 0));
-        TurnController.MasterChecker(new Vector2Int(sl, 0),false);
+        TurnController.MasterChecker(new Vector2Int(sl, 0), false);
         for (int i = 1; i < _fieldSize.y; i++)
         {
-            TurnController.MasterChecker(new Vector2Int(fl, i),false);
-            TurnController.MasterChecker(new Vector2Int(sl, i),false);
+            TurnController.MasterChecker(new Vector2Int(fl, i), false);
+            TurnController.MasterChecker(new Vector2Int(sl, i), false);
         }
 
     }
@@ -473,8 +466,8 @@ public class Field : MonoBehaviour
             var kk = _cellList[i][fl];
             _cellList[i][fl] = _cellList[i][sl];
             _cellList[i][sl] = kk;
-            _cellList[i][sl].Id = new Vector2Int(i,sl);
-            _cellList[i][fl].Id = new Vector2Int(i,fl);
+            _cellList[i][sl].Id = new Vector2Int(i, sl);
+            _cellList[i][fl].Id = new Vector2Int(i, fl);
         }
 
         NewCellSize(_fieldSize, instantly);
@@ -548,7 +541,8 @@ public class Field : MonoBehaviour
 
     IEnumerator FinishLineCleaning()
     {
-        while (CellAnimating != 0) {
+        while (CellAnimating != 0)
+        {
             yield return null;
         }
         _lineFinish.LineRend.positionCount = 2;
@@ -586,7 +580,7 @@ public class Field : MonoBehaviour
 
         _lineFinish.LineRend.positionCount = 0;
     }
-    
+
     public bool CheckIsInField(Vector2 pos)
     {
         return pos.x >= (_startPositionX + _remainX) & pos.x <= (_endPositionX - _remainX) &
@@ -602,9 +596,9 @@ public class Field : MonoBehaviour
     public Vector2Int GetIdFromPosition(Vector2 pos, bool IsFindBorder)
     {
         Vector2Int pos_final = Vector2Int.zero;
-        pos_final.y = (int) Mathf.Clamp((float)Math.Floor(pos.y - (_startPositionY + _remainY) / _cellList[0][0].CellSize), 0, _fieldSize.y - 1);
-        pos_final.x = (int) Mathf.Clamp((float)Math.Floor(pos.x - (_startPositionX + _remainX) / _cellList[0][0].CellSize), 0, _fieldSize.x - 1);
+        pos_final.y = (int)Mathf.Clamp((float)Math.Floor(pos.y - (_startPositionY + _remainY) / _cellList[0][0].CellSize), 0, _fieldSize.y - 1);
+        pos_final.x = (int)Mathf.Clamp((float)Math.Floor(pos.x - (_startPositionX + _remainX) / _cellList[0][0].CellSize), 0, _fieldSize.x - 1);
         if (CheckIsInField(pos) || IsFindBorder) return pos_final;
-        else               return (  new Vector2Int(-1,-1));
+        else return (new Vector2Int(-1, -1));
     }
 }

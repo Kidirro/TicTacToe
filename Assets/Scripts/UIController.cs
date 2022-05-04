@@ -38,7 +38,7 @@ public class UIController : Singleton<UIController>
     private float _logSize;
     private float _logBeginX;
 
-    void Awake()
+    public void Initialization()
     {
         _playerOneScoreStat = _playerOneScoreText;
         _playerOneScoreStat.text = "0";
@@ -57,11 +57,10 @@ public class UIController : Singleton<UIController>
             vr.transform.SetParent(_logParent);
             _listLog.Add(vr);
             _listLog[i].SetSprite(i % 2);
+            //_listLog[i].SetTransformPosition(_logBeginX + _logSize * (i), _startPositionY * 0.5f + _endPositionY * 0.5f);
         }
-        NewTurn();
+        NewTurn(true);
         int currentPlayer = ((int)_listLog.Count / 2) - 1;
-        Debug.Log(currentPlayer);
-        Debug.Log(_listLog[currentPlayer].CurrentState);
         if (_listLog[currentPlayer].CurrentState != PlayerManager.Instance.GetCurrentPlayer().SideId)
         {
             Debug.Log(currentPlayer);
@@ -84,6 +83,7 @@ public class UIController : Singleton<UIController>
                 _listLog[i].SetTransformSize(Mathf.Abs((1.0f) / (float)(currentPlayer - i))*_logSize, instantly);
             }
             _listLog[i].SetTransformPosition(_logBeginX + _logSize * (i), _startPositionY * 0.5f + _endPositionY * 0.5f, instantly);
+            
         }
         var k = _listLog[0];
 
@@ -148,7 +148,6 @@ public class UIController : Singleton<UIController>
         _startPositionY = Camera.main.ScreenToWorldPoint(new Vector2(0, Camera.main.pixelHeight * (_screenBorderY.x) / _defaultScreenResolution.y)).y;
         _endPositionY = Camera.main.ScreenToWorldPoint(new Vector2(0, Camera.main.pixelHeight * (_defaultScreenResolution.y - _screenBorderY.y) / _defaultScreenResolution.y)).y;
 
-
     }
 
 
@@ -156,8 +155,7 @@ public class UIController : Singleton<UIController>
     {
         if (TurnController.CheckCanTurn())
         {
-            NewTurn(false);
-            TurnController.NewTurn();
+            GameplayManager.Instance.ChangeGameplayState(GameplayState.NewTurn);
         }
     }
 }

@@ -81,6 +81,7 @@ public class TurnHistory : MonoBehaviour
     public void SetTransformPosition(float x, float y, bool instantly = true)
     {
         _position = new Vector2(x, y);
+        Debug.Log(_position);
         if (instantly) _trns.position = _position;
         else if (!_isPositionCoroutineWork) StartCoroutine(PositionIEnumerator());
     }

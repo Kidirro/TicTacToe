@@ -281,14 +281,6 @@ public static class TurnController
     {
 
         _isPossibilityOfMove = true;
-        PlayerManager.Instance.NextPlayer();
-        Debug.Log(PlayerManager.Instance.GetCurrentPlayer().SideId);
-        Debug.Log(PlayerManager.Instance.GetCurrentPlayer().EntityType);
-        if (PlayerManager.Instance.GetCurrentPlayer().EntityType.Equals(PlayerType.AI))
-        {
-            TurnProcess(AIManager.Instance.GenerateNewTurn(Field.Instance.FieldSize));
-            UIController.Instance.EndButtonPressed();
-        }
         //_enableManaPoint = 3;
         //if (IsEvent == false) NetworkEvent.RaiseEventEndTurn();
     }
