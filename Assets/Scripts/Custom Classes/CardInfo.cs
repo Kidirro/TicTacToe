@@ -7,22 +7,23 @@ using UnityEngine.Events;
 [CreateAssetMenu(fileName = "New card", menuName = "Card")]
 public class CardInfo : ScriptableObject
 {
-    public int CardId;
     public Image CardImage;
     public string CardName;
     public string CardDescription;
+
+    [Range(0,5)]
+    public int CardManacost;
     public UnityEvent ÑardAction;
 
 
 
     public void Test()
     {
-        Debug.Log("++");
+        Field.Instance.AddLineUp();
     }
 
     public void Test2()
     {
-        Field.Instance.SwapHorizontalLines(0, 1);
     }
     public void Test3()
     {

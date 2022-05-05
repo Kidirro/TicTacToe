@@ -6,11 +6,21 @@ public class AIManager : Singleton<AIManager>
 {
    public Vector2Int GenerateNewTurn(int sizeX,int sizeY)
     {
-        return new Vector2Int(Random.Range(0, sizeX), Random.Range(0, sizeY));
+        Vector2Int result = new Vector2Int(Random.Range(0, sizeX), Random.Range(0, sizeY));
+        while (!TurnController.IsCellEmpty(result))
+        {
+            result = new Vector2Int(Random.Range(0, sizeX), Random.Range(0, sizeY));
+        }
+        return result;
     }
     
     public Vector2Int GenerateNewTurn(Vector2Int size)
     {
-        return new Vector2Int(Random.Range(0, size.x), Random.Range(0, size.y));
+        Vector2Int result = new Vector2Int(Random.Range(0, size.x), Random.Range(0, size.y));
+        while (!TurnController.IsCellEmpty(result))
+        {
+            result = new Vector2Int(Random.Range(0, size.x), Random.Range(0, size.y));
+        }
+        return result;
     }
 }

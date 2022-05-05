@@ -87,7 +87,7 @@ public class Field : Singleton<Field>
 
     }
 
-    private void AddLineLeft()
+    public void AddLineLeft()
     {
         _fieldSize.x += 1;
         GameObject newLine = Instantiate(_linePrefab);
@@ -125,7 +125,7 @@ public class Field : Singleton<Field>
 
     }
 
-    private void AddLineRight()
+    public void AddLineRight()
     {
         _fieldSize.x += 1;
         GameObject newLine = Instantiate(_linePrefab);
@@ -165,7 +165,7 @@ public class Field : Singleton<Field>
 
     }
 
-    private void AddLineUp()
+    public void AddLineUp()
     {
         _fieldSize.y += 1;
         GameObject newLine = Instantiate(_linePrefab);
@@ -203,7 +203,7 @@ public class Field : Singleton<Field>
         NewCellSize(_fieldSize, false);
     }
 
-    private void AddLineDown()
+    public void AddLineDown()
     {
         _fieldSize.y += 1;
         GameObject newLine = Instantiate(_linePrefab);
@@ -378,7 +378,7 @@ public class Field : Singleton<Field>
         {
             for (int j = 0; j < _cellList[i].Count; j++)
             {
-                _cellList[i][j].SetState(0);
+                _cellList[i][j].SetState(CellState.empty);
             }
         }
     }
@@ -511,21 +511,21 @@ public class Field : Singleton<Field>
     private int ClearCellOnLine(Vector2Int id1, Vector2Int id2)
     {
         int res = 0;
-        if (_cellList[id1.x][id1.y].State != 0)
+        if (_cellList[id1.x][id1.y].State != CellState.empty)
         {
-            _cellList[id1.x][id1.y].SetState(0);
+            _cellList[id1.x][id1.y].SetState(CellState.empty);
             res++;
         }
         Vector2Int nextValue = new Vector2Int(id1.x + (int)Math.Sign(id2.x - id1.x), id1.y + (int)Math.Sign(id2.y - id1.y));
         while (nextValue != id2)
         {
-            if (_cellList[nextValue.x][nextValue.y].State != 0) _cellList[nextValue.x][nextValue.y].SetState(0);
+            if (_cellList[nextValue.x][nextValue.y].State != CellState.empty) _cellList[nextValue.x][nextValue.y].SetState(CellState.empty);
             nextValue = new Vector2Int(nextValue.x + (int)Math.Sign(id2.x - id1.x), nextValue.y + (int)Math.Sign(id2.y - id1.y));
             res++;
         }
-        if (_cellList[id2.x][id2.y].State != 0)
+        if (_cellList[id2.x][id2.y].State != CellState.empty)
         {
-            _cellList[id2.x][id2.y].SetState(0);
+            _cellList[id2.x][id2.y].SetState(CellState.empty);
             res++;
         }
         return res;

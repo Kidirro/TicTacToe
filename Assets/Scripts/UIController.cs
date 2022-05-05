@@ -24,12 +24,12 @@ public class UIController : Singleton<UIController>
 
     [Space]
     [Header("LOGS")]
-    [SerializeField] private TurnHistory _logPref;
+    [SerializeField] private TurnHistorySingleCell _logPref;
     [SerializeField] private Transform _logParent;
     [SerializeField] private Vector2 _defaultScreenResolution;
     [SerializeField] private Vector2 _screenBorderX;
     [SerializeField] private Vector2 _screenBorderY;
-    private List<TurnHistory> _listLog = new List<TurnHistory>();
+    private List<TurnHistorySingleCell> _listLog = new List<TurnHistorySingleCell>();
     private float _startPositionX;
     private float _endPositionX;
 
@@ -53,18 +53,14 @@ public class UIController : Singleton<UIController>
         InitializeCellSize();
         for (int i = 0; i < 6; i++)
         {
-            TurnHistory vr = Instantiate(_logPref);
+            TurnHistorySingleCell vr = Instantiate(_logPref);
             vr.transform.SetParent(_logParent);
             _listLog.Add(vr);
-            _listLog[i].SetSprite(i % 2);
+            _listLog[i].SetSprite((i%2==0)? CellState.p1:CellState.p2);
             //_listLog[i].SetTransformPosition(_logBeginX + _logSize * (i), _startPositionY * 0.5f + _endPositionY * 0.5f);
         }
         NewTurn(true);
         int currentPlayer = ((int)_listLog.Count / 2) - 1;
-        if (_listLog[currentPlayer].CurrentState != PlayerManager.Instance.GetCurrentPlayer().SideId)
-        {
-            Debug.Log(currentPlayer);
-        }
     }
 
     public void NewTurn(bool instantly = true)

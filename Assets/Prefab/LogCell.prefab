@@ -60,7 +60,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 0, g: 0, b: 0, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -90,5 +90,5 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _spriteList:
-  - {fileID: 21300000, guid: e5f2b06a9d22c95468769d72cee8567b, type: 3}
-  - {fileID: 21300000, guid: c3206f6a7d367cf4892a756b0eed09ea, type: 3}
+  - {fileID: 21300000, guid: cfb6d025372a2104d814c38534c1619b, type: 3}
+  - {fileID: 21300000, guid: c3c20710043075846b6cbe2bfc70dc33, type: 3}

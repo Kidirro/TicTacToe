@@ -40,9 +40,10 @@ public class Cell : MonoBehaviour
     private Transform _transform;
 
     private CellState _state;
+
     private BoxCollider2D _collider;
 
-    [SerializeField] private List<Sprite> _spriteList;
+
     private SpriteRenderer _sprRend;
 
     void Awake()
@@ -54,8 +55,14 @@ public class Cell : MonoBehaviour
 
     public void SetState(int s)
     {
-        _sprRend.sprite = _spriteList[s];
+        _sprRend.sprite = ThemeManager.Instance.GetSprite((CellState) s);
         _state = (CellState) s;
+    }
+
+    public void SetState(CellState s)
+    {
+        _sprRend.sprite = ThemeManager.Instance.GetSprite(s);
+        _state = s;
     }
 
     public void SetColliderSize(float s)
@@ -142,8 +149,8 @@ public class Cell : MonoBehaviour
 
 public enum CellState
 {
-    empty,
-    cross,
-    circle,
-    block
+    block=-1,
+    empty =0,
+    p1 =1,
+    p2= 2
 }

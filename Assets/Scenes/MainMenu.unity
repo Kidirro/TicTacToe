@@ -3755,7 +3755,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 1073464521}
         m_TargetAssemblyTypeName: MainMenuUI, Assembly-CSharp
-        m_MethodName: OnAIButtonStart
+        m_MethodName: OnHumanButtonStart
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}

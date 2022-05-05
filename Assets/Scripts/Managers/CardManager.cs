@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class CardManager : MonoBehaviour
+public class CardManager : Singleton<CardManager>
 {
 
     [SerializeField] private bool _isNeedGizmos;
@@ -35,6 +35,11 @@ public class CardManager : MonoBehaviour
     private void AddCard()
     {
         _cardList.Add(Instantiate(_testCard));
+        Debug.Log(_cardList[_cardList.Count - 1].transform.localScale);
+        _cardList[_cardList.Count - 1].transform.SetParent(this.transform);
+        _cardList[_cardList.Count - 1].transform.localPosition = Vector3.zero;
+        _cardList[_cardList.Count - 1].transform.localScale = Vector3.one;
+
         float StartPositionX = Camera.main.ScreenToWorldPoint(new Vector2(Camera.main.pixelWidth * ((_screenBorderX.x) / _defaultScreenResolution.x), 0)).x;
         float EndPositionX = Camera.main.ScreenToWorldPoint(new Vector2(Camera.main.pixelWidth * ((_defaultScreenResolution.x - _screenBorderX.y) / _defaultScreenResolution.x), 0)).x;
         float StartPositionY = Camera.main.ScreenToWorldPoint(new Vector2(0, Camera.main.pixelHeight * (_screenBorderY.x) / _defaultScreenResolution.y)).y;

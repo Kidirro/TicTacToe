@@ -15,6 +15,14 @@ public class PlayerManager : Singleton<PlayerManager>
         _players.Add(player);
         player.SideId = _players.Count;
     }
+    public void AddPlayer(PlayerType type, int side)
+    {
+        PlayerInfo player = new PlayerInfo();
+        player.EntityType = type;
+        _players.Add(player);
+        player.SideId = side;
+    }
+
 
     public PlayerInfo GetCurrentPlayer()
     {

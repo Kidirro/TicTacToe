@@ -3,15 +3,13 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class TurnHistory : MonoBehaviour
+public class TurnHistorySingleCell : MonoBehaviour
 {
     const float _alphaSpeed = 4;
     const float _positionSpeed = 4;
     const float _scaleSpeed = 4;
 
     private  Image _sprt;
-
-    [SerializeField]private List<Sprite> _spriteList;
 
     public float CellSize
     {
@@ -38,8 +36,8 @@ public class TurnHistory : MonoBehaviour
 
     private Transform _trns;
 
-    private int _currentState;
-    public int CurrentState
+    private CellState _currentState;
+    public CellState CurrentState
     {
         get { return _currentState; }
     }
@@ -50,10 +48,10 @@ public class TurnHistory : MonoBehaviour
         _trns = GetComponent<Transform>();
     }
 
-    public void SetSprite(int i)
+    public void SetSprite(CellState i)
     {
         _currentState = i;
-        _sprt.sprite = _spriteList[i];
+        _sprt.sprite = ThemeManager.Instance.GetSprite(i);
     }
 
     public void SetAlpha(float fAlpha, bool instantly = true)
@@ -81,7 +79,6 @@ public class TurnHistory : MonoBehaviour
     public void SetTransformPosition(float x, float y, bool instantly = true)
     {
         _position = new Vector2(x, y);
-        Debug.Log(_position);
         if (instantly) _trns.position = _position;
         else if (!_isPositionCoroutineWork) StartCoroutine(PositionIEnumerator());
     }

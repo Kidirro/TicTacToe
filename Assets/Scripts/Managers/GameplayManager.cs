@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class GameplayManager : Singleton<GameplayManager>
 {
-    private static GameplayState _gameplayState =0;
+    private static GameplayState _gameplayState = GameplayState.NewGame;
 
     public static GameType TypeGame = 0;
 
@@ -23,6 +23,9 @@ public class GameplayManager : Singleton<GameplayManager>
     {
         switch (_gameplayState)
         {
+            case GameplayState.None:
+                break;
+
             case GameplayState.NewGame:
                 switch (TypeGame)
                 {
@@ -35,9 +38,12 @@ public class GameplayManager : Singleton<GameplayManager>
                         PlayerManager.Instance.AddPlayer(PlayerType.Human);
                         break;
                 }
+                ThemeManager.Instance.Initialization();
                 UIController.Instance.Initialization();
                 Field.Instance.Initialization();
+                ChangeGameplayState(GameplayState.None);
                 break;
+
             case GameplayState.NewTurn:
                 TurnController.NewTurn();
                 PlayerManager.Instance.NextPlayer();
@@ -46,8 +52,13 @@ public class GameplayManager : Singleton<GameplayManager>
                 if (PlayerManager.Instance.GetCurrentPlayer().EntityType.Equals(PlayerType.AI))
                 {
                     TurnController.TurnProcess(AIManager.Instance.GenerateNewTurn(Field.Instance.FieldSize));
+                    ChangeGameplayState(GameplayState.NewTurn);
                 }
-                break;
+                else
+                {
+                    ChangeGameplayState(GameplayState.None);
+                }
+                break;           
 
         }
     }
@@ -56,6 +67,8 @@ public class GameplayManager : Singleton<GameplayManager>
 
 public enum GameplayState
 {
+    None,
+
     NewGame,
 
     NewTurn

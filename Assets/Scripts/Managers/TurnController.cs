@@ -18,14 +18,14 @@ public static class TurnController
     static private int _enableManaPoint;
 
     static private bool _isGamePlaying=true;
-    //static private bool _isLogComplete = true;
+
     static private bool _isPossibilityOfMove = true;
 
     static private List<List<CellState>> _cellStateCopy = new List<List<CellState>>();
 
     static public void TurnProcess(Vector2Int id)
     {
-        if (Field.Instance.CellList[id.x][id.y].State == 0 && _isGamePlaying && _isPossibilityOfMove)
+        if (IsCellEmpty(id) && _isGamePlaying && _isPossibilityOfMove)
         {
             //if (PhotonNetwork.PlayerList[_currentPlayer-1] == PhotonNetwork.LocalPlayer)
             //{
@@ -122,7 +122,7 @@ public static class TurnController
 
                 if (flagX && flagY)
                 {
-                    lineFind = CheckField(startX, startY, turnId) || lineFind;
+                    lineFind = lineFind|| CheckField(startX, startY, turnId);
                 }
 
             }
@@ -289,9 +289,15 @@ public static class TurnController
     {
         return _isGamePlaying;//&& CheckIsCurrentPlayer();
     }
-    
-/*    static public bool CheckIsCurrentPlayer()
+
+
+    static public bool IsCellEmpty(Vector2Int id)
     {
-        return PhotonNetwork.PlayerList[_currentPlayer - 1] == PhotonNetwork.LocalPlayer;
-    }*/
+        return Field.Instance.CellList[id.x][id.y].State == CellState.empty;
+    }
+
+    static public bool IsCellEmpty(int x, int y)
+    {
+        return Field.Instance.CellList[x][y].State == CellState.empty;
+    }
 }
