@@ -10,18 +10,18 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 280c217edb247014c88a71e11514f438, type: 3}
-  m_Name: AddUp
+  m_Name: AddRight
   m_EditorClassIdentifier: 
   CardImage: {fileID: 0}
   CardName: 
   CardDescription: 
-  CardManacost: 5
+  CardManacost: 0
   "\u0421ardAction":
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 11400000}
         m_TargetAssemblyTypeName: CardInfo, Assembly-CSharp
-        m_MethodName: AddLineUp
+        m_MethodName: AddLineRight
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}

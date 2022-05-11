@@ -10,7 +10,8 @@ public class GameplayManager : Singleton<GameplayManager>
 
     private void Start()
     {
-        CheckGameplayState();
+        ChangeGameplayState(GameplayState.NewGame);
+        GameSceneManager.Instance.SetGameScene(GameScene.Game);
     }
 
     public void ChangeGameplayState(GameplayState state)

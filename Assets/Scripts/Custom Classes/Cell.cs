@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 
 
@@ -15,7 +16,6 @@ public class Cell : MonoBehaviour
     }
     private float _cellSize;
 
-    private float _realSize;
     private bool _isSizeCoroutineWork = false;
 
     public Vector2 Position
@@ -32,83 +32,83 @@ public class Cell : MonoBehaviour
     }
     private Vector2Int _id;
 
+    private RectTransform _transformRect;
+
     public CellState State
     {
         get { return _state; }
     }
 
-    private Transform _transform;
-
     private CellState _state;
 
-    private BoxCollider2D _collider;
-
-
-    private SpriteRenderer _sprRend;
+    private Image _image;
 
     void Awake()
     {
-        _transform = transform;
-        _collider = GetComponent<BoxCollider2D>();
-        _sprRend = GetComponent<SpriteRenderer>();
+        _transformRect = GetComponent<RectTransform>();
+        _image = GetComponent<Image>();
     }
 
     public void SetState(int s)
     {
-        _sprRend.sprite = ThemeManager.Instance.GetSprite((CellState) s);
-        _state = (CellState) s;
+        _image.sprite = ThemeManager.Instance.GetSprite((CellState)s);
+        _state = (CellState)s;
     }
 
     public void SetState(CellState s)
     {
-        _sprRend.sprite = ThemeManager.Instance.GetSprite(s);
+        _image.sprite = ThemeManager.Instance.GetSprite(s);
         _state = s;
     }
 
-    public void SetColliderSize(float s)
-    {        
-        _collider.size = new Vector2(s, s);
-    }
-
-    public void SetTransformSize(float s,float reals,bool instantly = true)
+    public void SetTransformSize(float reals, bool instantly = true)
     {
         _cellSize = reals;
-        _realSize = s;
-        if (instantly) _transform.localScale=new Vector2(_realSize, _realSize);
+        if (instantly) _transformRect.sizeDelta = new Vector2(_cellSize, _cellSize);
         else if (!_isSizeCoroutineWork) StartCoroutine(ScaleIEnumerator());
     }
 
+    public void SetTransformParent(Transform parent)
+    {
+        _transformRect.SetParent(parent);
+        SetTransformPosition(0, 0);
+        _transformRect.localScale = Vector3.one;
+    }
     public void SetTransformPosition(float x, float y, bool instantly = true)
     {
-        _position = new Vector2(x, y);
-        if (instantly) _transform.position = _position;
+        _position = new Vector3(x, y, 0);
+        if (instantly)
+        {
+            _transformRect.localPosition = _position;
+        }
         else if (!_isPositionCoroutineWork) StartCoroutine(PositionIEnumerator());
     }
 
     public void Clicked()
     {
-            TurnController.TurnProcess(_id);
+        TurnController.TurnProcess(_id);
     }
 
     private IEnumerator ScaleIEnumerator()
     {
         _isSizeCoroutineWork = true;
         Field.Instance.CellAnimating = Field.Instance.CellAnimating + 1;
-        float prevS = _realSize;
-        float step = (_realSize - _transform.localScale.x) / 100f*_scaleSpeed;
+        float prevS = _cellSize;
+        float step = (_cellSize - _transformRect.sizeDelta.x) / 100f * _scaleSpeed;
         int i = 0;
-        while (i <= 100/ _scaleSpeed)
+        while (i <= 100 / _scaleSpeed)
         {
-            if (prevS != _realSize)
+            if (prevS != _cellSize)
             {
-                 prevS = _realSize;
-                 step = (_realSize - _transform.localScale.x) / 100f* _scaleSpeed;
-                 i = 0;
+                prevS = _cellSize;
+                step = (_cellSize - _transformRect.sizeDelta.x) / 100f * _scaleSpeed;
+                i = 0;
             }
-            _transform.localScale = _transform.localScale + new Vector3(step, step);
+            _transformRect.sizeDelta = _transformRect.sizeDelta + new Vector2(step, step);
             i++;
             yield return null;
         }
+        _transformRect.sizeDelta = new Vector2(_cellSize, _cellSize);
         Field.Instance.CellAnimating = Field.Instance.CellAnimating - 1;
         _isSizeCoroutineWork = false;
         yield break;
@@ -118,14 +118,14 @@ public class Cell : MonoBehaviour
     {
         _isPositionCoroutineWork = true;
         Field.Instance.CellAnimating = Field.Instance.CellAnimating + 1;
-        Vector2 prevPos = _position ;
+        Vector2 prevPos = _position;
 
-        Vector2 currentPosition = _transform.position;
+        Vector2 currentPosition = _transformRect.localPosition;
         Vector2 step = (prevPos - currentPosition) / 100f * _positionSpeed;
         int i = 0;
-        while (i <= 100/ _positionSpeed)
+        while (i <= 100 / _positionSpeed)
         {
-            currentPosition = _transform.position;
+            currentPosition = _transformRect.localPosition;
             if (prevPos != _position)
             {
                 prevPos = _position;
@@ -134,12 +134,12 @@ public class Cell : MonoBehaviour
                 i = 0;
             }
 
-            _transform.position= currentPosition+step;
+            _transformRect.localPosition = currentPosition + step;
             i++;
             yield return null;
         }
-        _transform.position =_position;
-        Field.Instance.CellAnimating = Field.Instance.CellAnimating- 1;
+        _transformRect.localPosition = _position;
+        Field.Instance.CellAnimating = Field.Instance.CellAnimating - 1;
         _isPositionCoroutineWork = false;
         yield break;
     }
@@ -149,8 +149,8 @@ public class Cell : MonoBehaviour
 
 public enum CellState
 {
-    block=-1,
-    empty =0,
-    p1 =1,
-    p2= 2
+    block = -1,
+    empty = 0,
+    p1 = 1,
+    p2 = 2
 }

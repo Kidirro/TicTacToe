@@ -2816,7 +2816,7 @@ MonoBehaviour:
   - {fileID: 6178722220462067212}
   - {fileID: 976192133356563200}
   - {fileID: 8710376682260808263}
-  Info: {fileID: 11400000, guid: cb9de8fed95d28f489d3ba0983853e9d, type: 2}
+  Info: {fileID: 0}
   _cardDescription: {fileID: 0}
   _cardImage: {fileID: 0}
   HandPosition: {x: 0, y: 0}

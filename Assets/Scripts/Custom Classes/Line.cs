@@ -43,13 +43,32 @@ public class Line : MonoBehaviour
         _endPoint = _line.GetPosition(1);
     }
 
-    public void SetWidth(float s, bool instantly = true)
+    private float ScreenToWorld(float s)
+    {
+        return Camera.main.ScreenToWorldPoint(new Vector2(s, s)).x;
+    }
+
+    public void SetWidthScreenCord(float s, bool instantly = true)
+    {
+        _width = s/250;
+        if (instantly)
+        {
+            _line.endWidth = _width;
+            _line.startWidth = _width;
+        }
+        else
+        {
+            if (!_isWidthCoroutineWork) StartCoroutine(WidthIEnumerator());
+        } 
+    } 
+
+    public void SetWidthWorldCord(float s, bool instantly = true)
     {
         _width = s;
         if (instantly)
         {
-            _line.endWidth = s;
-            _line.startWidth = s;
+            _line.endWidth = _width;
+            _line.startWidth = _width;
         }
         else
         {
@@ -70,6 +89,14 @@ public class Line : MonoBehaviour
         {
             if (!_isPositionCoroutineWork) StartCoroutine(PositionIEnumerator());
         }
+    }
+
+    public void SetTransformParent(Transform parent, bool instantly = true)
+    {
+        transform.SetParent(parent);
+        transform.localPosition = Vector3.zero;
+        transform.localScale = Vector3.one;
+        
     }
 
     private IEnumerator WidthIEnumerator()

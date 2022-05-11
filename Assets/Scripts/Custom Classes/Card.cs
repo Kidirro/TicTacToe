@@ -90,7 +90,7 @@ public class Card : MonoBehaviour
         foreach(GameObject go in _manapoints) {
             go.SetActive(false);
         }
-        if (Info.CardManacost != 0)
+        if (Info!=null && Info.CardManacost != 0)
         {
             _manapoints[Info.CardManacost-1].SetActive(true);
         }

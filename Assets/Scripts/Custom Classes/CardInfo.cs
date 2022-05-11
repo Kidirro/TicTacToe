@@ -17,16 +17,23 @@ public class CardInfo : ScriptableObject
 
 
 
-    public void Test()
+    public void AddLineUp()
     {
         Field.Instance.AddLineUp();
     }
 
-    public void Test2()
+    public void AddLineDown()
     {
+        Field.Instance.AddLineDown();
     }
-    public void Test3()
+
+    public void AddLineLeft()
     {
-        Field.Instance.SwapVerticalLines(0, 1);
+        Field.Instance.AddLineLeft();
+    }
+
+    public void AddLineRight()
+    {
+        Field.Instance.AddLineRight();
     }
 }

@@ -8,6 +8,10 @@ public class PlayerInfo
 
     public int SideId;
 
+    public List<Card> HandPool = new List<Card>();
+    public List<Card> DeckPool = new List<Card>();
+    public List<Card> FullDeckPool = new List<Card>();
+
 }
 
 
