@@ -28,6 +28,7 @@ public class GameplayManager : Singleton<GameplayManager>
                 break;
 
             case GameplayState.NewGame:
+                CardManager.Instance.Initialization();
                 switch (TypeGame)
                 {
                     case GameType.SingleAI:
@@ -42,6 +43,7 @@ public class GameplayManager : Singleton<GameplayManager>
                 ThemeManager.Instance.Initialization();
                 UIController.Instance.Initialization();
                 Field.Instance.Initialization();
+                SlotManager.Instance.Initialization();
                 ChangeGameplayState(GameplayState.None);
                 break;
 
@@ -59,7 +61,14 @@ public class GameplayManager : Singleton<GameplayManager>
                 {
                     ChangeGameplayState(GameplayState.None);
                 }
-                break;           
+                break;
+            case GameplayState.GameOver:
+                UIController.Instance.StateGameOverPanel(true);
+                break;
+            case GameplayState.RestartGame:
+                Field.Instance.Initialization();
+                break;
+
 
         }
     }
@@ -72,7 +81,11 @@ public enum GameplayState
 
     NewGame,
 
-    NewTurn
+    NewTurn,
+
+    GameOver,
+    
+    RestartGame
 }
 
 public enum GameType

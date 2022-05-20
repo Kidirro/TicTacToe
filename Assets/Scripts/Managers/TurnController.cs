@@ -25,6 +25,10 @@ public static class TurnController
 
     static public void TurnProcess(Vector2Int id)
     {
+        Debug.Log("IsCellEmpty(id)" + IsCellEmpty(id).ToString());
+        Debug.Log("_isGamePlaying" + _isGamePlaying.ToString());
+        Debug.Log("_isPossibilityOfMove" + _isPossibilityOfMove.ToString());
+        Debug.Log(PlayerManager.Instance.GetCurrentPlayer().SideId);
         if (IsCellEmpty(id) && _isGamePlaying && _isPossibilityOfMove)
         {
             //if (PhotonNetwork.PlayerList[_currentPlayer-1] == PhotonNetwork.LocalPlayer)

@@ -24,7 +24,8 @@ public class Field : Singleton<Field>
     [SerializeField] private Vector2 _screenBorderX;
     [SerializeField] private Vector2 _screenBorderY;
 
-    [SerializeField] private Vector2Int _fieldSize;
+    [SerializeField] private Vector2Int _startFieldSize;
+    private Vector2Int _fieldSize;
 
     public Vector2Int FieldSize
     {
@@ -73,7 +74,11 @@ public class Field : Singleton<Field>
 
     public void Initialization()
     {
+        StopAllCoroutines();
+        CellAnimating = 0;
         InitializeField();
+
+        _fieldSize = _startFieldSize;
         InitializeLine();
         NewCellSize(_fieldSize, false);
     }
@@ -257,31 +262,57 @@ public class Field : Singleton<Field>
     private void InitializeField()
     {
         GetStartPosition();
-        _cellList = new List<List<Cell>>();
-
-        for (int i = 0; i < _fieldSize.x; i++)
+        if (_cellList.Count != 0)
         {
-            _cellList.Add(new List<Cell>());
-            for (int j = 0; j < _fieldSize.y; j++)
+            for (int i = 0; i < _fieldSize.x; i++)
             {
-                GameObject newCellObject = Instantiate(_cellPrefab);
-                Cell cell = newCellObject.GetComponent<Cell>();
-                newCellObject.name = "[" + i + "][" + j + "]cell";
-                cell.Id = new Vector2Int(i, j);
-                cell.SetTransformParent(_cellParent.transform);
-
-                _cellList[i].Add(cell);
+                for (int j = 0; j < _fieldSize.y; j++)
+                {
+                    Destroy(_cellList[i][j].gameObject);
+                    
+                }
             }
         }
+        _cellList = new List<List<Cell>>();
+            for (int i = 0; i < _startFieldSize.x; i++)
+            {
+                _cellList.Add(new List<Cell>());
+                for (int j = 0; j < _startFieldSize.y; j++)
+                {
+                    GameObject newCellObject = Instantiate(_cellPrefab);
+                    Cell cell = newCellObject.GetComponent<Cell>();
+                    newCellObject.name = "[" + i + "][" + j + "]cell";
+                    cell.Id = new Vector2Int(i, j);
+                    cell.SetTransformParent(_cellParent.transform);
+
+                    _cellList[i].Add(cell);
+                }
+            }
+        
     }
 
     private void InitializeLine()
     {
-        int i = 0;
-        int j = 0;
+        if (_lineListVertical.Count != 0)
+        {
+            foreach (Line line in _lineListVertical) {
+                Destroy(line.gameObject);
+            }
+        }
 
-        int verticalSize = Mathf.Max(_lineListVertical.Count, _cellList.Count - 1);
-        int horizontalSize = Mathf.Max(_lineListHorizontal.Count, _cellList[0].Count - 1);
+        if (_lineListHorizontal.Count != 0)
+        {
+            foreach (Line line in _lineListHorizontal)
+            {
+                Destroy(line.gameObject);
+            }
+        }
+
+        _lineListHorizontal = new List<Line>();
+        _lineListVertical = new List<Line>();
+
+        int verticalSize = _fieldSize.x - 1;
+        int horizontalSize = _fieldSize.y- 1;
 
         if (!_lineFinish)
         {
@@ -296,41 +327,26 @@ public class Field : Singleton<Field>
         }
         _lineFinish.LineRend.positionCount = 0;
 
-        while (i < verticalSize)
+        for (int i = 0; i <verticalSize; i++)
         {
-            if (i >= _lineListVertical.Count)
-            {
                 GameObject newLine = Instantiate(_linePrefab);
                 Line LR = newLine.GetComponent<Line>();
                 LR.SetTransformParent(_lineParent.transform);
                 _lineListVertical.Add(LR);
                 newLine.name = "Vertical Line " + i;
-            }
+            
 
-            if (i >= _cellList.Count - 1)
-            {
-
-                _lineListVertical[i].LineRend.positionCount = 0;
-            }
-            i++;
         }
 
-        while (j < horizontalSize)
+        for  (int j =0; j < horizontalSize; j++)
         {
-            if (j >= _lineListHorizontal.Count)
-            {
                 GameObject newLine = Instantiate(_linePrefab);
                 Line LR = newLine.GetComponent<Line>();
                 LR.SetTransformParent(_lineParent.transform);
                 _lineListHorizontal.Add(LR);
                 newLine.name = "Horizontal Line " + j;
-            }
-
-            if (j >= _cellList[0].Count - 1)
-            {
-                _lineListHorizontal[i].LineRend.positionCount = 0;
-            }
-            j++;
+            
+            
         }
     }
     public void NewCellSize(Vector2Int VirtualfieldSize, bool instantly = true)
@@ -339,7 +355,6 @@ public class Field : Singleton<Field>
         _remainX = (_endPositionX - _startPositionX - _cellSize * _fieldSize.x) / 2;
         _remainY = (_endPositionY - _startPositionY - _cellSize * _fieldSize.y) / 2;
         Vector2 StartPositionMatrix = new Vector2(_startPositionX + _remainX + _cellSize / 2, _startPositionY + _remainY + _cellSize / 2);
-        Debug.Log(StartPositionMatrix);
         for (int i = 0; i < _fieldSize.x; i++)
         {
             for (int j = 0; j < _fieldSize.y; j++)
@@ -392,6 +407,10 @@ public class Field : Singleton<Field>
         if (Input.GetKeyDown(KeyCode.L))
         {
             NewCellSize(_fieldSize, false);
+        } 
+        if (Input.GetKeyDown(KeyCode.Tab))
+        {
+            foreach (Line line in _lineListVertical) Destroy(line.gameObject);
         }
         if (Input.GetKeyDown(KeyCode.K))
         {

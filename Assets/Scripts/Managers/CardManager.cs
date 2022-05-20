@@ -12,17 +12,23 @@ public class CardManager : Singleton<CardManager>
 
     private List<Card> _cardList = new List<Card>();
 
+    public List<Card> CardAvaible
+    {
+        get { return _cardList; }
+    }
+    
+
     [SerializeField]
     private List<CardInfo> _cardInfoList = new List<CardInfo>();
 
-    private void Awake()
+    public void Initialization()
     {
         foreach (CardInfo cardInfo in _cardInfoList)
         {
             Card card = GameObject.Instantiate(_cardPrefab);
             card.SetCardInfo(cardInfo);
             card.gameObject.SetActive(false);
-            card.transform.SetParent(transform);
+            card.SetTransformParent(transform);
             _cardList.Add(card);
         }
     }

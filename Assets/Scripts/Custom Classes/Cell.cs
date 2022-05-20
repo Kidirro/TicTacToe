@@ -74,6 +74,7 @@ public class Cell : MonoBehaviour
         SetTransformPosition(0, 0);
         _transformRect.localScale = Vector3.one;
     }
+
     public void SetTransformPosition(float x, float y, bool instantly = true)
     {
         _position = new Vector3(x, y, 0);

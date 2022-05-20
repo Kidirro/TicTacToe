@@ -47,7 +47,10 @@ public class Card : MonoBehaviour
     }
     private Vector2 _cardPosition;
 
-    
+    /// <summary>
+    /// Рект трансформ 
+    /// </summary>
+    private RectTransform _transformRect;
 
     /// <summary>
     /// Флаг работы карутины перемещения
@@ -76,6 +79,14 @@ public class Card : MonoBehaviour
 
     #endregion
 
+
+    void Awake()
+    {
+        _transformRect = GetComponent<RectTransform>();
+    }
+
+
+
     /// <summary>
     /// Начало перетягивания карты
     /// </summary>
@@ -83,6 +94,13 @@ public class Card : MonoBehaviour
     {
         stopWatch.Reset();
         stopWatch.Start();
+    }
+
+    private void OnDisable()
+    {
+        _isPositionCoroutineWork = false;
+        _isSizeCoroutineWork = false;
+
     }
 
     private void OnEnable()
@@ -114,18 +132,21 @@ public class Card : MonoBehaviour
     /// </summary>
     public void EndDraged()
     {
+        Debug.Log(Field.Instance.CheckIsInField(Position));
+        Debug.Log(Position);
         stopWatch.Stop();
         if (stopWatch.ElapsedMilliseconds > 80 && Field.Instance.CheckIsInField(Position))
         {
             Info.СardAction.Invoke();
-            Destroy(gameObject);
+            SlotManager.Instance.RemoveCard(PlayerManager.Instance.GetCurrentPlayer(), this);
+            //Destroy(gameObject);
 
         }
         else
         {
             Debug.Log("InfoShowed!");
+            SetTransformPosition(HandPosition.x, HandPosition.y, false);
         }
-        SetTransformPosition(HandPosition.x, HandPosition.y, false);
     }
 
 
@@ -134,7 +155,7 @@ public class Card : MonoBehaviour
     /// </summary>
     public void OnDrag()
     {
-        Vector2 vector = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+        Vector2 vector =Input.mousePosition;
         SetTransformPosition(vector.x, vector.y);
     }
 
@@ -150,6 +171,17 @@ public class Card : MonoBehaviour
         else if (!_isSizeCoroutineWork) StartCoroutine(ScaleIEnumerator());
     }
 
+    /// <summary>
+    /// Установить родительский обьект
+    /// </summary>
+    /// <param name="parent"></param>
+    public void SetTransformParent(Transform parent)
+    {
+        _transformRect.SetParent(parent);
+        SetTransformPosition(0, 0);
+        _transformRect.localScale = Vector3.one;
+    }
+
 
     /// <summary>
     /// Изменение актуального положения карты
@@ -159,7 +191,7 @@ public class Card : MonoBehaviour
     public void SetTransformPosition(float x, float y, bool instantly = true)
     {
         _cardPosition = new Vector2(x, y);
-        if (instantly) transform.position = _cardPosition;
+        if (instantly) _transformRect.localPosition = _cardPosition;
         else if (!_isPositionCoroutineWork) StartCoroutine(PositionIEnumerator());
     }
 
@@ -190,12 +222,12 @@ public class Card : MonoBehaviour
         _isPositionCoroutineWork = true;
         Vector2 prevPos = _cardPosition;
 
-        Vector2 currentPosition = transform.position;
+        Vector2 currentPosition = _transformRect.localPosition;
         Vector2 step = (prevPos - currentPosition) / 100f;
         int i = 0;
         while (i <= 100)
         {
-            currentPosition = transform.position;
+            currentPosition = _transformRect.localPosition;
             if (prevPos != _cardPosition)
             {
                 prevPos = _cardPosition;
@@ -204,11 +236,11 @@ public class Card : MonoBehaviour
                 i = 0;
             }
 
-            transform.position = currentPosition + step;
+            _transformRect.localPosition = currentPosition + step;
             i++;
             yield return null;
         }
-        transform.position = _cardPosition;
+        _transformRect.localPosition = _cardPosition;
         _isPositionCoroutineWork = false;
         yield break;
     }

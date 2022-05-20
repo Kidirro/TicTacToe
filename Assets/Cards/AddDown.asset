@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: AddDown
   m_EditorClassIdentifier: 
   CardImage: {fileID: 0}
-  CardName: 
+  CardName: AddDown
   CardDescription: 
   CardManacost: 5
   "\u0421ardAction":

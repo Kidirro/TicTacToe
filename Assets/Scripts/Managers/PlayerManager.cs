@@ -11,16 +11,24 @@ public class PlayerManager : Singleton<PlayerManager>
     public void AddPlayer(PlayerType type)
     {
         PlayerInfo player = new PlayerInfo();
-        player.EntityType = type;
         _players.Add(player);
+
+        player.EntityType = type;
         player.SideId = _players.Count;
+        player.FullDeckPool = new List<Card>(CardManager.Instance.CardAvaible);
+        player.DeckPool = new List<Card>(CardManager.Instance.CardAvaible);
+        player.HandPool = new List<Card>();
+
     }
     public void AddPlayer(PlayerType type, int side)
     {
         PlayerInfo player = new PlayerInfo();
         player.EntityType = type;
-        _players.Add(player);
         player.SideId = side;
+        player.FullDeckPool = new List<Card>(CardManager.Instance.CardAvaible);
+        player.DeckPool = new List<Card>(CardManager.Instance.CardAvaible);
+        player.HandPool = new List<Card>();
+        _players.Add(player);
     }
 
 
