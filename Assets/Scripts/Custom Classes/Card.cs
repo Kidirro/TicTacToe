@@ -1,4 +1,4 @@
- using System.Collections;
+using System.Collections;
 using UnityEngine.EventSystems;
 using UnityEngine;
 using UnityEngine.UI;
@@ -39,6 +39,12 @@ public class Card : MonoBehaviour
     public Vector2 HandPosition;
 
     /// <summary>
+    /// Место позиции в руке 
+    /// Требует доработки
+    /// </summary>
+    public float HandRotation;
+
+    /// <summary>
     /// Актуальная позиция карты
     /// </summary>
     public Vector2 Position
@@ -48,15 +54,18 @@ public class Card : MonoBehaviour
     private Vector2 _cardPosition;
 
     /// <summary>
+    /// Актуальная позиция карты
+    /// </summary>
+    public float Rotation
+    {
+        get { return _cardRotation; }
+    }
+    private float _cardRotation;
+
+    /// <summary>
     /// Рект трансформ 
     /// </summary>
     private RectTransform _transformRect;
-
-    /// <summary>
-    /// Флаг работы карутины перемещения
-    /// </summary>
-    private bool _isPositionCoroutineWork = false;
-
 
     /// <summary>
     /// Актуальный размер карты
@@ -71,6 +80,17 @@ public class Card : MonoBehaviour
     /// Флаг работы карутины размера
     /// </summary>
     private bool _isSizeCoroutineWork = false;
+
+    /// <summary>
+    /// Флаг работы карутины перемещения
+    /// </summary>
+    private bool _isPositionCoroutineWork = false;
+
+    /// <summary>
+    /// Флаг работы карутины перемещения
+    /// </summary>
+    private bool _isRotationCoroutineWork = false;
+
 
     /// <summary>
     /// Секундомер
@@ -100,17 +120,19 @@ public class Card : MonoBehaviour
     {
         _isPositionCoroutineWork = false;
         _isSizeCoroutineWork = false;
+        _isRotationCoroutineWork = false;
 
     }
 
     private void OnEnable()
     {
-        foreach(GameObject go in _manapoints) {
+        foreach (GameObject go in _manapoints)
+        {
             go.SetActive(false);
         }
-        if (Info!=null && Info.CardManacost != 0)
+        if (Info != null && Info.CardManacost != 0)
         {
-            _manapoints[Info.CardManacost-1].SetActive(true);
+            _manapoints[Info.CardManacost - 1].SetActive(true);
         }
     }
 
@@ -139,12 +161,10 @@ public class Card : MonoBehaviour
         {
             Info.СardAction.Invoke();
             SlotManager.Instance.RemoveCard(PlayerManager.Instance.GetCurrentPlayer(), this);
-            //Destroy(gameObject);
 
         }
         else
         {
-            Debug.Log("InfoShowed!");
             SetTransformPosition(HandPosition.x, HandPosition.y, false);
         }
     }
@@ -155,7 +175,7 @@ public class Card : MonoBehaviour
     /// </summary>
     public void OnDrag()
     {
-        Vector2 vector =Input.mousePosition;
+        Vector2 vector = Input.mousePosition;
         SetTransformPosition(vector.x, vector.y);
     }
 
@@ -193,6 +213,21 @@ public class Card : MonoBehaviour
         _cardPosition = new Vector2(x, y);
         if (instantly) _transformRect.localPosition = _cardPosition;
         else if (!_isPositionCoroutineWork) StartCoroutine(PositionIEnumerator());
+    }
+
+    /// <summary>
+    /// Изменение актуального поворота карты
+    /// </summary>
+    /// <param name="x"></param>
+    /// <param name="y"></param>
+    /// <param name="instantly"></param>
+    public void SetTransformRotation(float x, bool instantly = true)
+    {
+        Debug.Log(_cardRotation);
+        Debug.Log(x);
+        _cardRotation = x;
+        if (instantly) _transformRect.localRotation = Quaternion.Euler(0, 0, x);
+        else if (!_isRotationCoroutineWork) StartCoroutine(RotationIEnumerator());
     }
 
     private IEnumerator ScaleIEnumerator()
@@ -242,6 +277,32 @@ public class Card : MonoBehaviour
         }
         _transformRect.localPosition = _cardPosition;
         _isPositionCoroutineWork = false;
+        yield break;
+    }
+
+    private IEnumerator RotationIEnumerator()
+    {
+        _isRotationCoroutineWork = true;
+
+        Quaternion prevRot = Quaternion.Euler(0,0, _cardRotation);
+
+        Quaternion currentRotation = _transformRect.localRotation;
+        int i = 0;
+        while (i <= 100)
+        {
+            if (prevRot!= Quaternion.Euler(0,0, _cardRotation))
+           {
+                prevRot = Quaternion.Euler(0, 0, _cardRotation);
+                currentRotation = _transformRect.localRotation;
+                i = 0;
+            }
+
+            _transformRect.localRotation = Quaternion.Lerp(currentRotation, prevRot, (float)i / 100f);
+            i++;
+            yield return null;
+        }
+        _transformRect.localRotation = Quaternion.Euler(0, 0, _cardRotation);
+        _isRotationCoroutineWork = false;
         yield break;
     }
 

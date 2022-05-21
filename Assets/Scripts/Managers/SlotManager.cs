@@ -31,7 +31,17 @@ public class SlotManager : Singleton<SlotManager>
     [SerializeField]
     private float _deckPosition;
 
+    /// <summary>
+    /// Дельта угла карт
+    /// </summary>
+    [SerializeField]
+    private float _angleDelta;
 
+    /// <summary>
+    /// Дельта высоты карт
+    /// </summary>
+    [SerializeField]
+    private float _heightDelta;
 
     /// <summary>
     /// Количество слотов
@@ -42,12 +52,12 @@ public class SlotManager : Singleton<SlotManager>
     /// <summary>
     /// Позиция слотов
     /// </summary>
-    private List<Vector2> _slots = new List<Vector2>();
+    private List<Vector2> _slotsPosition = new List<Vector2>();
 
     /// <summary>
-    /// Позиция колоды
+    /// Позиция слотов
     /// </summary>
-    private Vector2 _deck;
+    private List<float> _slotsRotation = new List<float>();
 
     #endregion 
 
@@ -55,31 +65,31 @@ public class SlotManager : Singleton<SlotManager>
     {
         if (_isNeedGizmos)
         {
-            //float StartPositionX = Camera.main.ScreenToWorldPoint(new Vector2(Camera.main.pixelWidth * ((_screenBorderX.x) / _defaultScreenResolution.x), 0)).x;
-            //float EndPositionX = Camera.main.ScreenToWorldPoint(new Vector2(Camera.main.pixelWidth * ((_defaultScreenResolution.x - _screenBorderX.y) / _defaultScreenResolution.x), 0)).x;
-
             float PositionY = Camera.main.pixelHeight * (_buttonBorder) / _defaultScreenResolution.y;
-            float StepX = Camera.main.pixelWidth / (_slotsCount * 2);
+            float StepX = Camera.main.pixelWidth / (_slotsCount+1);
             Gizmos.color = Color.green;
             for (int i = 0; i < _slotsCount; i++)
             {
-                Gizmos.DrawCube(Camera.main.ScreenToWorldPoint(new Vector2(StepX * (i * 2 + 1), PositionY)), Vector3.one / 2);
+                float posY = PositionY + (Mathf.Sin(Mathf.PI * (i + 1) / (_slotsCount + 1)))* _heightDelta;
+                Gizmos.DrawCube(Camera.main.ScreenToWorldPoint(new Vector2(StepX * (i + 1), posY)), Vector3.one / 2);
             }
             Gizmos.DrawLine(Camera.main.ScreenToWorldPoint(new Vector2(0, _deckPosition)),
                 Camera.main.ScreenToWorldPoint(new Vector2(Camera.main.pixelWidth, _deckPosition)));
-
-
         }
     }
 
 
 
+    /// <summary>
+    /// Требуется пересборка
+    /// </summary>
     public void Initialization()
     {
         float step = Camera.main.pixelWidth / (_slotsCount * 2);
         for (int i = 0; i < _slotsCount; i++)
         {
-            _slots.Add(new Vector2(step * (i * 2 + 1), _buttonBorder));
+            _slotsPosition.Add(new Vector2(step * (i * 2 + 1), _buttonBorder + (Mathf.Sin(Mathf.PI * (i + 1) / (_slotsCount + 1))) * _heightDelta));
+            _slotsRotation.Add(_angleDelta - _angleDelta * i);
 
         }
     }
@@ -95,8 +105,11 @@ public class SlotManager : Singleton<SlotManager>
         player.DeckPool.RemoveRange(card, 1);
         card = player.HandPool.Count - 1;
         player.HandPool[card].SetTransformParent(transform);
-        player.HandPool[card].SetTransformPosition(_slots[card].x, _deckPosition);
-        player.HandPool[card].HandPosition = _slots[card];
+        player.HandPool[card].SetTransformPosition(_slotsPosition[card].x, _deckPosition);
+        player.HandPool[card].SetTransformRotation(0);
+        player.HandPool[card].HandPosition = _slotsPosition[card];
+        player.HandPool[card].HandRotation = _slotsRotation[card];
+
         player.HandPool[card].gameObject.SetActive(true);
         PrintCArd();
 
@@ -109,7 +122,8 @@ public class SlotManager : Singleton<SlotManager>
         player.DeckPool.Add(player.HandPool[id]);
         player.HandPool.RemoveRange(id, 1);
         player.DeckPool[player.DeckPool.Count - 1].gameObject.SetActive(false);
-        player.DeckPool[player.DeckPool.Count - 1].SetTransformPosition(_slots[0].x, _deckPosition);
+        player.DeckPool[player.DeckPool.Count - 1].SetTransformPosition(_slotsPosition[0].x, _deckPosition);
+        player.DeckPool[player.DeckPool.Count - 1].SetTransformRotation(0);
         PrintCArd();
     }
 
@@ -121,7 +135,9 @@ public class SlotManager : Singleton<SlotManager>
         player.DeckPool.Add(card);
         player.HandPool.Remove(card);
         player.DeckPool[player.DeckPool.Count - 1].gameObject.SetActive(false);
-        player.DeckPool[player.DeckPool.Count - 1].SetTransformPosition(_slots[0].x, _deckPosition);
+        player.DeckPool[player.DeckPool.Count - 1].SetTransformPosition(_slotsPosition[0].x, _deckPosition);
+
+        player.DeckPool[player.DeckPool.Count - 1].SetTransformRotation(0);
         PrintCArd();
     }
 
@@ -160,11 +176,12 @@ public class SlotManager : Singleton<SlotManager>
     {
         for (int i = 0; i < PlayerManager.Instance.GetCurrentPlayer().HandPool.Count; i++)
         {
-            Debug.Log(i);
-            Debug.Log(_slots[i]);
-            PlayerManager.Instance.GetCurrentPlayer().HandPool[i].HandPosition = _slots[i];
-            PlayerManager.Instance.GetCurrentPlayer().HandPool[i].SetTransformPosition(_slots[i].x, _slots[i].y, instantly);
-            Debug.Log(PlayerManager.Instance.GetCurrentPlayer().HandPool[i].Position);
+            PlayerManager.Instance.GetCurrentPlayer().HandPool[i].HandPosition = _slotsPosition[i];
+            PlayerManager.Instance.GetCurrentPlayer().HandPool[i].SetTransformPosition(_slotsPosition[i].x, _slotsPosition[i].y, instantly);
+
+            PlayerManager.Instance.GetCurrentPlayer().HandPool[i].HandRotation = _slotsRotation[i];
+            PlayerManager.Instance.GetCurrentPlayer().HandPool[i].SetTransformRotation(_slotsRotation[i], instantly);
+
         }
     }
 }

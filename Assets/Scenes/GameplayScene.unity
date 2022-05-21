@@ -1167,8 +1167,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _isNeedGizmos: 1
   _defaultScreenResolution: {x: 720, y: 1280}
-  _buttonBorder: 150
-  _deckPosition: -150
+  _buttonBorder: 75
+  _deckPosition: -100
+  _angleDelta: 5
+  _heightDelta: 50
   _slotsCount: 3
 --- !u!1 &1907715547
 GameObject:

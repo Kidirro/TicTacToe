@@ -402,6 +402,9 @@ public class Field : Singleton<Field>
         }
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
     public void Update()
     {
         if (Input.GetKeyDown(KeyCode.L))
@@ -447,7 +450,8 @@ public class Field : Singleton<Field>
             _cellList[1][0] = kk;
             NewCellSize(_fieldSize, false);
         }
-        if (Input.GetKeyDown(KeyCode.Mouse1))
+
+/*        if (Input.GetKeyDown(KeyCode.Mouse1))
         {
             Debug.Log(GetIdFromPosition(Input.mousePosition, false));
             Debug.Log(AreaManager.GetArea(GetIdFromPosition(Input.mousePosition, false), new Vector2Int(1, 1)));
@@ -456,7 +460,7 @@ public class Field : Singleton<Field>
         if (Input.GetKeyDown(KeyCode.Mouse0))
         {
             Debug.Log(GetIdFromPosition(Input.mousePosition, false));
-        }
+        }*/
     }
 
     public void SwapVerticalLines(int fl, int sl, bool instantly = true)
