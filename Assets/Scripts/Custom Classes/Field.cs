@@ -411,10 +411,6 @@ public class Field : Singleton<Field>
         {
             NewCellSize(_fieldSize, false);
         } 
-        if (Input.GetKeyDown(KeyCode.Tab))
-        {
-            foreach (Line line in _lineListVertical) Destroy(line.gameObject);
-        }
         if (Input.GetKeyDown(KeyCode.K))
         {
             NewCellSize(_fieldSize + Vector2Int.one, false);
@@ -594,6 +590,7 @@ public class Field : Singleton<Field>
             }
 
             UIController.AddScore(current_player, ClearCellOnLine(new Vector2Int((int)id1.x, (int)id1.y), new Vector2Int((int)id2.x, (int)id2.y)));
+            Debug.Log("Cleaned");
             while (j > 0)
             {
                 j--;
@@ -614,6 +611,12 @@ public class Field : Singleton<Field>
                pos.y >= (_startPositionY + _remainY) & pos.y <= (_endPositionY - _remainY);
     }
 
+    public bool IsInField(float h)
+    {
+
+        return h >= (_startPositionY + _remainY);
+    }
+
     /// <summary>
     ///при выходе за границы при включенном флаге - последн€€ точка
     /// </summary>
@@ -627,5 +630,52 @@ public class Field : Singleton<Field>
         pos_final.x = (int)Mathf.Clamp((float)Math.Floor((pos.x - (_startPositionX + _remainX)) / _cellSize), 0, _fieldSize.x - 1);
         if (CheckIsInField(pos) || IsFindBorder) return pos_final;
         else return (new Vector2Int(-1, -1));
+    }
+
+    public void UnHighlightZone(Vector2Int Position, Vector2Int AreaSize)
+    {
+        Vector4 CurrentArea = AreaManager.GetArea(Position, AreaSize);
+        for (int x = (int)CurrentArea.x; x <= CurrentArea.z; x++)
+        {
+            for (int y = (int)CurrentArea.y; y <= CurrentArea.w; y++)
+            {
+                CellList[x][y].UnHighlightCell();
+            }
+        }
+    }
+
+    public void HighlightZone(Vector2Int Position, Vector2Int AreaSize)
+    {
+        Vector4 CurrentArea = AreaManager.GetArea(Position, AreaSize);
+        for (int x = (int)CurrentArea.x; x <= CurrentArea.z; x++)
+        {
+            for (int y = (int)CurrentArea.y; y <= CurrentArea.w; y++)
+            {
+                CellList[x][y].HighlightCell((CellState)PlayerManager.Instance.GetCurrentPlayer().SideId);
+            }
+        }
+    }
+
+    public bool IsZoneEmpty(Vector2Int Position, Vector2Int AreaSize)
+    {
+        Vector4 CurrentArea = AreaManager.GetArea(Position, AreaSize);
+        for (int x = (int)CurrentArea.x; x <= CurrentArea.z; x++)
+        {
+            for (int y = (int)CurrentArea.y; y <= CurrentArea.w; y++)
+            {
+                if (!IsCellEmpty(x,y)) return false;
+            }
+        }
+        return true;
+    }
+
+    public bool IsCellEmpty(Vector2Int id)
+    {
+        return CellList[id.x][id.y].State == CellState.empty || CellList[id.x][id.y].State == CellState.Highlighted;
+    }
+
+    public bool IsCellEmpty(int x, int y)
+    {
+        return CellList[x][y].State == CellState.empty || CellList[x][y].State == CellState.Highlighted;
     }
 }

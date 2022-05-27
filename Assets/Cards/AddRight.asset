@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 280c217edb247014c88a71e11514f438, type: 3}
   m_Name: AddRight
   m_EditorClassIdentifier: 
-  CardImage: {fileID: 0}
+  CardImage: {fileID: 21300000, guid: 1210f34c76768d34a911d035cd796404, type: 3}
   CardName: AddRight
   CardDescription: 
   CardManacost: 0

@@ -12,9 +12,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 280c217edb247014c88a71e11514f438, type: 3}
   m_Name: AddUp
   m_EditorClassIdentifier: 
-  CardImage: {fileID: 0}
+  CardImage: {fileID: 21300000, guid: 88f4d0b564498d54f9c3766a3ee23f23, type: 3}
   CardName: AddUp
   CardDescription: 
+  CardType: 0
+  CardAreaSize: {x: 0, y: 0}
   CardManacost: 5
   "\u0421ardAction":
     m_PersistentCalls:

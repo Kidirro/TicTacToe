@@ -40,10 +40,12 @@ public class GameplayManager : Singleton<GameplayManager>
                         PlayerManager.Instance.AddPlayer(PlayerType.Human);
                         break;
                 }
+                SlotManager.Instance.AddCard(PlayerManager.Instance.GetCurrentPlayer());
+                SlotManager.Instance.AddCard(PlayerManager.Instance.GetCurrentPlayer());
+                SlotManager.Instance.UpdateCardPosition(false);
                 ThemeManager.Instance.Initialization();
                 UIController.Instance.Initialization();
                 Field.Instance.Initialization();
-                SlotManager.Instance.Initialization();
                 ChangeGameplayState(GameplayState.None);
                 break;
 
@@ -54,11 +56,14 @@ public class GameplayManager : Singleton<GameplayManager>
 
                 if (PlayerManager.Instance.GetCurrentPlayer().EntityType.Equals(PlayerType.AI))
                 {
-                    TurnController.TurnProcess(AIManager.Instance.GenerateNewTurn(Field.Instance.FieldSize));
+                    TurnController.PlaceInCell(AIManager.Instance.GenerateNewTurn(Field.Instance.FieldSize));
                     ChangeGameplayState(GameplayState.NewTurn);
                 }
                 else
                 {
+                    SlotManager.Instance.AddCard(PlayerManager.Instance.GetCurrentPlayer());
+                    SlotManager.Instance.AddCard(PlayerManager.Instance.GetCurrentPlayer());
+                    SlotManager.Instance.UpdateCardPosition(false);
                     ChangeGameplayState(GameplayState.None);
                 }
                 break;

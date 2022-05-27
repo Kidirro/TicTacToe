@@ -49,10 +49,33 @@ public class Cell : MonoBehaviour
         _image = GetComponent<Image>();
     }
 
+    public void HighlightCell(CellState s)
+    {
+        if (_state != CellState.empty) return;
+        _state = CellState.Highlighted;
+        _image.sprite = ThemeManager.Instance.GetSprite(s);
+        var cl = _image.color;
+        cl.a = 0.15f;
+        _image.color = cl;
+    }
+    public void UnHighlightCell()
+    {
+        if (_state != CellState.Highlighted) return;
+        _state = CellState.empty;
+        _image.sprite = ThemeManager.Instance.GetSprite(CellState.empty);
+        var cl = _image.color;
+        cl.a =1f;
+        _image.color = cl;
+    }
+
     public void SetState(int s)
     {
         _image.sprite = ThemeManager.Instance.GetSprite((CellState)s);
+        Debug.LogFormat("{0}, {1} ", Id, (CellState)s);
         _state = (CellState)s;
+        var cl = _image.color;
+        cl.a =1f;
+        _image.color = cl;
     }
 
     public void SetState(CellState s)
@@ -87,7 +110,7 @@ public class Cell : MonoBehaviour
 
     public void Clicked()
     {
-        TurnController.TurnProcess(_id);
+        TurnController.PlaceInCell(_id);
     }
 
     private IEnumerator ScaleIEnumerator()
@@ -150,6 +173,7 @@ public class Cell : MonoBehaviour
 
 public enum CellState
 {
+    Highlighted = -2,
     block = -1,
     empty = 0,
     p1 = 1,

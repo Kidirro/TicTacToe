@@ -23,21 +23,20 @@ public static class TurnController
 
     static private List<List<CellState>> _cellStateCopy = new List<List<CellState>>();
 
-    static public void TurnProcess(Vector2Int id)
+    static public void PlaceInCell(Vector2Int id, bool isNeedCheck = true)
     {
-        Debug.Log("IsCellEmpty(id)" + IsCellEmpty(id).ToString());
+        Debug.Log("IsCellEmpty(id)" + Field.Instance.IsCellEmpty(id).ToString());
         Debug.Log("_isGamePlaying" + _isGamePlaying.ToString());
-        Debug.Log("_isPossibilityOfMove" + _isPossibilityOfMove.ToString());
-        Debug.Log(PlayerManager.Instance.GetCurrentPlayer().SideId);
-        if (IsCellEmpty(id) && _isGamePlaying && _isPossibilityOfMove)
+        Debug.Log("_isPossibilityOfMove " + _isPossibilityOfMove.ToString());
+        if (Field.Instance.IsCellEmpty(id) && _isGamePlaying && _isPossibilityOfMove)
         {
             //if (PhotonNetwork.PlayerList[_currentPlayer-1] == PhotonNetwork.LocalPlayer)
             //{
             //    NetworkEvent.RaiseEventCellState(id);
-            _isPossibilityOfMove = false;
+            //_isPossibilityOfMove = false;
                 Field.Instance.CellList[id.x][id.y].SetState(PlayerManager.Instance.GetCurrentPlayer().SideId);
 
-                MasterChecker(id);
+                if(isNeedCheck) MasterChecker(id);
             //}
         }
     }
@@ -145,7 +144,6 @@ public static class TurnController
             LineResult = CheckVerticalHorizontal(stepX, stepY);
             if (DiagonalResult != Vector4.zero)
             {
-                _isPossibilityOfMove = false;
                 Field.Instance.AddNewFinishId(DiagonalResult);
                 ClearLine(new Vector2Int((int)DiagonalResult.x, (int)DiagonalResult.y), new Vector2Int((int)DiagonalResult.z, (int)DiagonalResult.w), turnId);
                 lineFind = true;
@@ -153,7 +151,6 @@ public static class TurnController
             }
             if (LineResult != Vector4.zero)
             {
-                _isPossibilityOfMove = false;
                 Field.Instance.AddNewFinishId(LineResult);
 
                 ClearLine(new Vector2Int((int)LineResult.x, (int)LineResult.y), new Vector2Int((int)LineResult.z, (int)LineResult.w), turnId);
@@ -193,8 +190,6 @@ public static class TurnController
         else if (toleft)
         {
             i--;
-            Debug.Log(StartX);
-            Debug.Log(_cellStateCopy.Count);
 
             while ((i + StartX < _cellStateCopy.Count) && ( StartY+2-i >= 0) && toleft)
             {
@@ -265,12 +260,14 @@ public static class TurnController
 
    static private void ClearLine(Vector2Int id1,Vector2Int id2, Vector2Int idDefault)
     {
-        if (id1 != idDefault)  _cellStateCopy[id1.x][id1.y]= 0;
-        Vector2Int nextValue = new Vector2Int(id1.x + (int) Math.Sign(id2.x - id1.x), id1.y + (int)Math.Sign(id2.y - id1.y));
+        Debug.LogFormat("Cleared {0} {1}", id1, id2);
+
+        if (id1 != idDefault) _cellStateCopy[id1.x][id1.y] = 0;
+        Vector2Int nextValue = new Vector2Int(id1.x + (int)Math.Sign(id2.x - id1.x), id1.y + (int)Math.Sign(id2.y - id1.y));
         while (nextValue != id2)
         {
-            if (nextValue != idDefault) _cellStateCopy[nextValue.x][nextValue.y]=0;
-             nextValue = new Vector2Int(nextValue.x + (int)Math.Sign(id2.x - id1.x), nextValue.y + (int)Math.Sign(id2.y - id1.y));
+            if (nextValue != idDefault) _cellStateCopy[nextValue.x][nextValue.y] = 0;
+            nextValue = new Vector2Int(nextValue.x + (int)Math.Sign(id2.x - id1.x), nextValue.y + (int)Math.Sign(id2.y - id1.y));
         }
         if (id2 != idDefault) _cellStateCopy[id2.x][id2.y] = 0;
     }
@@ -292,16 +289,5 @@ public static class TurnController
     static public bool CheckCanTurn()
     {
         return _isGamePlaying;//&& CheckIsCurrentPlayer();
-    }
-
-
-    static public bool IsCellEmpty(Vector2Int id)
-    {
-        return Field.Instance.CellList[id.x][id.y].State == CellState.empty;
-    }
-
-    static public bool IsCellEmpty(int x, int y)
-    {
-        return Field.Instance.CellList[x][y].State == CellState.empty;
     }
 }

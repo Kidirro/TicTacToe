@@ -8,56 +8,72 @@ public class SlotManager : Singleton<SlotManager>
     /// <summary>
     /// Нужна ли прорисовка гизмоса
     /// </summary>
-    [SerializeField]
+    [SerializeField, Tooltip("Нужна ли прорисовка гизмоса")]
     private bool _isNeedGizmos = true;
 
     /// <summary>
     /// Разрешение экрана по умолчанию
     /// </summary>
-    [SerializeField]
+    [SerializeField, Tooltip("Разрешение экрана по умолчанию")]
     private Vector2 _defaultScreenResolution;
 
 
     /// <summary>
     /// Отступ от нижней границы
     /// </summary>
-    [SerializeField]
+    [SerializeField, Tooltip("Отступ от нижней границы")]
     private float _buttonBorder;
+
+    /// <summary>
+    /// Отступ от границ экрана по бокам
+    /// </summary>
+    [SerializeField,Tooltip("Отступ от границ экрана по бокам")]
+    private float _widthBorder;
+
+    /// <summary>
+    /// Ширина одной карты
+    /// </summary>
+    [SerializeField, Tooltip("Ширина одной карты")]
+    private float _widthCard;
 
 
     /// <summary>
     /// Позиция колоды
     /// </summary>
-    [SerializeField]
+    [SerializeField, Tooltip("Позиция колоды (По X)")]
     private float _deckPosition;
 
     /// <summary>
     /// Дельта угла карт
     /// </summary>
-    [SerializeField]
+    [SerializeField, Tooltip("Дельта угла карт")]
     private float _angleDelta;
 
     /// <summary>
     /// Дельта высоты карт
     /// </summary>
-    [SerializeField]
+    [SerializeField,Tooltip("Дельта высоты карт")]
     private float _heightDelta;
 
     /// <summary>
     /// Количество слотов
     /// </summary>
-    [SerializeField]
+    [SerializeField,Tooltip("Максимальное количество слотов")]
     private int _slotsCount;
 
     /// <summary>
-    /// Позиция слотов
+    /// Высота пересдачи карты
     /// </summary>
-    private List<Vector2> _slotsPosition = new List<Vector2>();
+    [SerializeField,Tooltip("Высота пересдачи карты")]
+    private int _rechangerHeight;
 
     /// <summary>
-    /// Позиция слотов
+    /// Пересдаватель
     /// </summary>
-    private List<float> _slotsRotation = new List<float>();
+    [SerializeField, Tooltip("Пересдаватель")]
+    private Rechanger _rechanger;
+
+
 
     #endregion 
 
@@ -66,34 +82,17 @@ public class SlotManager : Singleton<SlotManager>
         if (_isNeedGizmos)
         {
             float PositionY = Camera.main.pixelHeight * (_buttonBorder) / _defaultScreenResolution.y;
-            float StepX = Camera.main.pixelWidth / (_slotsCount+1);
+            float StepX = (Camera.main.pixelWidth - _widthBorder*2 + _widthCard*_slotsCount) / (_slotsCount + 1);
             Gizmos.color = Color.green;
             for (int i = 0; i < _slotsCount; i++)
             {
-                float posY = PositionY + (Mathf.Sin(Mathf.PI * (i + 1) / (_slotsCount + 1)))* _heightDelta;
-                Gizmos.DrawCube(Camera.main.ScreenToWorldPoint(new Vector2(StepX * (i + 1), posY)), Vector3.one / 2);
+                float posY = PositionY + (Mathf.Sin(Mathf.PI * (i + 1) / (_slotsCount + 1))) * _heightDelta;
+                Gizmos.DrawCube(Camera.main.ScreenToWorldPoint(new Vector2(_widthBorder - _widthCard * _slotsCount/2 + StepX * (i + 1), posY)), Vector3.one / 2);
             }
-            Gizmos.DrawLine(Camera.main.ScreenToWorldPoint(new Vector2(0, _deckPosition)),
-                Camera.main.ScreenToWorldPoint(new Vector2(Camera.main.pixelWidth, _deckPosition)));
+            Gizmos.DrawLine(Camera.main.ScreenToWorldPoint(new Vector2(_widthBorder - _widthCard * _slotsCount / 2, PositionY)),
+                Camera.main.ScreenToWorldPoint(new Vector2(Camera.main.pixelWidth - _widthBorder + _widthCard * _slotsCount / 2, PositionY)));
         }
     }
-
-
-
-    /// <summary>
-    /// Требуется пересборка
-    /// </summary>
-    public void Initialization()
-    {
-        float step = Camera.main.pixelWidth / (_slotsCount * 2);
-        for (int i = 0; i < _slotsCount; i++)
-        {
-            _slotsPosition.Add(new Vector2(step * (i * 2 + 1), _buttonBorder + (Mathf.Sin(Mathf.PI * (i + 1) / (_slotsCount + 1))) * _heightDelta));
-            _slotsRotation.Add(_angleDelta - _angleDelta * i);
-
-        }
-    }
-
 
     public void AddCard(PlayerInfo player)
     {
@@ -105,10 +104,8 @@ public class SlotManager : Singleton<SlotManager>
         player.DeckPool.RemoveRange(card, 1);
         card = player.HandPool.Count - 1;
         player.HandPool[card].SetTransformParent(transform);
-        player.HandPool[card].SetTransformPosition(_slotsPosition[card].x, _deckPosition);
+        player.HandPool[card].SetTransformPosition(_deckPosition, _buttonBorder);
         player.HandPool[card].SetTransformRotation(0);
-        player.HandPool[card].HandPosition = _slotsPosition[card];
-        player.HandPool[card].HandRotation = _slotsRotation[card];
 
         player.HandPool[card].gameObject.SetActive(true);
         PrintCArd();
@@ -122,9 +119,8 @@ public class SlotManager : Singleton<SlotManager>
         player.DeckPool.Add(player.HandPool[id]);
         player.HandPool.RemoveRange(id, 1);
         player.DeckPool[player.DeckPool.Count - 1].gameObject.SetActive(false);
-        player.DeckPool[player.DeckPool.Count - 1].SetTransformPosition(_slotsPosition[0].x, _deckPosition);
         player.DeckPool[player.DeckPool.Count - 1].SetTransformRotation(0);
-        PrintCArd();
+        player.DeckPool[player.DeckPool.Count - 1].SetTransformParent(CardManager.Instance.transform);
     }
 
     public void RemoveCard(PlayerInfo player, Card card)
@@ -135,10 +131,8 @@ public class SlotManager : Singleton<SlotManager>
         player.DeckPool.Add(card);
         player.HandPool.Remove(card);
         player.DeckPool[player.DeckPool.Count - 1].gameObject.SetActive(false);
-        player.DeckPool[player.DeckPool.Count - 1].SetTransformPosition(_slotsPosition[0].x, _deckPosition);
-
         player.DeckPool[player.DeckPool.Count - 1].SetTransformRotation(0);
-        PrintCArd();
+        player.DeckPool[player.DeckPool.Count - 1].SetTransformParent(CardManager.Instance.transform);
     }
 
     private void PrintCArd()
@@ -159,11 +153,13 @@ public class SlotManager : Singleton<SlotManager>
         if (Input.GetKeyDown(KeyCode.Alpha1))
         {
             AddCard(PlayerManager.Instance.GetCurrentPlayer());
+            _rechanger.Show();
         }
 
         if (Input.GetKeyDown(KeyCode.Alpha2))
         {
             RemoveCard(PlayerManager.Instance.GetCurrentPlayer(), 0);
+            _rechanger.Hide();
         }
         if (Input.GetKeyDown(KeyCode.Alpha3))
         {
@@ -174,13 +170,23 @@ public class SlotManager : Singleton<SlotManager>
 
     public void UpdateCardPosition(bool instantly = true)
     {
-        for (int i = 0; i < PlayerManager.Instance.GetCurrentPlayer().HandPool.Count; i++)
-        {
-            PlayerManager.Instance.GetCurrentPlayer().HandPool[i].HandPosition = _slotsPosition[i];
-            PlayerManager.Instance.GetCurrentPlayer().HandPool[i].SetTransformPosition(_slotsPosition[i].x, _slotsPosition[i].y, instantly);
+        float currentCount = PlayerManager.Instance.GetCurrentPlayer().HandPool.Count;
 
-            PlayerManager.Instance.GetCurrentPlayer().HandPool[i].HandRotation = _slotsRotation[i];
-            PlayerManager.Instance.GetCurrentPlayer().HandPool[i].SetTransformRotation(_slotsRotation[i], instantly);
+        float PositionY = Camera.main.pixelHeight * (_buttonBorder) / _defaultScreenResolution.y;
+        float StepPos = (Camera.main.pixelWidth - _widthBorder*2 + _widthCard*currentCount) / (currentCount + 1) * Camera.main.pixelWidth / _defaultScreenResolution.x;
+        float StepRot = (_angleDelta * 2) / (currentCount + 1);
+
+        for (int i = 0; i < currentCount; i++)
+        {
+            float posY = PositionY + (Mathf.Sin(Mathf.PI * (i + 1) / (currentCount + 1))) * _heightDelta * Camera.main.pixelHeight / _defaultScreenResolution.y;
+            Vector2 finPosition = new Vector2(_widthBorder + StepPos * (i + 1) - _widthCard * currentCount/2, posY);
+            PlayerManager.Instance.GetCurrentPlayer().HandPool[i].HandPosition = finPosition;
+            PlayerManager.Instance.GetCurrentPlayer().HandPool[i].SetTransformPosition(finPosition.x, finPosition.y, instantly);
+
+            PlayerManager.Instance.GetCurrentPlayer().HandPool[i].SetTransformSize(0.9f,false);
+
+            PlayerManager.Instance.GetCurrentPlayer().HandPool[i].HandRotation = _angleDelta - StepRot * (i + 1);
+            PlayerManager.Instance.GetCurrentPlayer().HandPool[i].SetTransformRotation(_angleDelta - StepRot * (i + 1), instantly);
 
         }
     }

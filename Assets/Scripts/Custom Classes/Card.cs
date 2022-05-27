@@ -3,6 +3,7 @@ using UnityEngine.EventSystems;
 using UnityEngine;
 using UnityEngine.UI;
 using System.Diagnostics;
+using TMPro;
 using Debug = UnityEngine.Debug;
 using System.Collections.Generic;
 
@@ -12,15 +13,43 @@ public class Card : MonoBehaviour
     #region Fields
 
     /// <summary>
-    /// Обьекты отражающие манакост
+    /// 
+    /// </summary>
+    [HideInInspector]
+    public static Vector2Int ChosedCell;
+
+    /// <summary>
+    /// Скорость поворота
+    /// </summary>
+    const float _rotationSpeed = 4;
+
+    /// <summary>
+    /// Скорость поворота
+    /// </summary>
+    const float _scaleSpeed = 8;
+
+
+    /// <summary>
+    /// Скорость перемещения
+    /// </summary>
+    const float _positionSpeed = 4;
+
+
+    /// <summary>
+    /// Текст манакоста
     /// </summary>
     [SerializeField]
-    private List<GameObject> _manapoints = new List<GameObject>();
+    private TextMeshProUGUI _manapoints;
 
     /// <summary>
     /// Информация карты как информационной сущности
     /// </summary>
     public CardInfo Info;
+
+    /// <summary>
+    /// Обьект карты
+    /// </summary>
+    [SerializeField] private GameObject _cardObj;
 
     /// <summary>
     /// Текст описания карты
@@ -91,29 +120,21 @@ public class Card : MonoBehaviour
     /// </summary>
     private bool _isRotationCoroutineWork = false;
 
-
     /// <summary>
     /// Секундомер
     /// </summary>
     private Stopwatch stopWatch = new Stopwatch();
 
+    private Vector2Int _prevPosition;
+
+    private Canvas _canvas;
     #endregion
 
 
     void Awake()
     {
         _transformRect = GetComponent<RectTransform>();
-    }
-
-
-
-    /// <summary>
-    /// Начало перетягивания карты
-    /// </summary>
-    public void BeginDrag()
-    {
-        stopWatch.Reset();
-        stopWatch.Start();
+        _canvas = GetComponent<Canvas>();
     }
 
     private void OnDisable()
@@ -126,49 +147,36 @@ public class Card : MonoBehaviour
 
     private void OnEnable()
     {
-        foreach (GameObject go in _manapoints)
+        _canvas.overrideSorting = false;
+        if (Info)
         {
-            go.SetActive(false);
-        }
-        if (Info != null && Info.CardManacost != 0)
-        {
-            _manapoints[Info.CardManacost - 1].SetActive(true);
+            _manapoints.text = Info.CardManacost.ToString();
+            _cardImage.sprite = Info.CardImage;
+            _cardObj.SetActive(true);
         }
     }
 
     public void SetCardInfo(CardInfo ci)
     {
         Info = ci;
-        foreach (GameObject go in _manapoints)
-        {
-            go.SetActive(false);
-        }
-        if (Info.CardManacost != 0)
-        {
-            _manapoints[Info.CardManacost - 1].SetActive(true);
-        }
+        _manapoints.text = Info.CardManacost.ToString();
+        _cardImage.sprite = Info.CardImage;
     }
+
 
     /// <summary>
-    /// Конец движения карты от пальца
+    /// Начало перетягивания карты
     /// </summary>
-    public void EndDraged()
+    public void BeginDrag()
     {
-        Debug.Log(Field.Instance.CheckIsInField(Position));
-        Debug.Log(Position);
-        stopWatch.Stop();
-        if (stopWatch.ElapsedMilliseconds > 80 && Field.Instance.CheckIsInField(Position))
-        {
-            Info.СardAction.Invoke();
-            SlotManager.Instance.RemoveCard(PlayerManager.Instance.GetCurrentPlayer(), this);
-
-        }
-        else
-        {
-            SetTransformPosition(HandPosition.x, HandPosition.y, false);
-        }
+        _canvas.overrideSorting = true;
+        SetTransformSize(1, false);
+        ChosedCell = new Vector2Int(-1, -1);
+        SetTransformRotation(0);
+        stopWatch.Reset();
+        stopWatch.Start();
+        //SlotManager.Instance.
     }
-
 
     /// <summary>
     /// Перетягивание карты
@@ -177,6 +185,70 @@ public class Card : MonoBehaviour
     {
         Vector2 vector = Input.mousePosition;
         SetTransformPosition(vector.x, vector.y);
+        _cardObj.SetActive(!Field.Instance.IsInField(vector.y));
+        transform.SetAsLastSibling();
+
+
+        if (Info.CardType == CardTypeImpact.OnField) return;
+
+
+        ChosedCell = Field.Instance.GetIdFromPosition(vector, false);
+        if (_prevPosition != ChosedCell)
+        {
+            if (_prevPosition != new Vector2Int(-1, -1))
+            {
+                Field.Instance.UnHighlightZone(_prevPosition, Info.CardAreaSize);
+            }
+
+            if (ChosedCell != new Vector2Int(-1, -1))
+            {
+                Field.Instance.HighlightZone(ChosedCell, Info.CardAreaSize);
+            }
+            _prevPosition = ChosedCell;
+        }
+    }
+
+    /// <summary>
+    /// Конец движения карты от пальца
+    /// </summary>
+    public void EndDraged()
+    {
+        if (ChosedCell != new Vector2Int(-1, -1))
+        {
+            Field.Instance.UnHighlightZone(ChosedCell, Info.CardAreaSize);
+        }
+
+        SetTransformSize(0.9f, false);
+        stopWatch.Stop();
+        _canvas.overrideSorting = false;
+
+        bool TimeFlag = stopWatch.ElapsedMilliseconds > 80;
+        bool TypeFlag = false;
+
+        switch (Info.CardType){
+            case CardTypeImpact.OnField:
+                TypeFlag = Field.Instance.IsInField(_cardPosition.y);
+                break;
+            case CardTypeImpact.OnArea:
+                TypeFlag = Field.Instance.IsInField(_cardPosition.y) && ChosedCell!= new Vector2(-1,-1);
+                break;
+            case CardTypeImpact.OnAreaWithCheck:
+                TypeFlag = Field.Instance.IsInField(_cardPosition.y) && ChosedCell != new Vector2(-1, -1) && Field.Instance.IsZoneEmpty(ChosedCell,Info.CardAreaSize);
+                break;
+        }
+
+        if (TypeFlag && TimeFlag)
+        {
+            Info.СardAction.Invoke();
+            SlotManager.Instance.RemoveCard(PlayerManager.Instance.GetCurrentPlayer(), this);
+            SlotManager.Instance.UpdateCardPosition(false);
+        }
+        else
+        {
+            _cardObj.SetActive(true);
+            SetTransformPosition(HandPosition.x, HandPosition.y, false);
+            SetTransformRotation(HandRotation, false);
+        }
     }
 
     /// <summary>
@@ -223,8 +295,6 @@ public class Card : MonoBehaviour
     /// <param name="instantly"></param>
     public void SetTransformRotation(float x, bool instantly = true)
     {
-        Debug.Log(_cardRotation);
-        Debug.Log(x);
         _cardRotation = x;
         if (instantly) _transformRect.localRotation = Quaternion.Euler(0, 0, x);
         else if (!_isRotationCoroutineWork) StartCoroutine(RotationIEnumerator());
@@ -234,14 +304,15 @@ public class Card : MonoBehaviour
     {
         _isSizeCoroutineWork = true;
         float prevS = _cardSize;
-        float step = (_cardSize - transform.localScale.x) / 100f;
+        float countStep = 100f / _scaleSpeed;
+        float step = (_cardSize - transform.localScale.x) / countStep;
         int i = 0;
-        while (i <= 100)
+        while (i <= countStep)
         {
             if (prevS != _cardSize)
             {
                 prevS = _cardSize;
-                step = (_cardSize - transform.localScale.x) / 100f;
+                step = (_cardSize - transform.localScale.x) / countStep;
                 i = 0;
             }
             transform.localScale = transform.localScale + new Vector3(step, step);
@@ -255,19 +326,22 @@ public class Card : MonoBehaviour
     private IEnumerator PositionIEnumerator()
     {
         _isPositionCoroutineWork = true;
+
+        float countStep = 100f / _positionSpeed;
+
         Vector2 prevPos = _cardPosition;
 
         Vector2 currentPosition = _transformRect.localPosition;
-        Vector2 step = (prevPos - currentPosition) / 100f;
+        Vector2 step = (prevPos - currentPosition) / countStep;
         int i = 0;
-        while (i <= 100)
+        while (i <= countStep)
         {
             currentPosition = _transformRect.localPosition;
             if (prevPos != _cardPosition)
             {
                 prevPos = _cardPosition;
 
-                step = (prevPos - currentPosition) / 100f;
+                step = (prevPos - currentPosition) / countStep;
                 i = 0;
             }
 
@@ -284,20 +358,23 @@ public class Card : MonoBehaviour
     {
         _isRotationCoroutineWork = true;
 
-        Quaternion prevRot = Quaternion.Euler(0,0, _cardRotation);
+
+        float countStep = 100f / _rotationSpeed;
+
+        Quaternion prevRot = Quaternion.Euler(0, 0, _cardRotation);
 
         Quaternion currentRotation = _transformRect.localRotation;
         int i = 0;
-        while (i <= 100)
+        while (i <= countStep)
         {
-            if (prevRot!= Quaternion.Euler(0,0, _cardRotation))
-           {
+            if (prevRot != Quaternion.Euler(0, 0, _cardRotation))
+            {
                 prevRot = Quaternion.Euler(0, 0, _cardRotation);
                 currentRotation = _transformRect.localRotation;
                 i = 0;
             }
 
-            _transformRect.localRotation = Quaternion.Lerp(currentRotation, prevRot, (float)i / 100f);
+            _transformRect.localRotation = Quaternion.Lerp(currentRotation, prevRot, (float)i / countStep);
             i++;
             yield return null;
         }
@@ -305,5 +382,4 @@ public class Card : MonoBehaviour
         _isRotationCoroutineWork = false;
         yield break;
     }
-
 }
