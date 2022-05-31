@@ -12,7 +12,13 @@ public class Line : MonoBehaviour
         get { return _line; }
     }
     private LineRenderer _line;
-   
+    
+    public float Alpha
+    {
+        get { return _alpha; }
+    }
+    private float _alpha=1;
+
     public Vector2 StartPoint
     {
         get { return _startPoint; }
@@ -46,6 +52,12 @@ public class Line : MonoBehaviour
     private float ScreenToWorld(float s)
     {
         return Camera.main.ScreenToWorldPoint(new Vector2(s, s)).x;
+    }
+
+    public void SetColor(Color s)
+    {
+        _line.startColor = s;
+        _line.endColor = s;
     }
 
     public void SetWidthScreenCord(float s, bool instantly = true)
@@ -97,6 +109,17 @@ public class Line : MonoBehaviour
         transform.localPosition = Vector3.zero;
         transform.localScale = Vector3.one;
         
+    }
+
+
+    public void SetAlphaFinishLine(float s)
+    {
+        Color cl = _line.startColor;
+        cl.a = s;
+        _alpha = s;
+
+        _line.startColor = cl;
+        _line.endColor = cl;
     }
 
     private IEnumerator WidthIEnumerator()

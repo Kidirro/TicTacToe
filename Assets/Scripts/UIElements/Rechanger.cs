@@ -4,6 +4,12 @@ using UnityEngine;
 
 public class Rechanger : MonoBehaviour
 {
+
+    public float Height
+    {
+        get { return _rectTransform.rect.height; }
+    }
+
     private RectTransform _rectTransform;
 
     private bool _isPositionCoroutineWork = false;
@@ -17,12 +23,12 @@ public class Rechanger : MonoBehaviour
 
     public void Show()
     {
-        SetTransformPosition(Camera.main.pixelWidth / 2, _rectTransform.rect.height/2, false);
+        SetTransformPosition(Camera.main.pixelWidth / 2, Height / 2, false);
     }
 
     public void Hide()
     {
-        SetTransformPosition(Camera.main.pixelWidth / 2, -_rectTransform.rect.height/2, false);
+        SetTransformPosition(Camera.main.pixelWidth / 2, -Height / 2, false);
     }
 
     private void SetTransformPosition(float x, float y, bool instantly = true)
@@ -39,6 +45,7 @@ public class Rechanger : MonoBehaviour
         float countStep = 100f / _positionSpeed;
 
         Vector2 prevPos = _rechangerPosition;
+
 
         Vector2 currentPosition = _rectTransform.localPosition;
         Vector2 step = (prevPos - currentPosition) / countStep;

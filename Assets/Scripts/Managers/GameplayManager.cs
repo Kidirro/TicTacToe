@@ -50,19 +50,21 @@ public class GameplayManager : Singleton<GameplayManager>
                 break;
 
             case GameplayState.NewTurn:
-                TurnController.NewTurn();
+                TurnController.Instance.NewTurn();
                 PlayerManager.Instance.NextPlayer();
                 UIController.Instance.NewTurn(false);
 
                 if (PlayerManager.Instance.GetCurrentPlayer().EntityType.Equals(PlayerType.AI))
                 {
-                    TurnController.PlaceInCell(AIManager.Instance.GenerateNewTurn(Field.Instance.FieldSize));
+                    TurnController.Instance.PlaceInCell(AIManager.Instance.GenerateNewTurn(Field.Instance.FieldSize));
+                    TurnController.Instance.MasterChecker((CellState)PlayerManager.Instance.GetCurrentPlayer().SideId);
                     ChangeGameplayState(GameplayState.NewTurn);
                 }
                 else
                 {
                     SlotManager.Instance.AddCard(PlayerManager.Instance.GetCurrentPlayer());
                     SlotManager.Instance.AddCard(PlayerManager.Instance.GetCurrentPlayer());
+                    SlotManager.Instance.ResetRechanher();
                     SlotManager.Instance.UpdateCardPosition(false);
                     ChangeGameplayState(GameplayState.None);
                 }

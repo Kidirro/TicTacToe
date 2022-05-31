@@ -154,7 +154,7 @@ public class UIController : Singleton<UIController>
 
     public void EndButtonPressed()
     {
-        if (TurnController.CheckCanTurn())
+        if (TurnController.Instance.CheckCanTurn())
         {
             GameplayManager.Instance.ChangeGameplayState(GameplayState.NewTurn);
         }

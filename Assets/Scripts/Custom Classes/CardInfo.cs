@@ -46,15 +46,24 @@ public class CardInfo : ScriptableObject
 
     public void PlaceFigure()
     {
-        TurnController.PlaceInCell(new Vector2Int(Card.ChosedCell.x, Card.ChosedCell.y));
+        Vector4 CurrentArea = AreaManager.GetArea(Card.ChosedCell, CardAreaSize);
+        for (int x = (int)CurrentArea.x; x <= CurrentArea.z; x++)
+        {
+            for (int y = (int)CurrentArea.y; y <= CurrentArea.w; y++)
+            {
+                TurnController.Instance.PlaceInCell(new Vector2Int(x,y));
+            }
+        }
+        TurnController.Instance.MasterChecker((CellState)PlayerManager.Instance.GetCurrentPlayer().SideId);
     }
 
     public void PlaceRandom()
     {
-        for (int i = 0; i < 3; i++)
+        for (int i = 0; i < 10; i++)
         {
-            TurnController.PlaceInCell(AIManager.Instance.GenerateNewTurn(Field.Instance.FieldSize));
+            TurnController.Instance.PlaceInCell(AIManager.Instance.GenerateNewTurn(Field.Instance.FieldSize));
         }
+        TurnController.Instance.MasterChecker((CellState)PlayerManager.Instance.GetCurrentPlayer().SideId);
     }
 
 }

@@ -74,6 +74,12 @@ public class SlotManager : Singleton<SlotManager>
     private Rechanger _rechanger;
 
 
+    /// <summary>
+    /// Использован ли заменитель на этом ходу
+    /// </summary>
+    private bool _isRechangerUsed = false;
+
+
 
     #endregion 
 
@@ -167,27 +173,75 @@ public class SlotManager : Singleton<SlotManager>
         }
     }
 
+    public void ResetRechanher()
+    {
+        _isRechangerUsed = false;
+        Debug.Log(_isRechangerUsed);
+    }
 
-    public void UpdateCardPosition(bool instantly = true)
+    public void UpdateCardPosition( bool instantly = true, Card card = null)
     {
         float currentCount = PlayerManager.Instance.GetCurrentPlayer().HandPool.Count;
+        int curIndex = PlayerManager.Instance.GetCurrentPlayer().HandPool.IndexOf(card);
+        if (curIndex != -1) { currentCount -= 1;
+            PlayerManager.Instance.GetCurrentPlayer().HandPool.Remove(card);
 
-        float PositionY = Camera.main.pixelHeight * (_buttonBorder) / _defaultScreenResolution.y;
-        float StepPos = (Camera.main.pixelWidth - _widthBorder*2 + _widthCard*currentCount) / (currentCount + 1) * Camera.main.pixelWidth / _defaultScreenResolution.x;
-        float StepRot = (_angleDelta * 2) / (currentCount + 1);
-
-        for (int i = 0; i < currentCount; i++)
-        {
-            float posY = PositionY + (Mathf.Sin(Mathf.PI * (i + 1) / (currentCount + 1))) * _heightDelta * Camera.main.pixelHeight / _defaultScreenResolution.y;
-            Vector2 finPosition = new Vector2(_widthBorder + StepPos * (i + 1) - _widthCard * currentCount/2, posY);
-            PlayerManager.Instance.GetCurrentPlayer().HandPool[i].HandPosition = finPosition;
-            PlayerManager.Instance.GetCurrentPlayer().HandPool[i].SetTransformPosition(finPosition.x, finPosition.y, instantly);
-
-            PlayerManager.Instance.GetCurrentPlayer().HandPool[i].SetTransformSize(0.9f,false);
-
-            PlayerManager.Instance.GetCurrentPlayer().HandPool[i].HandRotation = _angleDelta - StepRot * (i + 1);
-            PlayerManager.Instance.GetCurrentPlayer().HandPool[i].SetTransformRotation(_angleDelta - StepRot * (i + 1), instantly);
-
+            PlayerManager.Instance.GetCurrentPlayer().HandPool.Add(card);
         }
+        Debug.Log(PlayerManager.Instance.GetCurrentPlayer().HandPool.IndexOf(card));
+
+        
+
+            float PositionY = Camera.main.pixelHeight * (_buttonBorder) / _defaultScreenResolution.y;
+            float StepPos = (_defaultScreenResolution.x - _widthBorder * 2 + _widthCard * currentCount) / (currentCount + 1);
+            float StepRot = (_angleDelta * 2) / (currentCount + 1);
+
+            for (int i = 0; i < currentCount; i++)
+            {
+                float posY = PositionY + (Mathf.Sin(Mathf.PI * (i + 1) / (currentCount + 1))) * _heightDelta * Camera.main.pixelHeight / _defaultScreenResolution.y;
+                Vector2 finPosition = new Vector2((_widthBorder + StepPos * (i + 1) - _widthCard * currentCount / 2) * Camera.main.pixelWidth / _defaultScreenResolution.x, posY);
+                PlayerManager.Instance.GetCurrentPlayer().HandPool[i].HandPosition = finPosition;
+                PlayerManager.Instance.GetCurrentPlayer().HandPool[i].SetTransformPosition(finPosition.x, finPosition.y, instantly);
+
+                PlayerManager.Instance.GetCurrentPlayer().HandPool[i].SetTransformSize(0.9f, false);
+
+                PlayerManager.Instance.GetCurrentPlayer().HandPool[i].HandRotation = _angleDelta - StepRot * (i + 1);
+                PlayerManager.Instance.GetCurrentPlayer().HandPool[i].SetTransformRotation(_angleDelta - StepRot * (i + 1), instantly);
+
+            }
+    }
+
+    public void ShowRechanger()
+    {
+        Debug.Log(_isRechangerUsed);
+
+        if (!_isRechangerUsed)
+        {
+            _rechanger.Show();
+        }
+    }
+
+
+    public void HideRechanger()
+    {
+
+        _rechanger.Hide();
+    }
+
+    public void UseRechanger(Card card) 
+    { 
+        if (!_isRechangerUsed)
+        {
+            _isRechangerUsed = true;
+            RemoveCard(PlayerManager.Instance.GetCurrentPlayer(),card);
+            AddCard(PlayerManager.Instance.GetCurrentPlayer());
+            UpdateCardPosition(false);
+        }
+    }
+
+    public bool IsOnRechanger(float posY)
+    {
+        if (_isRechangerUsed) return false;
+        return posY < _rechanger.Height;
     }
 }

@@ -124,10 +124,23 @@ public class Card : MonoBehaviour
     /// Секундомер
     /// </summary>
     private Stopwatch stopWatch = new Stopwatch();
+    
 
+    /// <summary>
+    /// Предыдущая позиция карты
+    /// </summary>
     private Vector2Int _prevPosition;
 
+    /// <summary>
+    /// Канавас объекта для 
+    /// </summary>
     private Canvas _canvas;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    private bool _isSlotReInit = false;
+
     #endregion
 
 
@@ -173,9 +186,10 @@ public class Card : MonoBehaviour
         SetTransformSize(1, false);
         ChosedCell = new Vector2Int(-1, -1);
         SetTransformRotation(0);
+        _isSlotReInit = false;
         stopWatch.Reset();
         stopWatch.Start();
-        //SlotManager.Instance.
+        SlotManager.Instance.ShowRechanger();
     }
 
     /// <summary>
@@ -185,12 +199,19 @@ public class Card : MonoBehaviour
     {
         Vector2 vector = Input.mousePosition;
         SetTransformPosition(vector.x, vector.y);
-        _cardObj.SetActive(!Field.Instance.IsInField(vector.y));
-        transform.SetAsLastSibling();
+        
+        if (Field.Instance.IsInField(vector.y) && !_isSlotReInit)
+        {
+            _isSlotReInit = true;
+            SlotManager.Instance.UpdateCardPosition(false, this);
+            transform.SetAsLastSibling();
+            Debug.Log("Entered");
+        }
 
 
         if (Info.CardType == CardTypeImpact.OnField) return;
 
+        _cardObj.SetActive(!Field.Instance.IsInField(vector.y));
 
         ChosedCell = Field.Instance.GetIdFromPosition(vector, false);
         if (_prevPosition != ChosedCell)
@@ -217,10 +238,16 @@ public class Card : MonoBehaviour
         {
             Field.Instance.UnHighlightZone(ChosedCell, Info.CardAreaSize);
         }
-
+        SlotManager.Instance.HideRechanger();
         SetTransformSize(0.9f, false);
         stopWatch.Stop();
         _canvas.overrideSorting = false;
+
+        if (SlotManager.Instance.IsOnRechanger(_cardPosition.y))
+        {
+            SlotManager.Instance.UseRechanger(this);
+            return;
+        }
 
         bool TimeFlag = stopWatch.ElapsedMilliseconds > 80;
         bool TypeFlag = false;
@@ -246,9 +273,8 @@ public class Card : MonoBehaviour
         else
         {
             _cardObj.SetActive(true);
-            SetTransformPosition(HandPosition.x, HandPosition.y, false);
-            SetTransformRotation(HandRotation, false);
         }
+        SlotManager.Instance.UpdateCardPosition(false);
     }
 
     /// <summary>

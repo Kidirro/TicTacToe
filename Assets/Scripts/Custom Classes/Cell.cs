@@ -71,7 +71,6 @@ public class Cell : MonoBehaviour
     public void SetState(int s)
     {
         _image.sprite = ThemeManager.Instance.GetSprite((CellState)s);
-        Debug.LogFormat("{0}, {1} ", Id, (CellState)s);
         _state = (CellState)s;
         var cl = _image.color;
         cl.a =1f;
@@ -110,7 +109,8 @@ public class Cell : MonoBehaviour
 
     public void Clicked()
     {
-        TurnController.PlaceInCell(_id);
+        TurnController.Instance.PlaceInCell(_id);
+        TurnController.Instance.MasterChecker((CellState)PlayerManager.Instance.GetCurrentPlayer().SideId);
     }
 
     private IEnumerator ScaleIEnumerator()

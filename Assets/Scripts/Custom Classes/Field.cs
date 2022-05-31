@@ -34,7 +34,7 @@ public class Field : Singleton<Field>
 
     private List<Line> _lineListHorizontal = new List<Line>();
     private List<Line> _lineListVertical = new List<Line>();
-    private Line _lineFinish;
+    private List<FinishLine> _lineFinishEnabled = new List<FinishLine>();
     private float _cellSize;
 
     private List<List<Cell>> _cellList = new List<List<Cell>>();
@@ -46,7 +46,7 @@ public class Field : Singleton<Field>
 
     [SerializeField] private GameObject _cellPrefab;
     [SerializeField] private GameObject _linePrefab;
-    [SerializeField] private Material _finishLineMaterial;
+    [SerializeField] private GameObject _finishLinePrefab;
 
     [Space]
     [Space]
@@ -55,6 +55,10 @@ public class Field : Singleton<Field>
     [SerializeField] private float _lineWidthPercent;
     [SerializeField] private float _borderPercent;
 
+    public float LineWidthPercent
+    {
+        get { return _lineWidthPercent; }
+    }
 
     //In screen cord
     private float _startPositionX;
@@ -65,8 +69,6 @@ public class Field : Singleton<Field>
 
     private float _remainX;
     private float _remainY;
-
-    private List<Vector4> _finishLineId = new List<Vector4>();
 
     [HideInInspector]
     public int CellAnimating = 0;
@@ -85,16 +87,11 @@ public class Field : Singleton<Field>
 
     private void GetStartPosition()
     {
-        /* _startPositionX = Camera.main.ScreenToWorldPoint(new Vector2(Camera.main.pixelWidth * ((_screenBorderX.x) / _defaultScreenResolution.x), 0)).x;
-         _endPositionX = Camera.main.ScreenToWorldPoint(new Vector2(Camera.main.pixelWidth * ((_defaultScreenResolution.x - _screenBorderX.y) / _defaultScreenResolution.x), 0)).x;
-
-         _startPositionY = Camera.main.ScreenToWorldPoint(new Vector2(0, Camera.main.pixelHeight * (_screenBorderY.x) / _defaultScreenResolution.y)).y;
-         _endPositionY = Camera.main.ScreenToWorldPoint(new Vector2(0, Camera.main.pixelHeight * (_defaultScreenResolution.y - _screenBorderY.y) / _defaultScreenResolution.y)).y;*/
         _startPositionX = Camera.main.pixelWidth * ((_screenBorderX.x) / _defaultScreenResolution.x);
         _endPositionX = Camera.main.pixelWidth * ((_defaultScreenResolution.x - _screenBorderX.y) / _defaultScreenResolution.x);
 
-        _startPositionY = Camera.main.pixelHeight * (_screenBorderY.x) / _defaultScreenResolution.y;
-        _endPositionY = Camera.main.pixelHeight * (_defaultScreenResolution.y - _screenBorderY.y) / _defaultScreenResolution.y;
+        _startPositionY = Camera.main.pixelHeight * ((_screenBorderY.x) / _defaultScreenResolution.y);
+        _endPositionY = Camera.main.pixelHeight * ((_defaultScreenResolution.y - _screenBorderY.y) / _defaultScreenResolution.y);
 
     }
 
@@ -269,33 +266,33 @@ public class Field : Singleton<Field>
                 for (int j = 0; j < _fieldSize.y; j++)
                 {
                     Destroy(_cellList[i][j].gameObject);
-                    
+
                 }
             }
         }
         _cellList = new List<List<Cell>>();
-            for (int i = 0; i < _startFieldSize.x; i++)
+        for (int i = 0; i < _startFieldSize.x; i++)
+        {
+            _cellList.Add(new List<Cell>());
+            for (int j = 0; j < _startFieldSize.y; j++)
             {
-                _cellList.Add(new List<Cell>());
-                for (int j = 0; j < _startFieldSize.y; j++)
-                {
-                    GameObject newCellObject = Instantiate(_cellPrefab);
-                    Cell cell = newCellObject.GetComponent<Cell>();
-                    newCellObject.name = "[" + i + "][" + j + "]cell";
-                    cell.Id = new Vector2Int(i, j);
-                    cell.SetTransformParent(_cellParent.transform);
+                GameObject newCellObject = Instantiate(_cellPrefab);
+                Cell cell = newCellObject.GetComponent<Cell>();
+                newCellObject.name = "[" + i + "][" + j + "]cell";
+                cell.Id = new Vector2Int(i, j);
+                cell.SetTransformParent(_cellParent.transform);
 
-                    _cellList[i].Add(cell);
-                }
+                _cellList[i].Add(cell);
             }
-        
+        }
     }
 
     private void InitializeLine()
     {
         if (_lineListVertical.Count != 0)
         {
-            foreach (Line line in _lineListVertical) {
+            foreach (Line line in _lineListVertical)
+            {
                 Destroy(line.gameObject);
             }
         }
@@ -312,41 +309,29 @@ public class Field : Singleton<Field>
         _lineListVertical = new List<Line>();
 
         int verticalSize = _fieldSize.x - 1;
-        int horizontalSize = _fieldSize.y- 1;
+        int horizontalSize = _fieldSize.y - 1;
 
-        if (!_lineFinish)
+
+        for (int i = 0; i < verticalSize; i++)
         {
             GameObject newLine = Instantiate(_linePrefab);
-            newLine.name = "Finish Line";
-            _lineFinish = newLine.GetComponent<Line>();
-            _lineFinish.SetTransformParent(_lineParent.transform);
-            _lineFinish.LineRend.startColor = Color.red;
-            _lineFinish.LineRend.endColor = Color.red;
-            _lineFinish.LineRend.sortingOrder = 1;
-            _lineFinish.LineRend.material = _finishLineMaterial;
-        }
-        _lineFinish.LineRend.positionCount = 0;
+            Line LR = newLine.GetComponent<Line>();
+            LR.SetTransformParent(_lineParent.transform);
+            _lineListVertical.Add(LR);
+            newLine.name = "Vertical Line " + i;
 
-        for (int i = 0; i <verticalSize; i++)
-        {
-                GameObject newLine = Instantiate(_linePrefab);
-                Line LR = newLine.GetComponent<Line>();
-                LR.SetTransformParent(_lineParent.transform);
-                _lineListVertical.Add(LR);
-                newLine.name = "Vertical Line " + i;
-            
 
         }
 
-        for  (int j =0; j < horizontalSize; j++)
+        for (int j = 0; j < horizontalSize; j++)
         {
-                GameObject newLine = Instantiate(_linePrefab);
-                Line LR = newLine.GetComponent<Line>();
-                LR.SetTransformParent(_lineParent.transform);
-                _lineListHorizontal.Add(LR);
-                newLine.name = "Horizontal Line " + j;
-            
-            
+            GameObject newLine = Instantiate(_linePrefab);
+            Line LR = newLine.GetComponent<Line>();
+            LR.SetTransformParent(_lineParent.transform);
+            _lineListHorizontal.Add(LR);
+            newLine.name = "Horizontal Line " + j;
+
+
         }
     }
     public void NewCellSize(Vector2Int VirtualfieldSize, bool instantly = true)
@@ -370,7 +355,7 @@ public class Field : Singleton<Field>
             points[0] = new Vector2(_cellList[i][0].Position.x * 0.5f + _cellList[i + 1][0].Position.x * 0.5f, _cellList[i][0].Position.y - _cellList[0][0].CellSize / 2);
             points[1] = new Vector2(_cellList[i][_cellList[0].Count - 1].Position.x * 0.5f + _cellList[i + 1][_cellList[0].Count - 1].Position.x * 0.5f, _cellList[i][_cellList[0].Count - 1].Position.y + _cellList[0][0].CellSize / 2);
 
-            _lineListVertical[i].SetWidthScreenCord(_cellList[0][0].CellSize * _lineWidthPercent, instantly);
+            _lineListVertical[i].SetWidthScreenCord(_cellSize * _lineWidthPercent* _defaultScreenResolution.x/ Camera.main.pixelWidth, instantly);
             _lineListVertical[i].SetPositions(points[0], points[1], instantly);
         }
 
@@ -380,8 +365,9 @@ public class Field : Singleton<Field>
             points[0] = new Vector2(_cellList[0][i].Position.x - _cellSize / 2, _cellList[0][i].Position.y * 0.5f + _cellList[0][i + 1].Position.y * 0.5f);
             points[1] = new Vector2(_cellList[_cellList.Count - 1][i].Position.x + _cellSize / 2, _cellList[1][i].Position.y * 0.5f + _cellList[1][i + 1].Position.y * 0.5f);
 
-            _lineListHorizontal[i].SetWidthScreenCord(_cellSize * _lineWidthPercent, instantly);
+            _lineListHorizontal[i].SetWidthScreenCord(_cellSize * _lineWidthPercent*_defaultScreenResolution.x/ Camera.main.pixelWidth , instantly);
             _lineListHorizontal[i].SetPositions(points[0], points[1], instantly);
+            Debug.Log(_cellSize);
         }
     }
 
@@ -410,7 +396,7 @@ public class Field : Singleton<Field>
         if (Input.GetKeyDown(KeyCode.L))
         {
             NewCellSize(_fieldSize, false);
-        } 
+        }
         if (Input.GetKeyDown(KeyCode.K))
         {
             NewCellSize(_fieldSize + Vector2Int.one, false);
@@ -447,16 +433,16 @@ public class Field : Singleton<Field>
             NewCellSize(_fieldSize, false);
         }
 
-/*        if (Input.GetKeyDown(KeyCode.Mouse1))
-        {
-            Debug.Log(GetIdFromPosition(Input.mousePosition, false));
-            Debug.Log(AreaManager.GetArea(GetIdFromPosition(Input.mousePosition, false), new Vector2Int(1, 1)));
-        }
+        /*        if (Input.GetKeyDown(KeyCode.Mouse1))
+                {
+                    Debug.Log(GetIdFromPosition(Input.mousePosition, false));
+                    Debug.Log(AreaManager.GetArea(GetIdFromPosition(Input.mousePosition, false), new Vector2Int(1, 1)));
+                }
 
-        if (Input.GetKeyDown(KeyCode.Mouse0))
-        {
-            Debug.Log(GetIdFromPosition(Input.mousePosition, false));
-        }*/
+                if (Input.GetKeyDown(KeyCode.Mouse0))
+                {
+                    Debug.Log(GetIdFromPosition(Input.mousePosition, false));
+                }*/
     }
 
     public void SwapVerticalLines(int fl, int sl, bool instantly = true)
@@ -472,13 +458,13 @@ public class Field : Singleton<Field>
 
         NewCellSize(_fieldSize, instantly);
 
-        TurnController.MasterChecker(new Vector2Int(fl, 0));
-        TurnController.MasterChecker(new Vector2Int(sl, 0), false);
-        for (int i = 1; i < _fieldSize.y; i++)
-        {
-            TurnController.MasterChecker(new Vector2Int(fl, i), false);
-            TurnController.MasterChecker(new Vector2Int(sl, i), false);
-        }
+        /*        TurnController.MasterChecker(new Vector2Int(fl, 0));
+                TurnController.MasterChecker(new Vector2Int(sl, 0), false);
+                for (int i = 1; i < _fieldSize.y; i++)
+                {
+                    TurnController.MasterChecker(new Vector2Int(fl, i), false);
+                    TurnController.MasterChecker(new Vector2Int(sl, i), false);
+                }*/
 
     }
 
@@ -494,14 +480,14 @@ public class Field : Singleton<Field>
         }
 
         NewCellSize(_fieldSize, instantly);
-
-        TurnController.MasterChecker(new Vector2Int(0, fl));
-        TurnController.MasterChecker(new Vector2Int(0, sl), false);
-        for (int i = 1; i < _fieldSize.x; i++)
-        {
-            TurnController.MasterChecker(new Vector2Int(i, fl), false);
-            TurnController.MasterChecker(new Vector2Int(i, sl), false);
-        }
+        /*
+                TurnController.MasterChecker(new Vector2Int(0, fl));
+                TurnController.MasterChecker(new Vector2Int(0, sl), false);
+                for (int i = 1; i < _fieldSize.x; i++)
+                {
+                    TurnController.MasterChecker(new Vector2Int(i, fl), false);
+                    TurnController.MasterChecker(new Vector2Int(i, sl), false);
+                }*/
 
     }
 
@@ -522,87 +508,29 @@ public class Field : Singleton<Field>
         }
     }
 
-    private void SetAlphaFinishLine(float s)
+    public void DrawFinishLine(List<Vector2Int> ids, int score = 0)
     {
-        Color cl = _lineFinish.LineRend.startColor;
-        cl.a = s;
-
-        _lineFinish.LineRend.startColor = cl;
-        _lineFinish.LineRend.endColor = cl;
+        if (_lineFinishEnabled.Count == 0) CreateFinishLine();
+        FinishLine FL = _lineFinishEnabled[0];
+        _lineFinishEnabled.Remove(FL);
+        Debug.Log(_cellSize);
+        FL.SetWidthScreenCord(_cellSize * _lineWidthPercent * _defaultScreenResolution.x / Camera.main.pixelWidth);
+        FL.SetPositions(CellList[ids[0].x][ids[0].y].Position, CellList[ids[ids.Count - 1].x][ids[ids.Count - 1].x].Position);
+        StartCoroutine(FL.FinishLineCleaning(ids, score));
     }
 
-    private int ClearCellOnLine(Vector2Int id1, Vector2Int id2)
+    private void CreateFinishLine()
     {
-        int res = 0;
-        if (_cellList[id1.x][id1.y].State != CellState.empty)
-        {
-            _cellList[id1.x][id1.y].SetState(CellState.empty);
-            res++;
-        }
-        Vector2Int nextValue = new Vector2Int(id1.x + (int)Math.Sign(id2.x - id1.x), id1.y + (int)Math.Sign(id2.y - id1.y));
-        while (nextValue != id2)
-        {
-            if (_cellList[nextValue.x][nextValue.y].State != CellState.empty) _cellList[nextValue.x][nextValue.y].SetState(CellState.empty);
-            nextValue = new Vector2Int(nextValue.x + (int)Math.Sign(id2.x - id1.x), nextValue.y + (int)Math.Sign(id2.y - id1.y));
-            res++;
-        }
-        if (_cellList[id2.x][id2.y].State != CellState.empty)
-        {
-            _cellList[id2.x][id2.y].SetState(CellState.empty);
-            res++;
-        }
-        return res;
+        GameObject newLine = Instantiate(_finishLinePrefab);
+        FinishLine LR = newLine.GetComponent<FinishLine>();
+        LR.SetTransformParent(_lineParent.transform);
+        LR.SetPositions(Vector2Int.zero, Vector2.zero);
+        _lineFinishEnabled.Add(LR);
     }
 
-
-    public void AddNewFinishId(Vector4 id)
+    public void AddToFinishLineList(FinishLine FL)
     {
-        _finishLineId.Add(id);
-        if (_finishLineId.Count == 1) StartCoroutine(FinishLineCleaning());
-    }
-
-
-    IEnumerator FinishLineCleaning()
-    {
-        while (CellAnimating != 0)
-        {
-            yield return null;
-        }
-        _lineFinish.LineRend.positionCount = 2;
-        int current_player = PlayerManager.Instance.GetCurrentPlayer().SideId;
-        while (_finishLineId.Count > 0)
-        {
-            Vector2Int id1 = new Vector2Int((int)_finishLineId[0].x, (int)_finishLineId[0].y);
-            Vector2Int id2 = new Vector2Int((int)_finishLineId[0].z, (int)_finishLineId[0].w);
-            Vector3[] points = new Vector3[2];
-            points[0] = new Vector2(_cellList[id1.x][id1.y].Position.x, _cellList[id1.x][id1.y].Position.y);
-            points[1] = new Vector2(_cellList[id2.x][id2.y].Position.x, _cellList[id2.x][id2.y].Position.y);
-            SetAlphaFinishLine(0);
-            _lineFinish.SetWidthScreenCord(_cellList[0][0].CellSize * _lineWidthPercent);
-            _lineFinish.SetPositions(points[0], points[1]);
-            float j = 0;
-            while (j < 10)
-            {
-                j++;
-                SetAlphaFinishLine(j / 10);
-                yield return new WaitForFixedUpdate();
-                yield return new WaitForFixedUpdate();
-            }
-
-            UIController.AddScore(current_player, ClearCellOnLine(new Vector2Int((int)id1.x, (int)id1.y), new Vector2Int((int)id2.x, (int)id2.y)));
-            Debug.Log("Cleaned");
-            while (j > 0)
-            {
-                j--;
-                SetAlphaFinishLine(j / 10);
-                yield return new WaitForFixedUpdate();
-                yield return new WaitForFixedUpdate();
-            }
-            _finishLineId.Remove(_finishLineId[0]);
-
-        }
-
-        _lineFinish.LineRend.positionCount = 0;
+        _lineFinishEnabled.Add(FL);
     }
 
     public bool CheckIsInField(Vector2 pos)
@@ -663,7 +591,7 @@ public class Field : Singleton<Field>
         {
             for (int y = (int)CurrentArea.y; y <= CurrentArea.w; y++)
             {
-                if (!IsCellEmpty(x,y)) return false;
+                if (!IsCellEmpty(x, y)) return false;
             }
         }
         return true;

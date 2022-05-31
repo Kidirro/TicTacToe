@@ -48,12 +48,12 @@ public class NetworkEvent : MonoBehaviour, IOnEventCallback
         {
             case 2:
                 UIController.Instance.NewTurn(false);
-                TurnController.NewTurn(true);
+                TurnController.Instance.NewTurn(true);
                 break;
             case 3:
                 Vector2Int id = (Vector2Int)photonEvent.CustomData;
                 Field.Instance.CellList[id.x][id.y].SetState(PlayerManager.Instance.GetCurrentPlayer().SideId);
-                TurnController.MasterChecker(id);
+/*                TurnController.MasterChecker(id);*/
                 break;
         }
 
