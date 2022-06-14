@@ -19,7 +19,6 @@ public class Field : Singleton<Field>
 
     [Space]
 
-    [SerializeField] private Vector2 _defaultScreenResolution;
     //In screen cord
     [SerializeField] private Vector2 _screenBorderX;
     [SerializeField] private Vector2 _screenBorderY;
@@ -70,6 +69,8 @@ public class Field : Singleton<Field>
     private float _remainX;
     private float _remainY;
 
+
+
     [HideInInspector]
     public int CellAnimating = 0;
 
@@ -87,12 +88,11 @@ public class Field : Singleton<Field>
 
     private void GetStartPosition()
     {
-        _startPositionX = Camera.main.pixelWidth * ((_screenBorderX.x) / _defaultScreenResolution.x);
-        _endPositionX = Camera.main.pixelWidth * ((_defaultScreenResolution.x - _screenBorderX.y) / _defaultScreenResolution.x);
+        _startPositionX = ScreenManager.Instance.GetWidth(_screenBorderX.x);
+        _endPositionX = ScreenManager.Instance.GetWidth(ScreenManager.Instance.ScreenDefault.x - _screenBorderX.y);
 
-        _startPositionY = Camera.main.pixelHeight * ((_screenBorderY.x) / _defaultScreenResolution.y);
-        _endPositionY = Camera.main.pixelHeight * ((_defaultScreenResolution.y - _screenBorderY.y) / _defaultScreenResolution.y);
-
+        _startPositionY = ScreenManager.Instance.GetHeight(_screenBorderY.x);
+        _endPositionY = ScreenManager.Instance.GetHeight(ScreenManager.Instance.ScreenDefault.y - _screenBorderY.y);
     }
 
     /// <summary>
@@ -281,7 +281,7 @@ public class Field : Singleton<Field>
                 newCellObject.name = "[" + i + "][" + j + "]cell";
                 cell.Id = new Vector2Int(i, j);
                 cell.SetTransformParent(_cellParent.transform);
-
+                cell.SetTransformPosition(Camera.main.pixelWidth / 2, Camera.main.pixelHeight / 2);
                 _cellList[i].Add(cell);
             }
         }
@@ -317,6 +317,7 @@ public class Field : Singleton<Field>
             GameObject newLine = Instantiate(_linePrefab);
             Line LR = newLine.GetComponent<Line>();
             LR.SetTransformParent(_lineParent.transform);
+            LR.SetPositions(new Vector2(Camera.main.pixelWidth / 2, Camera.main.pixelHeight / 2), new Vector2(Camera.main.pixelWidth / 2, Camera.main.pixelHeight / 2));
             _lineListVertical.Add(LR);
             newLine.name = "Vertical Line " + i;
 
@@ -328,12 +329,14 @@ public class Field : Singleton<Field>
             GameObject newLine = Instantiate(_linePrefab);
             Line LR = newLine.GetComponent<Line>();
             LR.SetTransformParent(_lineParent.transform);
+            LR.SetPositions(new Vector2(Camera.main.pixelWidth / 2, Camera.main.pixelHeight / 2), new Vector2(Camera.main.pixelWidth / 2, Camera.main.pixelHeight / 2));
             _lineListHorizontal.Add(LR);
             newLine.name = "Horizontal Line " + j;
 
 
         }
     }
+
     public void NewCellSize(Vector2Int VirtualfieldSize, bool instantly = true)
     {
         _cellSize = GetCellSize(VirtualfieldSize.x, VirtualfieldSize.y);
@@ -355,7 +358,7 @@ public class Field : Singleton<Field>
             points[0] = new Vector2(_cellList[i][0].Position.x * 0.5f + _cellList[i + 1][0].Position.x * 0.5f, _cellList[i][0].Position.y - _cellList[0][0].CellSize / 2);
             points[1] = new Vector2(_cellList[i][_cellList[0].Count - 1].Position.x * 0.5f + _cellList[i + 1][_cellList[0].Count - 1].Position.x * 0.5f, _cellList[i][_cellList[0].Count - 1].Position.y + _cellList[0][0].CellSize / 2);
 
-            _lineListVertical[i].SetWidthScreenCord(_cellSize * _lineWidthPercent* _defaultScreenResolution.x/ Camera.main.pixelWidth, instantly);
+            _lineListVertical[i].SetWidthScreenCord(_cellSize * _lineWidthPercent / ScreenManager.Instance.GetWidthRatio(), instantly);
             _lineListVertical[i].SetPositions(points[0], points[1], instantly);
         }
 
@@ -365,9 +368,8 @@ public class Field : Singleton<Field>
             points[0] = new Vector2(_cellList[0][i].Position.x - _cellSize / 2, _cellList[0][i].Position.y * 0.5f + _cellList[0][i + 1].Position.y * 0.5f);
             points[1] = new Vector2(_cellList[_cellList.Count - 1][i].Position.x + _cellSize / 2, _cellList[1][i].Position.y * 0.5f + _cellList[1][i + 1].Position.y * 0.5f);
 
-            _lineListHorizontal[i].SetWidthScreenCord(_cellSize * _lineWidthPercent*_defaultScreenResolution.x/ Camera.main.pixelWidth , instantly);
+            _lineListHorizontal[i].SetWidthScreenCord(_cellSize * _lineWidthPercent / ScreenManager.Instance.GetWidthRatio(), instantly);
             _lineListHorizontal[i].SetPositions(points[0], points[1], instantly);
-            Debug.Log(_cellSize);
         }
     }
 
@@ -383,7 +385,7 @@ public class Field : Singleton<Field>
         {
             for (int j = 0; j < _cellList[i].Count; j++)
             {
-                _cellList[i][j].SetState(CellState.empty);
+                _cellList[i][j].SetFigure(CellFigure.none);
             }
         }
     }
@@ -432,6 +434,30 @@ public class Field : Singleton<Field>
             _cellList[1][0] = kk;
             NewCellSize(_fieldSize, false);
         }
+
+        if (Input.GetKeyDown(KeyCode.Mouse3))
+        {
+            if (GetIdFromPosition(Input.mousePosition, false) != new Vector2(-1, -1))
+            {
+
+                AIManager.Instance.BotAggression = BotGameType.Defense;
+
+                Debug.LogFormat("In {0} mode. Check {1}", AIManager.Instance.BotAggression.ToString(), GetIdFromPosition(Input.mousePosition, false));
+                Debug.LogFormat("Value Result : {0}", AIManager.Instance.GetCellValue(GetIdFromPosition(Input.mousePosition, false), PlayerManager.Instance.GetCurrentPlayer().SideId));
+            }
+        }
+        if (Input.GetKeyDown(KeyCode.Mouse4))
+        {
+            if (GetIdFromPosition(Input.mousePosition, false) != new Vector2(-1, -1))
+            {
+
+                AIManager.Instance.BotAggression = BotGameType.Attack;
+
+                Debug.LogFormat("In {0} mode. Check {1}", AIManager.Instance.BotAggression.ToString(), GetIdFromPosition(Input.mousePosition, false));
+                Debug.LogFormat("Value Result : {0}", AIManager.Instance.GetCellValue(GetIdFromPosition(Input.mousePosition, false), PlayerManager.Instance.GetCurrentPlayer().SideId));
+            }
+        }
+
 
         /*        if (Input.GetKeyDown(KeyCode.Mouse1))
                 {
@@ -495,11 +521,11 @@ public class Field : Singleton<Field>
     {
         if (_isNeedGizmos)
         {
-            float StartPositionX = Camera.main.ScreenToWorldPoint(new Vector2(Camera.main.pixelWidth * ((_screenBorderX.x) / _defaultScreenResolution.x), 0)).x;
-            float EndPositionX = Camera.main.ScreenToWorldPoint(new Vector2(Camera.main.pixelWidth * ((_defaultScreenResolution.x - _screenBorderX.y) / _defaultScreenResolution.x), 0)).x;
+            float StartPositionX = Camera.main.ScreenToWorldPoint(new Vector3(ScreenManager.Instance.GetWidth(_screenBorderX.x), 0)).x;
+            float EndPositionX = Camera.main.ScreenToWorldPoint(new Vector2(ScreenManager.Instance.GetWidth(ScreenManager.Instance.ScreenDefault.x - _screenBorderX.y), 0)).x;
 
-            float StartPositionY = Camera.main.ScreenToWorldPoint(new Vector2(0, Camera.main.pixelHeight * (_screenBorderY.x) / _defaultScreenResolution.y)).y;
-            float EndPositionY = Camera.main.ScreenToWorldPoint(new Vector2(0, Camera.main.pixelHeight * (_defaultScreenResolution.y - _screenBorderY.y) / _defaultScreenResolution.y)).y;
+            float StartPositionY = Camera.main.ScreenToWorldPoint(new Vector2(0, ScreenManager.Instance.GetHeight(_screenBorderY.x))).y;
+            float EndPositionY = Camera.main.ScreenToWorldPoint(new Vector2(0, ScreenManager.Instance.GetHeight(ScreenManager.Instance.ScreenDefault.y - _screenBorderY.y))).y;
             Gizmos.color = Color.blue;
             Gizmos.DrawLine(new Vector2(StartPositionX, StartPositionY), new Vector2(EndPositionX, StartPositionY));
             Gizmos.DrawLine(new Vector2(EndPositionX, StartPositionY), new Vector2(EndPositionX, EndPositionY));
@@ -513,8 +539,7 @@ public class Field : Singleton<Field>
         if (_lineFinishEnabled.Count == 0) CreateFinishLine();
         FinishLine FL = _lineFinishEnabled[0];
         _lineFinishEnabled.Remove(FL);
-        Debug.Log(_cellSize);
-        FL.SetWidthScreenCord(_cellSize * _lineWidthPercent * _defaultScreenResolution.x / Camera.main.pixelWidth);
+        FL.SetWidthScreenCord(_cellSize * _lineWidthPercent / ScreenManager.Instance.GetWidthRatio());
         FL.SetPositions(CellList[ids[0].x][ids[0].y].Position, CellList[ids[ids.Count - 1].x][ids[ids.Count - 1].x].Position);
         StartCoroutine(FL.FinishLineCleaning(ids, score));
     }
@@ -539,7 +564,7 @@ public class Field : Singleton<Field>
                pos.y >= (_startPositionY + _remainY) & pos.y <= (_endPositionY - _remainY);
     }
 
-    public bool IsInField(float h)
+    public bool IsInFieldHeight(float h)
     {
 
         return h >= (_startPositionY + _remainY);
@@ -579,7 +604,7 @@ public class Field : Singleton<Field>
         {
             for (int y = (int)CurrentArea.y; y <= CurrentArea.w; y++)
             {
-                CellList[x][y].HighlightCell((CellState)PlayerManager.Instance.GetCurrentPlayer().SideId);
+                CellList[x][y].HighlightCell((CellSubState)PlayerManager.Instance.GetCurrentPlayer().SideId);
             }
         }
     }
@@ -599,11 +624,20 @@ public class Field : Singleton<Field>
 
     public bool IsCellEmpty(Vector2Int id)
     {
-        return CellList[id.x][id.y].State == CellState.empty || CellList[id.x][id.y].State == CellState.Highlighted;
+        return CellList[id.x][id.y].Figure == CellFigure.none;
     }
 
     public bool IsCellEmpty(int x, int y)
     {
-        return CellList[x][y].State == CellState.empty || CellList[x][y].State == CellState.Highlighted;
+        return CellList[x][y].Figure == CellFigure.none;
+    }
+
+    public Cell GetNextCell(Vector2Int currentId, Vector2Int step)
+    {
+        Vector2Int nextId = currentId + step;
+        if (nextId.x < 0 || nextId.y < 0 || nextId.x >= Field.Instance.FieldSize.x || nextId.y >= Field.Instance.FieldSize.y) return null;
+        if (Field.Instance.CellList[nextId.x][nextId.y].Figure == CellFigure.none) return null;
+
+        return Field.Instance.CellList[nextId.x][nextId.y];
     }
 }

@@ -22,10 +22,12 @@ public class FinishLine : Line
             SetAlphaFinishLine(j / (100f / _finishLineSpeed));
             yield return null;
         }
-        UIController.AddScore(current_player, score);
+
+        GameplayManager.Instance.AddScore(score, current_player);
+
         foreach (Vector2Int id in ids)
         {
-            Field.Instance.CellList[id.x][id.y].SetState(CellState.empty);
+            Field.Instance.CellList[id.x][id.y].SetFigure(CellFigure.none);
         }
 
         while (j > 0)

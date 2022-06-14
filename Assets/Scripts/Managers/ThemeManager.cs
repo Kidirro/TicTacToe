@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class ThemeManager : Singleton<ThemeManager>
 {
-    private Dictionary<CellState, Sprite> _cellSprites = new Dictionary<CellState, Sprite>();
+    private Dictionary<CellFigure, Sprite> _cellSprites = new Dictionary<CellFigure, Sprite>();
 
     [SerializeField]
     private Sprite _blankSprite;
@@ -17,12 +17,12 @@ public class ThemeManager : Singleton<ThemeManager>
 
    public void Initialization()
     {
-        _cellSprites.Add(CellState.empty, _blankSprite);
-        _cellSprites.Add(CellState.p1, _p1Sprite);
-        _cellSprites.Add(CellState.p2, _p2Sprite);
+        _cellSprites.Add(CellFigure.none, _blankSprite);
+        _cellSprites.Add(CellFigure.p1, _p1Sprite);
+        _cellSprites.Add(CellFigure.p2, _p2Sprite);
     }
 
-    public Sprite GetSprite(CellState i)
+    public Sprite GetSprite(CellFigure i)
     {
         return _cellSprites[i];
     }

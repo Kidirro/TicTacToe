@@ -36,8 +36,8 @@ public class TurnHistorySingleCell : MonoBehaviour
 
     private Transform _trns;
 
-    private CellState _currentState;
-    public CellState CurrentState
+    private CellFigure _currentState;
+    public CellFigure CurrentState
     {
         get { return _currentState; }
     }
@@ -48,7 +48,7 @@ public class TurnHistorySingleCell : MonoBehaviour
         _trns = GetComponent<Transform>();
     }
 
-    public void SetSprite(CellState i)
+    public void SetSprite(CellFigure i)
     {
         _currentState = i;
         _sprt.sprite = ThemeManager.Instance.GetSprite(i);
@@ -70,17 +70,17 @@ public class TurnHistorySingleCell : MonoBehaviour
 
     public void SetTransformSize(float s, bool instantly = true)
     {
-        _cellSize = s;
-        if (instantly) _trns.localScale = new Vector2(s, s);
-        else if (!_isSizeCoroutineWork) StartCoroutine(ScaleIEnumerator());
+        //_cellSize = s;
+        //if (instantly) _trns.localScale = new Vector2(s, s);
+        //else if (!_isSizeCoroutineWork) StartCoroutine(ScaleIEnumerator());
     }
 
 
     public void SetTransformPosition(float x, float y, bool instantly = true)
     {
-        _position = new Vector2(x, y);
-        if (instantly) _trns.position = _position;
-        else if (!_isPositionCoroutineWork) StartCoroutine(PositionIEnumerator());
+        //_position = new Vector2(x, y);
+        //if (instantly) _trns.position = _position;
+        //else if (!_isPositionCoroutineWork) StartCoroutine(PositionIEnumerator());
     }
 
     private IEnumerator AlphaIEnumerator()

@@ -21,7 +21,7 @@ public class Card : MonoBehaviour
     /// <summary>
     /// Скорость поворота
     /// </summary>
-    const float _rotationSpeed = 4;
+    const float _rotationSpeed = 8;
 
     /// <summary>
     /// Скорость поворота
@@ -32,7 +32,7 @@ public class Card : MonoBehaviour
     /// <summary>
     /// Скорость перемещения
     /// </summary>
-    const float _positionSpeed = 4;
+    const float _positionSpeed = 8;
 
 
     /// <summary>
@@ -44,33 +44,46 @@ public class Card : MonoBehaviour
     /// <summary>
     /// Информация карты как информационной сущности
     /// </summary>
+    [HideInInspector]
     public CardInfo Info;
 
     /// <summary>
     /// Обьект карты
     /// </summary>
-    [SerializeField] private GameObject _cardObj;
+    [SerializeField]
+    private GameObject _cardObj;
 
     /// <summary>
     /// Текст описания карты
     /// </summary>
-    [SerializeField] private Text _cardDescription;
+    [SerializeField]
+    private TextMeshProUGUI _cardDescription;
 
     /// <summary>
     /// Изображение карты
     /// </summary>
-    [SerializeField] private Image _cardImage;
+    [SerializeField]
+    private Image _cardImage;
+
+
+    /// <summary>
+    /// Изображение карты
+    /// </summary>
+    [SerializeField]
+    private List<GameObject> _bonusImageList = new List<GameObject>();
 
     /// <summary>
     /// Место позиции в руке 
     /// Требует доработки
     /// </summary>
+    [HideInInspector]
     public Vector2 HandPosition;
 
     /// <summary>
     /// Место позиции в руке 
     /// Требует доработки
     /// </summary>
+    [HideInInspector]
     public float HandRotation;
 
     /// <summary>
@@ -140,6 +153,14 @@ public class Card : MonoBehaviour
     /// 
     /// </summary>
     private bool _isSlotReInit = false;
+    
+    /// <summary>
+    /// 
+    /// </summary>
+    [SerializeField]
+    private Vector2 _fingerDistance;
+
+
 
     #endregion
 
@@ -164,8 +185,16 @@ public class Card : MonoBehaviour
         if (Info)
         {
             _manapoints.text = Info.CardManacost.ToString();
-            _cardImage.sprite = Info.CardImage;
+            SetSideCard(1);
+            _cardDescription.text = Info.CardDescription;
+
             _cardObj.SetActive(true);
+            _cardObj.transform.localScale = new Vector3(ScreenManager.Instance.GetWidthRatio(), ScreenManager.Instance.GetWidthRatio());
+
+            for (int i = 0; i < _bonusImageList.Count; i++)
+            {
+                _bonusImageList[i].SetActive(i + 1 == (int)Info.CardBonus);
+            }
         }
     }
 
@@ -173,7 +202,17 @@ public class Card : MonoBehaviour
     {
         Info = ci;
         _manapoints.text = Info.CardManacost.ToString();
-        _cardImage.sprite = Info.CardImage;
+        SetSideCard(1);
+        _cardDescription.text = Info.CardDescription;
+        for (int i = 0; i < _bonusImageList.Count; i++)
+        {
+            _bonusImageList[i].SetActive(i + 1 == (int)Info.CardBonus);
+        }
+    }
+
+    public void SetSideCard(int side)
+    {
+        _cardImage.sprite = (side == 1) ? Info.CardImageP1 : Info.CardImageP2;
     }
 
 
@@ -184,6 +223,8 @@ public class Card : MonoBehaviour
     {
         _canvas.overrideSorting = true;
         SetTransformSize(1, false);
+        Vector2 positionVect = Input.mousePosition + new Vector3(ScreenManager.Instance.GetWidth(_fingerDistance.x),ScreenManager.Instance.GetHeight(_fingerDistance.y));
+        SetTransformPosition(positionVect.x,positionVect.y,false);
         ChosedCell = new Vector2Int(-1, -1);
         SetTransformRotation(0);
         _isSlotReInit = false;
@@ -197,10 +238,12 @@ public class Card : MonoBehaviour
     /// </summary>
     public void OnDrag()
     {
-        Vector2 vector = Input.mousePosition;
+        Vector2 vector = Input.mousePosition + new Vector3(ScreenManager.Instance.GetWidth(_fingerDistance.x), ScreenManager.Instance.GetHeight(_fingerDistance.y));
+        Vector2 vectorFigure = Input.mousePosition + new Vector3(ScreenManager.Instance.GetWidth(_fingerDistance.x), ScreenManager.Instance.GetHeight(_fingerDistance.y/2));
+
         SetTransformPosition(vector.x, vector.y);
         
-        if (Field.Instance.IsInField(vector.y) && !_isSlotReInit)
+        if (Field.Instance.IsInFieldHeight(vectorFigure.y) && !_isSlotReInit)
         {
             _isSlotReInit = true;
             SlotManager.Instance.UpdateCardPosition(false, this);
@@ -211,9 +254,9 @@ public class Card : MonoBehaviour
 
         if (Info.CardType == CardTypeImpact.OnField) return;
 
-        _cardObj.SetActive(!Field.Instance.IsInField(vector.y));
+        _cardObj.SetActive(!Field.Instance.IsInFieldHeight(vectorFigure.y));
 
-        ChosedCell = Field.Instance.GetIdFromPosition(vector, false);
+        ChosedCell = Field.Instance.GetIdFromPosition(vectorFigure, false);
         if (_prevPosition != ChosedCell)
         {
             if (_prevPosition != new Vector2Int(-1, -1))
@@ -239,11 +282,11 @@ public class Card : MonoBehaviour
             Field.Instance.UnHighlightZone(ChosedCell, Info.CardAreaSize);
         }
         SlotManager.Instance.HideRechanger();
-        SetTransformSize(0.9f, false);
+        SetTransformSize(0.7f, false);
         stopWatch.Stop();
         _canvas.overrideSorting = false;
 
-        if (SlotManager.Instance.IsOnRechanger(_cardPosition.y))
+        if (SlotManager.Instance.IsOnRechanger(_cardPosition.y - ScreenManager.Instance.GetHeight(_fingerDistance.y)))
         {
             SlotManager.Instance.UseRechanger(this);
             return;
@@ -251,24 +294,28 @@ public class Card : MonoBehaviour
 
         bool TimeFlag = stopWatch.ElapsedMilliseconds > 80;
         bool TypeFlag = false;
+        bool ManaFlag = ManaManager.Instance.IsEnoughMana(Info.CardManacost);
 
         switch (Info.CardType){
             case CardTypeImpact.OnField:
-                TypeFlag = Field.Instance.IsInField(_cardPosition.y);
+                TypeFlag = Field.Instance.IsInFieldHeight(_cardPosition.y);
                 break;
             case CardTypeImpact.OnArea:
-                TypeFlag = Field.Instance.IsInField(_cardPosition.y) && ChosedCell!= new Vector2(-1,-1);
+                TypeFlag = Field.Instance.IsInFieldHeight(_cardPosition.y) && ChosedCell!= new Vector2(-1,-1);
                 break;
             case CardTypeImpact.OnAreaWithCheck:
-                TypeFlag = Field.Instance.IsInField(_cardPosition.y) && ChosedCell != new Vector2(-1, -1) && Field.Instance.IsZoneEmpty(ChosedCell,Info.CardAreaSize);
+                TypeFlag = Field.Instance.IsInFieldHeight(_cardPosition.y) && ChosedCell != new Vector2(-1, -1) && Field.Instance.IsZoneEmpty(ChosedCell,Info.CardAreaSize);
                 break;
         }
 
-        if (TypeFlag && TimeFlag)
+        if (TypeFlag && TimeFlag&& ManaFlag)
         {
-            Info.СardAction.Invoke();
             SlotManager.Instance.RemoveCard(PlayerManager.Instance.GetCurrentPlayer(), this);
             SlotManager.Instance.UpdateCardPosition(false);
+            ManaManager.Instance.DecreaseMana(Info.CardManacost);
+            ManaManager.Instance.UpdateManaUI();
+
+            Info.СardAction.Invoke();
         }
         else
         {

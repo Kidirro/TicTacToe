@@ -10,18 +10,25 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 280c217edb247014c88a71e11514f438, type: 3}
-  m_Name: AddLeft
+  m_Name: PlaceFigureWithCard
   m_EditorClassIdentifier: 
-  CardImage: {fileID: 21300000, guid: 10c096bb721e8284a96b7f78d0539e73, type: 3}
-  CardName: AddLeft
-  CardDescription: 
-  CardManacost: 5
+  CardImageP1: {fileID: 21300000, guid: 7af33364b1218d44da1bc0fb1bcd4700, type: 3}
+  CardImageP2: {fileID: 21300000, guid: 4003fc22641b97547946e32f2d9569ac, type: 3}
+  CardName: 
+  CardDescription: "\u0421\u0442\u0430\u0432\u0438\u0442 \u0424\u0438\u0433\u0443\u0440\u0443
+    \u0432 \u0432\u044B\u0431\u0440\u0430\u043D\u043D\u043E\u043C \u043C\u0435\u0441\u0442\u0435
+    \u043D\u0430 \u043F\u043E\u043B\u0435 \u0418 \u0432\u044B \u0431\u0435\u0440\u0451\u0442\u0435
+    \u043E\u0434\u043D\u0443 \u043A\u0430\u0440\u0442\u0443"
+  CardType: 2
+  CardBonus: 2
+  CardAreaSize: {x: 1, y: 1}
+  CardManacost: 1
   "\u0421ardAction":
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 11400000}
         m_TargetAssemblyTypeName: CardInfo, Assembly-CSharp
-        m_MethodName: AddLineLeft
+        m_MethodName: PlaceFigureWithAddCard
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}

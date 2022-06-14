@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 
 public class UIController : Singleton<UIController>
 {
@@ -13,13 +14,9 @@ public class UIController : Singleton<UIController>
 
     [SerializeField] private bool _isNeedGizmos;
 
-    [SerializeField] private Text _playerOneScoreText;
-    private static Text _playerOneScoreStat;
-    private static int _playerOneScoreCount = 0;
+    [SerializeField] private TextMeshProUGUI _playerOneScoreText;
 
-    [SerializeField] private Text _playerTwoScorText;
-    private static Text _playerTwoScoreStat;
-    private static int _playerTwoScoreCount = 0;
+    [SerializeField] private TextMeshProUGUI _playerTwoScorText;
 
 
     [Space]
@@ -42,17 +39,15 @@ public class UIController : Singleton<UIController>
 
     public void Initialization()
     {
-        _playerOneScoreStat = _playerOneScoreText;
-        _playerOneScoreStat.text = "0";
-        _playerTwoScoreStat = _playerTwoScorText;
-        _playerTwoScoreStat.text = "0";
+        _playerOneScoreText.text = "0";
+        _playerTwoScorText.text = "0";
         InitializeLog();
     }
 
 
 
     private void InitializeLog()
-    {
+    {/*
         GetStartPosition();
         InitializeCellSize();
         for (int i = 0; i < 6; i++)
@@ -60,11 +55,11 @@ public class UIController : Singleton<UIController>
             TurnHistorySingleCell vr = Instantiate(_logPref);
             vr.transform.SetParent(_logParent);
             _listLog.Add(vr);
-            _listLog[i].SetSprite((i % 2 == 0) ? CellState.p1 : CellState.p2);
+            _listLog[i].SetSprite((i % 2 == 0) ? CellFigure.p1 : CellFigure.p2);
             //_listLog[i].SetTransformPosition(_logBeginX + _logSize * (i), _startPositionY * 0.5f + _endPositionY * 0.5f);
         }
         NewTurn(true);
-        int currentPlayer = ((int)_listLog.Count / 2) - 1;
+        int currentPlayer = ((int)_listLog.Count / 2) - 1;*/
     }
 
     private void OnDrawGizmos()
@@ -87,48 +82,35 @@ public class UIController : Singleton<UIController>
 
     public void NewTurn(bool instantly = true)
     {
-        int currentPlayer = ((int)_listLog.Count / 2) - 1;
-        for (int i = 0; i < _listLog.Count - 1; i++)
-        {
-            if (i == currentPlayer)
-            {
-                _listLog[i].SetAlpha(1, instantly);
-                _listLog[i].SetTransformSize(_logSize, instantly);
-            }
-            else
-            {
-                _listLog[i].SetAlpha(Mathf.Abs((1.0f) / (float)(currentPlayer - i)), instantly);
-                _listLog[i].SetTransformSize(Mathf.Abs((1.0f) / (float)(currentPlayer - i)) * _logSize, instantly);
-            }
-            _listLog[i].SetTransformPosition(_logBeginX + _logSize * (i), _startPositionY * 0.5f + _endPositionY * 0.5f, instantly);
+        /*  int currentPlayer = ((int)_listLog.Count / 2) - 1;
+          for (int i = 0; i < _listLog.Count - 1; i++)
+          {
+              if (i == currentPlayer)
+              {
+                  _listLog[i].SetAlpha(1, instantly);
+                  _listLog[i].SetTransformSize(_logSize, instantly);
+              }
+              else
+              {
+                  _listLog[i].SetAlpha(Mathf.Abs((1.0f) / (float)(currentPlayer - i)), instantly);
+                  _listLog[i].SetTransformSize(Mathf.Abs((1.0f) / (float)(currentPlayer - i)) * _logSize, instantly);
+              }
+              _listLog[i].SetTransformPosition(_logBeginX + _logSize * (i), _startPositionY * 0.5f + _endPositionY * 0.5f, instantly);
 
-        }
-        var k = _listLog[0];
+          }
+          var k = _listLog[0];
 
-        _listLog[_listLog.Count - 1].SetAlpha(0);
-        _listLog[_listLog.Count - 1].SetTransformSize(0);
-        _listLog[_listLog.Count - 1].SetTransformPosition(_logBeginX + _logSize * (_listLog.Count - 1), _startPositionY * 0.5f + _endPositionY * 0.5f, instantly);
-        _listLog.RemoveAt(0);
-        _listLog.Add(k);
+          _listLog[_listLog.Count - 1].SetAlpha(0);
+          _listLog[_listLog.Count - 1].SetTransformSize(0);
+          _listLog[_listLog.Count - 1].SetTransformPosition(_logBeginX + _logSize * (_listLog.Count - 1), _startPositionY * 0.5f + _endPositionY * 0.5f, instantly);
+          _listLog.RemoveAt(0);
+          _listLog.Add(k);*/
     }
 
-    public static void AddScore(int player, int score)
+    public void UpdateScore()
     {
-        switch (player)
-        {
-            case 1:
-                _playerOneScoreCount += score;
-                if (_playerOneScoreCount >= 100) GameplayManager.Instance.ChangeGameplayState(GameplayState.GameOver);
-                _playerOneScoreStat.text = _playerOneScoreCount.ToString();
-                break;
-            case 2:
-                _playerTwoScoreCount += score;
-
-                if (_playerTwoScoreCount >= 100) GameplayManager.Instance.ChangeGameplayState(GameplayState.GameOver);
-                _playerTwoScoreStat.text = _playerTwoScoreCount.ToString();
-                break;
-
-        }
+        _playerOneScoreText.text = ScoreManager.Instance.GetScore(1).ToString();
+        _playerTwoScorText.text = ScoreManager.Instance.GetScore(2).ToString();
     }
 
     private void InitializeCellSize()
@@ -151,6 +133,11 @@ public class UIController : Singleton<UIController>
 
     }
 
+
+    public void OnPauseButtonPressed()
+    {
+        GameSceneManager.Instance.SetGameScene(GameScene.MainMenu);
+    }
 
     public void EndButtonPressed()
     {

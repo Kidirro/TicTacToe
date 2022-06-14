@@ -3,11 +3,13 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.Events;
+using System;
 
 [CreateAssetMenu(fileName = "New card", menuName = "Card")]
 public class CardInfo : ScriptableObject
 {
-    public Sprite CardImage;
+    public Sprite CardImageP1;
+    public Sprite CardImageP2;
     public string CardName;
     public string CardDescription;
 
@@ -16,6 +18,7 @@ public class CardInfo : ScriptableObject
     [Space]
 
     public CardTypeImpact CardType;
+    public CardBonusType CardBonus;
     public Vector2Int CardAreaSize;
 
     [Range(0, 5)]
@@ -44,7 +47,7 @@ public class CardInfo : ScriptableObject
         Field.Instance.AddLineRight();
     }
 
-    public void PlaceFigure()
+    public void PlaceFigureWithAddCard()
     {
         Vector4 CurrentArea = AreaManager.GetArea(Card.ChosedCell, CardAreaSize);
         for (int x = (int)CurrentArea.x; x <= CurrentArea.z; x++)
@@ -54,16 +57,47 @@ public class CardInfo : ScriptableObject
                 TurnController.Instance.PlaceInCell(new Vector2Int(x,y));
             }
         }
-        TurnController.Instance.MasterChecker((CellState)PlayerManager.Instance.GetCurrentPlayer().SideId);
+        TurnController.Instance.MasterChecker((CellFigure)PlayerManager.Instance.GetCurrentPlayer().SideId);
+
+        SlotManager.Instance.AddCard(PlayerManager.Instance.GetCurrentPlayer());
     }
 
-    public void PlaceRandom()
+    public void PlaceFigure()
     {
-        for (int i = 0; i < 10; i++)
+        Vector4 CurrentArea = AreaManager.GetArea(Card.ChosedCell, CardAreaSize);
+        for (int x = (int)CurrentArea.x; x <= CurrentArea.z; x++)
+        {
+            for (int y = (int)CurrentArea.y; y <= CurrentArea.w; y++)
+            {
+                TurnController.Instance.PlaceInCell(new Vector2Int(x, y));
+            }
+        }
+        TurnController.Instance.MasterChecker((CellFigure)PlayerManager.Instance.GetCurrentPlayer().SideId);
+    }
+
+    public void PlaceRandom5()
+    {
+        for (int i = 0; i <5; i++)
         {
             TurnController.Instance.PlaceInCell(AIManager.Instance.GenerateNewTurn(Field.Instance.FieldSize));
         }
-        TurnController.Instance.MasterChecker((CellState)PlayerManager.Instance.GetCurrentPlayer().SideId);
+        TurnController.Instance.MasterChecker((CellFigure)PlayerManager.Instance.GetCurrentPlayer().SideId);
+    }  
+    
+    public void AddBonusMana_Effected()
+    {
+        Action f = delegate () { ManaManager.Instance.AddBonusMana(1); };
+        Effect effect = new Effect(f, 1, PlayerManager.Instance.GetCurrentPlayer().SideId);;
+        EffectManager.Instance.AddEffect(effect);
+    }
+    public void AddFigure_Effected()
+    {
+        Action f = delegate () { TurnController.Instance.PlaceInCell(AIManager.Instance.GenerateNewTurn(Field.Instance.FieldSize));
+            TurnController.Instance.MasterChecker((CellFigure)PlayerManager.Instance.GetCurrentPlayer().SideId);
+        };
+        Effect effect = new Effect(f, 3, PlayerManager.Instance.GetCurrentPlayer().SideId); ;
+        EffectManager.Instance.AddEffect(effect);
+
     }
 
 }
@@ -73,4 +107,11 @@ public enum CardTypeImpact
     OnField,
     OnArea,
     OnAreaWithCheck
+}
+
+public enum CardBonusType
+{
+    None,
+    Random,
+    AddCard
 }

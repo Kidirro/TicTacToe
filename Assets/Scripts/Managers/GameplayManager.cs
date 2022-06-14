@@ -20,6 +20,16 @@ public class GameplayManager : Singleton<GameplayManager>
         CheckGameplayState();
     }
 
+    public void AddScore(int value, int sideId)
+    {
+        ScoreManager.Instance.AddScore(sideId, value);
+        if (ScoreManager.Instance.GetScore(sideId) >= 100)
+        {
+            ChangeGameplayState(GameplayState.GameOver);
+        }
+        UIController.Instance.UpdateScore();
+    }
+
     public void CheckGameplayState()
     {
         switch (_gameplayState)
@@ -33,11 +43,15 @@ public class GameplayManager : Singleton<GameplayManager>
                 {
                     case GameType.SingleAI:
                         PlayerManager.Instance.AddPlayer(PlayerType.Human);
+                        ScoreManager.Instance.AddPlayer(1);
                         PlayerManager.Instance.AddPlayer(PlayerType.AI);
+                        ScoreManager.Instance.AddPlayer(2);
                         break;
                     case GameType.SingleHuman:
                         PlayerManager.Instance.AddPlayer(PlayerType.Human);
+                        ScoreManager.Instance.AddPlayer(1);
                         PlayerManager.Instance.AddPlayer(PlayerType.Human);
+                        ScoreManager.Instance.AddPlayer(2);
                         break;
                 }
                 SlotManager.Instance.AddCard(PlayerManager.Instance.GetCurrentPlayer());
@@ -46,6 +60,10 @@ public class GameplayManager : Singleton<GameplayManager>
                 ThemeManager.Instance.Initialization();
                 UIController.Instance.Initialization();
                 Field.Instance.Initialization();
+
+                ManaManager.Instance.ResetMana();
+                ManaManager.Instance.UpdateManaUI();
+
                 ChangeGameplayState(GameplayState.None);
                 break;
 
@@ -53,11 +71,17 @@ public class GameplayManager : Singleton<GameplayManager>
                 TurnController.Instance.NewTurn();
                 PlayerManager.Instance.NextPlayer();
                 UIController.Instance.NewTurn(false);
+                ManaManager.Instance.SetBonusMana(0);
+
+                EffectManager.Instance.UpdateEffectTurn();
+
+                ManaManager.Instance.ResetMana();
+                ManaManager.Instance.UpdateManaUI();
 
                 if (PlayerManager.Instance.GetCurrentPlayer().EntityType.Equals(PlayerType.AI))
                 {
                     TurnController.Instance.PlaceInCell(AIManager.Instance.GenerateNewTurn(Field.Instance.FieldSize));
-                    TurnController.Instance.MasterChecker((CellState)PlayerManager.Instance.GetCurrentPlayer().SideId);
+                    TurnController.Instance.MasterChecker((CellFigure)PlayerManager.Instance.GetCurrentPlayer().SideId);
                     ChangeGameplayState(GameplayState.NewTurn);
                 }
                 else
@@ -73,6 +97,8 @@ public class GameplayManager : Singleton<GameplayManager>
                 UIController.Instance.StateGameOverPanel(true);
                 break;
             case GameplayState.RestartGame:
+                ScoreManager.Instance.ResetAllScore();
+                UIController.Instance.UpdateScore();
                 Field.Instance.Initialization();
                 break;
 

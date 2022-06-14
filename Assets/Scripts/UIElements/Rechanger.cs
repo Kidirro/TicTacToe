@@ -19,6 +19,7 @@ public class Rechanger : MonoBehaviour
     private void Awake()
     {
         _rectTransform = GetComponent<RectTransform>();
+        _rectTransform.sizeDelta = new Vector2(_rectTransform.rect.width*Camera.main.pixelWidth/720f, _rectTransform.rect.height * Camera.main.pixelHeight / 1280);
     }
 
     public void Show()

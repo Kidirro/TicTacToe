@@ -34,53 +34,57 @@ public class Cell : MonoBehaviour
 
     private RectTransform _transformRect;
 
-    public CellState State
+    public CellFigure Figure
     {
-        get { return _state; }
+        get { return _figure; }
     }
 
-    private CellState _state;
+    private CellFigure _figure;
+
+    public CellSubState SubState
+    {
+        get { return _subState; }
+    }
+
+    private CellSubState _subState;
 
     private Image _image;
+    private Image _subImage;
 
     void Awake()
     {
         _transformRect = GetComponent<RectTransform>();
         _image = GetComponent<Image>();
+        _subImage = transform.GetChild(0).GetComponent<Image>();
     }
 
-    public void HighlightCell(CellState s)
+    public void HighlightCell(CellSubState s)
     {
-        if (_state != CellState.empty) return;
-        _state = CellState.Highlighted;
-        _image.sprite = ThemeManager.Instance.GetSprite(s);
-        var cl = _image.color;
+        if (_figure != CellFigure.none) return;
+        _subState = CellSubState.Highlighted;
+        _subImage.sprite = ThemeManager.Instance.GetSprite((CellFigure)1);
+        Debug.Log(_subImage.gameObject);
+        var cl = _subImage.color;
         cl.a = 0.15f;
-        _image.color = cl;
+        _subImage.color = cl;
     }
     public void UnHighlightCell()
     {
-        if (_state != CellState.Highlighted) return;
-        _state = CellState.empty;
-        _image.sprite = ThemeManager.Instance.GetSprite(CellState.empty);
-        var cl = _image.color;
-        cl.a =1f;
-        _image.color = cl;
+        if (_subState != CellSubState.Highlighted) return;
+        _subState = CellSubState.none;
+        _subImage.sprite = ThemeManager.Instance.GetSprite(CellFigure.none);
     }
 
-    public void SetState(int s)
+    public void SetFigure(int s)
     {
-        _image.sprite = ThemeManager.Instance.GetSprite((CellState)s);
-        _state = (CellState)s;
-        var cl = _image.color;
-        cl.a =1f;
-        _image.color = cl;
+        _image.sprite = ThemeManager.Instance.GetSprite((CellFigure)s);
+        _figure = (CellFigure)s;
     }
 
-    public void SetState(CellState s)
+    public void SetFigure(CellFigure s)
     {
         _image.sprite = ThemeManager.Instance.GetSprite(s);
-        _state = s;
+        _figure = s;
     }
 
     public void SetTransformSize(float reals, bool instantly = true)
@@ -108,9 +112,9 @@ public class Cell : MonoBehaviour
     }
 
     public void Clicked()
-    {
+    {/*
         TurnController.Instance.PlaceInCell(_id);
-        TurnController.Instance.MasterChecker((CellState)PlayerManager.Instance.GetCurrentPlayer().SideId);
+        TurnController.Instance.MasterChecker((CellState)PlayerManager.Instance.GetCurrentPlayer().SideId);*/
     }
 
     private IEnumerator ScaleIEnumerator()
@@ -128,11 +132,13 @@ public class Cell : MonoBehaviour
                 step = (_cellSize - _transformRect.sizeDelta.x) / 100f * _scaleSpeed;
                 i = 0;
             }
-            _transformRect.sizeDelta = _transformRect.sizeDelta + new Vector2(step, step);
+            _image.rectTransform.sizeDelta = _transformRect.sizeDelta + new Vector2(step, step);
+            _subImage.rectTransform.sizeDelta = _transformRect.sizeDelta + new Vector2(step, step);
             i++;
             yield return null;
         }
-        _transformRect.sizeDelta = new Vector2(_cellSize, _cellSize);
+        _image.rectTransform.sizeDelta = new Vector2(_cellSize, _cellSize); 
+        _subImage.rectTransform.sizeDelta = new Vector2(_cellSize, _cellSize);
         Field.Instance.CellAnimating = Field.Instance.CellAnimating - 1;
         _isSizeCoroutineWork = false;
         yield break;
@@ -171,11 +177,17 @@ public class Cell : MonoBehaviour
 
 }
 
-public enum CellState
+public enum CellSubState
 {
-    Highlighted = -2,
-    block = -1,
-    empty = 0,
+    none,
+    Highlighted,
+    block
+}
+
+public enum CellFigure
+{
+    none = 0,
     p1 = 1,
     p2 = 2
 }
+
