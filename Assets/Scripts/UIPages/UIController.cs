@@ -27,7 +27,9 @@ public class UIController : Singleton<UIController>
     [SerializeField] private Vector2 _screenBorderX;
     [SerializeField] private Vector2 _screenBorderY;
 
-    [SerializeField] private GameObject _gameOverPanel;
+
+    [Space, Header("GameOver Properties"),SerializeField] private GameObject _gameOverPanel;
+    [SerializeField] private Image _gameOverLogo;
     private List<TurnHistorySingleCell> _listLog = new List<TurnHistorySingleCell>();
     private float _startPositionX;
     private float _endPositionX;
@@ -134,7 +136,7 @@ public class UIController : Singleton<UIController>
     }
 
 
-    public void OnPauseButtonPressed()
+    public void ReturnHome()
     {
         GameSceneManager.Instance.SetGameScene(GameScene.MainMenu);
     }
@@ -143,18 +145,20 @@ public class UIController : Singleton<UIController>
     {
         if (TurnController.Instance.CheckCanTurn())
         {
-            GameplayManager.Instance.ChangeGameplayState(GameplayState.NewTurn);
+            GameplayManager.Instance.SetGameplayState(GameplayState.NewTurn);
         }
     }
 
     public void StateGameOverPanel(bool state)
     {
         _gameOverPanel.SetActive(state);
+        _gameOverLogo.sprite = ThemeManager.Instance.GetSprite((CellFigure) ScoreManager.Instance.GetWinner());
+        Debug.Log(ThemeManager.Instance.GetSprite((CellFigure)PlayerManager.Instance.GetCurrentPlayer().SideId));
     }
 
     public void RestartGame()
     {
         StateGameOverPanel(false);
-        GameplayManager.Instance.ChangeGameplayState(GameplayState.RestartGame);
+        GameplayManager.Instance.SetGameplayState(GameplayState.RestartGame);
     }
 }

@@ -35,4 +35,13 @@ public class ScoreManager : Singleton<ScoreManager>
             _currentScoreList[key] = 0;
         }
     }
+    
+    public int GetWinner()
+    {
+        foreach(int res in _currentScoreList.Keys)
+        {
+            if (_currentScoreList[res] >= 100) return res;
+        }
+        return -1;
+    }
 }

@@ -50,29 +50,14 @@ public class Cell : MonoBehaviour
 
     private Image _image;
     private Image _subImage;
+    private Image _highlightImage;
 
     void Awake()
     {
         _transformRect = GetComponent<RectTransform>();
-        _image = GetComponent<Image>();
-        _subImage = transform.GetChild(0).GetComponent<Image>();
-    }
-
-    public void HighlightCell(CellSubState s)
-    {
-        if (_figure != CellFigure.none) return;
-        _subState = CellSubState.Highlighted;
-        _subImage.sprite = ThemeManager.Instance.GetSprite((CellFigure)1);
-        Debug.Log(_subImage.gameObject);
-        var cl = _subImage.color;
-        cl.a = 0.15f;
-        _subImage.color = cl;
-    }
-    public void UnHighlightCell()
-    {
-        if (_subState != CellSubState.Highlighted) return;
-        _subState = CellSubState.none;
-        _subImage.sprite = ThemeManager.Instance.GetSprite(CellFigure.none);
+        _subImage = GetComponent<Image>();
+        _image = transform.GetChild(0).GetComponent<Image>();
+        _highlightImage = transform.GetChild(1).GetComponent<Image>();
     }
 
     public void SetFigure(int s)
@@ -111,10 +96,34 @@ public class Cell : MonoBehaviour
         else if (!_isPositionCoroutineWork) StartCoroutine(PositionIEnumerator());
     }
 
-    public void Clicked()
-    {/*
-        TurnController.Instance.PlaceInCell(_id);
-        TurnController.Instance.MasterChecker((CellState)PlayerManager.Instance.GetCurrentPlayer().SideId);*/
+    public void SetSubState(Sprite sprite,Color color, CellSubState cellSubState)
+    {
+        _subState = cellSubState;
+        _subImage.sprite = sprite;
+        _subImage.color = color;
+    }
+
+    public void ResetSubState()
+    {
+        _subState = CellSubState.none;
+        _subImage.sprite = null;
+        Color color = Color.white;
+        color.a = 0;
+        _subImage.color = color;
+    } 
+    
+    public void HighlightCell(Sprite sprite,Color color)
+    {
+        _highlightImage.sprite = sprite;
+        _highlightImage.color = color;
+    }
+
+    public void UnhighlightCell()
+    {
+        _highlightImage.sprite = null;
+        Color color = Color.white;
+        color.a = 0;
+        _highlightImage.color = color;
     }
 
     private IEnumerator ScaleIEnumerator()
@@ -180,7 +189,6 @@ public class Cell : MonoBehaviour
 public enum CellSubState
 {
     none,
-    Highlighted,
     block
 }
 

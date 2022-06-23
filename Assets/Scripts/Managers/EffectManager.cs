@@ -24,7 +24,9 @@ public class EffectManager : Singleton<EffectManager>
                 effect.EffectTurnCount -= 1;
                 Debug.Log("Effect turn delete");
 
+
                 effect.EffectAction.Invoke();
+                if (effect.EffectTurnCount == 0) effect.OnEffectDisable.Invoke();
 
                 Debug.Log("Effect Invoke");                
             }
@@ -36,12 +38,16 @@ public class EffectManager : Singleton<EffectManager>
 public class Effect
 {
     public Action EffectAction;
+    public Action OnEffectDisable;
     public int EffectTurnCount;
     public int EffectSideId;
 
-    public Effect(Action action, int turnCount, int SideId)
+    public Effect(Action action, int turnCount, int SideId, Action onDisable = null )   
     {
+        if (onDisable == null) onDisable = delegate () { };
+
         EffectAction = action;
+        OnEffectDisable = onDisable;
         EffectTurnCount = turnCount;
         EffectSideId = SideId;
     }

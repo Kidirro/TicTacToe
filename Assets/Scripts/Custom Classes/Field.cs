@@ -434,7 +434,7 @@ public class Field : Singleton<Field>
             _cellList[1][0] = kk;
             NewCellSize(_fieldSize, false);
         }
-
+/*
         if (Input.GetKeyDown(KeyCode.Mouse3))
         {
             if (GetIdFromPosition(Input.mousePosition, false) != new Vector2(-1, -1))
@@ -448,16 +448,10 @@ public class Field : Singleton<Field>
         }
         if (Input.GetKeyDown(KeyCode.Mouse4))
         {
-            if (GetIdFromPosition(Input.mousePosition, false) != new Vector2(-1, -1))
-            {
-
-                AIManager.Instance.BotAggression = BotGameType.Attack;
-
-                Debug.LogFormat("In {0} mode. Check {1}", AIManager.Instance.BotAggression.ToString(), GetIdFromPosition(Input.mousePosition, false));
-                Debug.LogFormat("Value Result : {0}", AIManager.Instance.GetCellValue(GetIdFromPosition(Input.mousePosition, false), PlayerManager.Instance.GetCurrentPlayer().SideId));
-            }
+            AIManager.Instance.BotAggression = BotGameType.Attack;
+            AIManager.Instance.GenerateNewTurn(PlayerManager.Instance.GetCurrentPlayer().SideId);
         }
-
+*/
 
         /*        if (Input.GetKeyDown(KeyCode.Mouse1))
                 {
@@ -585,29 +579,55 @@ public class Field : Singleton<Field>
         else return (new Vector2Int(-1, -1));
     }
 
-    public void UnHighlightZone(Vector2Int Position, Vector2Int AreaSize)
+    public void ResetSubStateZone(Vector2Int Position, Vector2Int AreaSize)
     {
         Vector4 CurrentArea = AreaManager.GetArea(Position, AreaSize);
         for (int x = (int)CurrentArea.x; x <= CurrentArea.z; x++)
         {
             for (int y = (int)CurrentArea.y; y <= CurrentArea.w; y++)
             {
-                CellList[x][y].UnHighlightCell();
+                CellList[x][y].ResetSubState();
             }
         }
     }
 
-    public void HighlightZone(Vector2Int Position, Vector2Int AreaSize)
+    public void SetSubStateZone(Vector2Int Position, Vector2Int AreaSize, Sprite sprite,Color color, CellSubState cellSubState)
     {
         Vector4 CurrentArea = AreaManager.GetArea(Position, AreaSize);
         for (int x = (int)CurrentArea.x; x <= CurrentArea.z; x++)
         {
             for (int y = (int)CurrentArea.y; y <= CurrentArea.w; y++)
             {
-                CellList[x][y].HighlightCell((CellSubState)PlayerManager.Instance.GetCurrentPlayer().SideId);
+                CellList[x][y].SetSubState(sprite,color, cellSubState);
             }
         }
     }
+
+    public void UnhighlightZone(Vector2Int Position, Vector2Int AreaSize)
+    {
+        Vector4 CurrentArea = AreaManager.GetArea(Position, AreaSize);
+        for (int x = (int)CurrentArea.x; x <= CurrentArea.z; x++)
+        {
+            for (int y = (int)CurrentArea.y; y <= CurrentArea.w; y++)
+            {
+                CellList[x][y].UnhighlightCell();
+            }
+        }
+    }
+
+    public void HighlightZone(Vector2Int Position, Vector2Int AreaSize, Sprite sprite, Color color)
+    {
+        Vector4 CurrentArea = AreaManager.GetArea(Position, AreaSize);
+        for (int x = (int)CurrentArea.x; x <= CurrentArea.z; x++)
+        {
+            for (int y = (int)CurrentArea.y; y <= CurrentArea.w; y++)
+            {
+                CellList[x][y].HighlightCell(sprite, color);
+            }
+        }
+    }
+
+
 
     public bool IsZoneEmpty(Vector2Int Position, Vector2Int AreaSize)
     {
@@ -624,12 +644,17 @@ public class Field : Singleton<Field>
 
     public bool IsCellEmpty(Vector2Int id)
     {
+        Debug.Log(id);
         return CellList[id.x][id.y].Figure == CellFigure.none;
+    } 
+    public bool IsCellBlocked(Vector2Int id)
+    {
+        return CellList[id.x][id.y].SubState == CellSubState.block;
     }
 
     public bool IsCellEmpty(int x, int y)
     {
-        return CellList[x][y].Figure == CellFigure.none;
+        return CellList[x][y].Figure == CellFigure.none && CellList[x][y].SubState != CellSubState.block;
     }
 
     public Cell GetNextCell(Vector2Int currentId, Vector2Int step)

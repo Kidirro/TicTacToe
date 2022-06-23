@@ -31,7 +31,7 @@ public class TurnController : Singleton<TurnController>
 
     public void PlaceInCell(Vector2Int id)
     {
-        if (Field.Instance.IsCellEmpty(id) && _isGamePlaying && _isPossibilityOfMove)
+        if (Field.Instance.IsCellEmpty(id) && _isGamePlaying && _isPossibilityOfMove && !Field.Instance.IsCellBlocked(id))
         {
             Field.Instance.CellList[id.x][id.y].SetFigure(PlayerManager.Instance.GetCurrentPlayer().SideId);
         }
@@ -57,7 +57,7 @@ public class TurnController : Singleton<TurnController>
                 {
                     if (verticalList.IndexOf(curId) == -1)
                     {
-                        Debug.LogFormat("Current id : {0}", curId);
+                        //Debug.LogFormat("Current id : {0}", curId);
                         Vector2Int step = new Vector2Int(0, 1);
                         Vector2Int nextVal = GetNextCellId(curId, step);
                         if (nextVal != new Vector2Int(-1, -1))
@@ -103,7 +103,7 @@ public class TurnController : Singleton<TurnController>
 
                     if (diagonalRightList.IndexOf(curId) == -1)
                     {
-                        Debug.LogFormat("Current id : {0}", curId);
+                        //Debug.LogFormat("Current id : {0}", curId);
                         Vector2Int step = new Vector2Int(1, 1);
                         Vector2Int nextVal = GetNextCellId(curId, step);
                         if (nextVal != new Vector2Int(-1, -1))
@@ -130,7 +130,7 @@ public class TurnController : Singleton<TurnController>
                 {
                     if (diagonalLeftList.IndexOf(curId) == -1)
                     {
-                        Debug.LogFormat("Current id : {0}", curId);
+                        //Debug.LogFormat("Current id : {0}", curId);
                         Vector2Int step = new Vector2Int(1, -1);
                         Vector2Int nextVal = GetNextCellId(curId, step);
                         if (nextVal != new Vector2Int(-1, -1))
@@ -175,6 +175,8 @@ public class TurnController : Singleton<TurnController>
     {
         Vector2Int nextId = currentId + step;
         if (nextId.x < 0 || nextId.y < 0 || nextId.x >= Field.Instance.FieldSize.x || nextId.y >= Field.Instance.FieldSize.y) return new Vector2Int(-1, -1);
+        if (Field.Instance.IsCellEmpty(nextId)) return new Vector2Int(-1, -1);
+        if (Field.Instance.IsCellBlocked(nextId)) return new Vector2Int(-1, -1);
         if (Field.Instance.CellList[nextId.x][nextId.y].Figure != Field.Instance.CellList[currentId.x][currentId.y].Figure) return new Vector2Int(-1, -1);
 
         return nextId;

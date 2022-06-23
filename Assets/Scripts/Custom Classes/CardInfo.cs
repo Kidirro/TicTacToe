@@ -4,12 +4,19 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.Events;
 using System;
+using Random = UnityEngine.Random;
 
 [CreateAssetMenu(fileName = "New card", menuName = "Card")]
 public class CardInfo : ScriptableObject
 {
+    [Space, Header("Images")]
     public Sprite CardImageP1;
     public Sprite CardImageP2;
+    public Sprite CardHighlightP1;
+    public Sprite CardHighlightP2;
+    public Color CardHighlightColor;
+
+    [Space, Header("Name")]
     public string CardName;
     public string CardDescription;
 
@@ -79,7 +86,7 @@ public class CardInfo : ScriptableObject
     {
         for (int i = 0; i <5; i++)
         {
-            TurnController.Instance.PlaceInCell(AIManager.Instance.GenerateNewTurn(Field.Instance.FieldSize));
+            TurnController.Instance.PlaceInCell(AIManager.Instance.GenerateRandomPosition(Field.Instance.FieldSize));
         }
         TurnController.Instance.MasterChecker((CellFigure)PlayerManager.Instance.GetCurrentPlayer().SideId);
     }  
@@ -90,16 +97,91 @@ public class CardInfo : ScriptableObject
         Effect effect = new Effect(f, 1, PlayerManager.Instance.GetCurrentPlayer().SideId);;
         EffectManager.Instance.AddEffect(effect);
     }
+
     public void AddFigure_Effected()
     {
-        Action f = delegate () { TurnController.Instance.PlaceInCell(AIManager.Instance.GenerateNewTurn(Field.Instance.FieldSize));
+        Action f = delegate () { TurnController.Instance.PlaceInCell(AIManager.Instance.GenerateRandomPosition(Field.Instance.FieldSize));
             TurnController.Instance.MasterChecker((CellFigure)PlayerManager.Instance.GetCurrentPlayer().SideId);
         };
-        Effect effect = new Effect(f, 3, PlayerManager.Instance.GetCurrentPlayer().SideId); ;
+        Effect effect = new Effect(f, 3, PlayerManager.Instance.GetCurrentPlayer().SideId);
         EffectManager.Instance.AddEffect(effect);
 
     }
 
+    public void FreezeCell_Efected()
+    {
+        Vector2Int posCard = Card.ChosedCell;
+
+        Sprite sprite = (PlayerManager.Instance.GetCurrentPlayer().SideId == 1) ? CardHighlightP1 : CardHighlightP2;
+        Action f = delegate () {
+            Field.Instance.SetSubStateZone(posCard,
+                                            CardAreaSize,
+                                            sprite,
+                                            Color.white,
+                                            CellSubState.block
+                                          );
+        };
+        Action d = delegate () {
+            Field.Instance.ResetSubStateZone(posCard,
+                                            CardAreaSize
+                                          );
+        };
+        f.Invoke();
+        Effect effect = new Effect(f, 2, PlayerManager.Instance.GetCurrentPlayer().SideId, d);
+        EffectManager.Instance.AddEffect(effect);
+    }
+    
+    
+    public void FreezeCellGroup_Efected()
+    {
+        List<Vector2Int> _posList = new List<Vector2Int>();
+        for (int i = 0; i < 3; i++)
+        {
+            Vector2Int result = new Vector2Int(Random.Range(0, Field.Instance.FieldSize.x), Random.Range(0, Field.Instance.FieldSize.y));
+            while(_posList.IndexOf(result)!=-1|| Field.Instance.IsCellBlocked(result) || !Field.Instance.IsCellEmpty(result)) result = new Vector2Int(Random.Range(0, Field.Instance.FieldSize.x), Random.Range(0, Field.Instance.FieldSize.y));
+            _posList.Add(result);
+        }
+        Sprite sprite = (PlayerManager.Instance.GetCurrentPlayer().SideId == 1) ? CardHighlightP1 : CardHighlightP2;
+        Action f = delegate () {
+
+            Debug.LogFormat("_posList: {0}", _posList.Count);
+            foreach (Vector2Int pos in _posList)
+            {
+                Field.Instance.SetSubStateZone(pos,
+                                                CardAreaSize,
+                                                sprite,
+                                                Color.white,
+                                                CellSubState.block
+                                              );
+            }
+        };
+        Action d = delegate () {
+            foreach (Vector2Int pos in _posList)
+            {
+                Field.Instance.ResetSubStateZone(pos,
+                                            CardAreaSize
+                                          );
+            }
+        };
+        f.Invoke();
+        Effect effect = new Effect(f, 2, PlayerManager.Instance.GetCurrentPlayer().SideId, d);
+        EffectManager.Instance.AddEffect(effect);
+    }
+
+    public void Prikol()
+    {
+        int i = 0;
+        Action f = delegate () {
+            i++;
+            Debug.LogFormat("Action Up: {0}",i);
+        };        
+        Action d= delegate () {
+            i++;
+            Debug.LogFormat("Action dis: {0}", i);
+        };
+        Effect effect = new Effect(f, 3, PlayerManager.Instance.GetCurrentPlayer().SideId,d); 
+        EffectManager.Instance.AddEffect(effect);
+    }
 }
 
 public enum CardTypeImpact

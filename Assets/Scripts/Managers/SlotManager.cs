@@ -185,7 +185,7 @@ public class SlotManager : Singleton<SlotManager>
     public void ResetRechanher()
     {
         _isRechangerUsed = false;
-        Debug.Log(_isRechangerUsed);
+        //Debug.Log(_isRechangerUsed);
     }
 
     public void UpdateCardPosition(bool instantly = true, Card card = null)
@@ -254,5 +254,13 @@ public class SlotManager : Singleton<SlotManager>
     {
         if (_isRechangerUsed) return false;
         return posY < _rechanger.Height;
+    }
+
+    public void ResetHandPool(PlayerInfo player)
+    {
+        for(int i=0;i< player.HandPool.Count;i++)
+        {
+            RemoveCard(player, player.HandPool[0]);
+        }
     }
 }

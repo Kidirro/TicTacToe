@@ -6,6 +6,11 @@ public class PlayerManager : Singleton<PlayerManager>
 {
     private List<PlayerInfo> _players = new List<PlayerInfo>();
 
+    public List<PlayerInfo> Players
+    {
+        get { return _players; }
+    }
+
     private int _currentPlayer=0;
 
     public void AddPlayer(PlayerType type)
@@ -50,4 +55,10 @@ public class PlayerManager : Singleton<PlayerManager>
         if (_currentPlayer == _players.Count) _currentPlayer = 0;
     }
 
+    public PlayerInfo GetNextPlayer()
+    {
+        int _nextPlayer = _currentPlayer + 1;
+        if (_nextPlayer == _players.Count) _nextPlayer = 0;
+        return _players[_nextPlayer];
+    }
 }

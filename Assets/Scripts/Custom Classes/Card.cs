@@ -261,12 +261,16 @@ public class Card : MonoBehaviour
         {
             if (_prevPosition != new Vector2Int(-1, -1))
             {
-                Field.Instance.UnHighlightZone(_prevPosition, Info.CardAreaSize);
+                Field.Instance.UnhighlightZone(_prevPosition, Info.CardAreaSize);
             }
 
             if (ChosedCell != new Vector2Int(-1, -1))
             {
-                Field.Instance.HighlightZone(ChosedCell, Info.CardAreaSize);
+                Field.Instance.HighlightZone(   ChosedCell,
+                                                Info.CardAreaSize,
+                                                (PlayerManager.Instance.GetCurrentPlayer().SideId == 1) ? Info.CardHighlightP1: Info.CardHighlightP2,
+                                                Info.CardHighlightColor
+                                              );
             }
             _prevPosition = ChosedCell;
         }
@@ -279,7 +283,7 @@ public class Card : MonoBehaviour
     {
         if (ChosedCell != new Vector2Int(-1, -1))
         {
-            Field.Instance.UnHighlightZone(ChosedCell, Info.CardAreaSize);
+            Field.Instance.UnhighlightZone(ChosedCell, Info.CardAreaSize);
         }
         SlotManager.Instance.HideRechanger();
         SetTransformSize(0.7f, false);
