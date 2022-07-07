@@ -24,6 +24,8 @@ MonoBehaviour:
   CardType: 2
   CardBonus: 0
   CardAreaSize: {x: 1, y: 1}
+  IsNeedShowTip: 0
+  TipText: 
   CardManacost: 0
   "\u0421ardAction":
     m_PersistentCalls:

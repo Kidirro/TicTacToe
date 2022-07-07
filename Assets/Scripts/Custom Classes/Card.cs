@@ -65,6 +65,12 @@ public class Card : MonoBehaviour
     [SerializeField]
     private Image _cardImage;
 
+    /// <summary>
+    /// Подсказка
+    /// </summary>
+    [SerializeField]
+    private CardTips _cardTip;
+
 
     /// <summary>
     /// Изображение карты
@@ -74,17 +80,27 @@ public class Card : MonoBehaviour
 
     /// <summary>
     /// Место позиции в руке 
-    /// Требует доработки
     /// </summary>
     [HideInInspector]
     public Vector2 HandPosition;
 
     /// <summary>
     /// Место позиции в руке 
-    /// Требует доработки
     /// </summary>
     [HideInInspector]
     public float HandRotation;
+
+    /// <summary>
+    /// Магнитуда ло удаления подсказки
+    /// </summary>
+    [SerializeField]
+    private float _magnitudeCard;
+
+    /// <summary>
+    /// Начальная позиция магнитуды
+    /// </summary>
+    private Vector2 _magnitudePosition = Vector2.zero;
+
 
     /// <summary>
     /// Актуальная позиция карты
@@ -189,7 +205,9 @@ public class Card : MonoBehaviour
             _cardDescription.text = Info.CardDescription;
 
             _cardObj.SetActive(true);
+            _cardTip.HideTip(true);
             _cardObj.transform.localScale = new Vector3(ScreenManager.Instance.GetWidthRatio(), ScreenManager.Instance.GetWidthRatio());
+            _cardTip.transform.localScale = new Vector3(ScreenManager.Instance.GetWidthRatio(), ScreenManager.Instance.GetWidthRatio());
 
             for (int i = 0; i < _bonusImageList.Count; i++)
             {
@@ -230,7 +248,9 @@ public class Card : MonoBehaviour
         _isSlotReInit = false;
         stopWatch.Reset();
         stopWatch.Start();
+        if (Info.IsNeedShowTip) _cardTip.ShowTip(Info.TipText,false);
         SlotManager.Instance.ShowRechanger();
+        _magnitudePosition = positionVect;
     }
 
     /// <summary>
@@ -250,11 +270,26 @@ public class Card : MonoBehaviour
             transform.SetAsLastSibling();
             Debug.Log("Entered");
         }
-
+/*
+        if (_magnitudePosition != Vector2.zero && (_magnitudePosition - vector).magnitude > _magnitudeCard)
+        {
+            _cardTip.HideTip(Field.Instance.IsInFieldHeight(vectorFigure.y));
+            _magnitudePosition = Vector2.zero;
+        }*/
 
         if (Info.CardType == CardTypeImpact.OnField) return;
 
+        if (Field.Instance.IsInFieldHeight(vectorFigure.y))
+        {
+            _cardTip.HideTip(true);
+        }
+        else
+        {
+            if (Info.IsNeedShowTip) _cardTip.ShowTip(Info.TipText);
+        }
+
         _cardObj.SetActive(!Field.Instance.IsInFieldHeight(vectorFigure.y));
+
 
         ChosedCell = Field.Instance.GetIdFromPosition(vectorFigure, false);
         if (_prevPosition != ChosedCell)
@@ -285,6 +320,8 @@ public class Card : MonoBehaviour
         {
             Field.Instance.UnhighlightZone(ChosedCell, Info.CardAreaSize);
         }
+
+        if (Info.IsNeedShowTip) _cardTip.HideTip(false);
         SlotManager.Instance.HideRechanger();
         SetTransformSize(0.7f, false);
         stopWatch.Stop();

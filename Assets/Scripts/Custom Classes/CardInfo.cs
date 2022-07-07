@@ -28,6 +28,9 @@ public class CardInfo : ScriptableObject
     public CardBonusType CardBonus;
     public Vector2Int CardAreaSize;
 
+    public bool IsNeedShowTip;
+    public string TipText;
+
     [Range(0, 5)]
     public int CardManacost;
     public UnityEvent ÑardAction;
