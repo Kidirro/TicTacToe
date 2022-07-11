@@ -13,6 +13,11 @@ public class EffectManager : Singleton<EffectManager>
         _effectList.Add(effect);
     }
 
+    public void ClearEffect()
+    {
+        _effectList.Clear();
+    }
+
     public void UpdateEffectTurn()
     {
         foreach (Effect effect in _effectList)

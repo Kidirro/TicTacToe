@@ -25,11 +25,32 @@ public class CardManager : Singleton<CardManager>
     {
         foreach (CardInfo cardInfo in _cardInfoList)
         {
-            Card card = GameObject.Instantiate(_cardPrefab);
-            card.SetCardInfo(cardInfo);
-            card.gameObject.SetActive(false);
-            card.SetTransformParent(transform);
-            _cardList.Add(card);
+            for (int i = 0; i < cardInfo.CardCount; i++)
+            {
+                Card card = GameObject.Instantiate(_cardPrefab);
+                card.SetCardInfo(cardInfo);
+                card.gameObject.SetActive(false);
+                card.SetTransformParent(transform);
+                _cardList.Add(card);
+            }
         }
+    } 
+    public List<Card> CreateDeck()
+    {
+        List<Card> newDeck = new List<Card>();
+        foreach (CardInfo cardInfo in _cardInfoList)
+        {
+            for (int i = 0; i < cardInfo.CardCount; i++)
+            {
+                Card card = GameObject.Instantiate(_cardPrefab);
+                //card.name = card.Info.CardName;
+                Debug.Log(card);
+                card.SetCardInfo(cardInfo);
+                card.gameObject.SetActive(false); 
+                card.SetTransformParent(transform);
+                newDeck.Add(card);
+            }
+        }
+        return newDeck;
     }
 }

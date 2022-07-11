@@ -143,7 +143,7 @@ public class UIController : Singleton<UIController>
 
     public void EndButtonPressed()
     {
-        if (TurnController.Instance.CheckCanTurn())
+        if (FieldCellLineManager.Instance.CheckCanTurn())
         {
             GameplayManager.Instance.SetGameplayState(GameplayState.NewTurn);
         }
@@ -152,7 +152,7 @@ public class UIController : Singleton<UIController>
     public void StateGameOverPanel(bool state)
     {
         _gameOverPanel.SetActive(state);
-        _gameOverLogo.sprite = ThemeManager.Instance.GetSprite((CellFigure) ScoreManager.Instance.GetWinner());
+        if (state) _gameOverLogo.sprite = ThemeManager.Instance.GetSprite((CellFigure) ScoreManager.Instance.GetWinner());
         Debug.Log(ThemeManager.Instance.GetSprite((CellFigure)PlayerManager.Instance.GetCurrentPlayer().SideId));
     }
 

@@ -4,7 +4,7 @@ using UnityEngine;
 using System;
 using Photon.Pun;
 
-public class TurnController : Singleton<TurnController>
+public class FieldCellLineManager : Singleton<FieldCellLineManager>
 {
     public bool IsGamePlayimg
     {
@@ -16,14 +16,7 @@ public class TurnController : Singleton<TurnController>
         get { return _currentGoalLine; }
     }
 
-    public int EnableManaPoint
-    {
-        get { return _enableManaPoint; }
-    }
-
     private int _currentGoalLine = 3;
-
-    private int _enableManaPoint;
 
     private bool _isGamePlaying = true;
 
@@ -73,14 +66,12 @@ public class TurnController : Singleton<TurnController>
                                 curIdLocal = nextVal;
                                 nextVal = GetNextCellId(curIdLocal, step);
                             }
-                            Debug.LogFormat("Finded Line. Start at:{0}, End at:{1}, with count{2} ", newLine[0], newLine[newLine.Count - 1], newLine.Count);
                             linesFind.Add(newLine);
                         }
                     }
 
                     if (horizontalList.IndexOf(curId) == -1)
                     {
-                        Debug.LogFormat("Current id : {0}", curId);
                         Vector2Int step = new Vector2Int(1, 0);
                         Vector2Int nextVal = GetNextCellId(curId, step);
                         if (nextVal != new Vector2Int(-1, -1))
@@ -96,7 +87,6 @@ public class TurnController : Singleton<TurnController>
                                 curIdLocal = nextVal;
                                 nextVal = GetNextCellId(curIdLocal, step);
                             }
-                            Debug.LogFormat("Finded Line. Start at:{0}, End at:{1}, with count{2} ", newLine[0], newLine[newLine.Count - 1], newLine.Count);
                             linesFind.Add(newLine);
                         }
                     }

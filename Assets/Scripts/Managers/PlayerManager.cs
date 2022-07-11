@@ -20,8 +20,8 @@ public class PlayerManager : Singleton<PlayerManager>
 
         player.EntityType = type;
         player.SideId = _players.Count;
-        player.FullDeckPool = new List<Card>(CardManager.Instance.CardAvaible);
-        player.DeckPool = new List<Card>(CardManager.Instance.CardAvaible);
+        player.FullDeckPool =CardManager.Instance.CreateDeck();
+        player.DeckPool = player.FullDeckPool;
         player.HandPool = new List<Card>();
 
     }
@@ -30,8 +30,8 @@ public class PlayerManager : Singleton<PlayerManager>
         PlayerInfo player = new PlayerInfo();
         player.EntityType = type;
         player.SideId = side;
-        player.FullDeckPool = new List<Card>(CardManager.Instance.CardAvaible);
-        player.DeckPool = new List<Card>(CardManager.Instance.CardAvaible);
+        player.FullDeckPool = CardManager.Instance.CreateDeck();
+        player.DeckPool = player.FullDeckPool;
         player.HandPool = new List<Card>();
         _players.Add(player);
     }

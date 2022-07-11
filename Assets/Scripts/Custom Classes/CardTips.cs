@@ -51,8 +51,6 @@ public class CardTips : MonoBehaviour
 
     public void HideTip(bool instantly)
     {
-         Debug.Log("Hide tip");
-
         _tipPosition = new Vector2(0, ScreenManager.Instance.GetHeight(_tipsPos.x));
         _tipAlpha = 0;
 

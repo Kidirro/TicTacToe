@@ -1,4 +1,4 @@
-using System.Collections;
+    using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -38,7 +38,7 @@ public class GameplayManager : Singleton<GameplayManager>
                 break;
 
             case GameplayState.NewGame:
-                CardManager.Instance.Initialization();
+                Card.ChosedCell = new Vector2Int(-1, -1);
                 switch (TypeGame)
                 {
                     case GameType.SingleAI:
@@ -54,21 +54,24 @@ public class GameplayManager : Singleton<GameplayManager>
                         ScoreManager.Instance.AddPlayer(2);
                         break;
                 }
-                SlotManager.Instance.AddCard(PlayerManager.Instance.GetCurrentPlayer());
-                SlotManager.Instance.AddCard(PlayerManager.Instance.GetCurrentPlayer());
-                SlotManager.Instance.UpdateCardPosition(false);
+                SlotManager.Instance.NewTurn(PlayerManager.Instance.GetCurrentPlayer());
                 ThemeManager.Instance.Initialization();
                 UIController.Instance.Initialization();
                 Field.Instance.Initialization();
 
                 ManaManager.Instance.ResetMana();
                 ManaManager.Instance.UpdateManaUI();
+                TurnTimerManager.Instance.StartNewTurnTimer(PlayerManager.Instance.GetCurrentPlayer().EntityType);
 
                 SetGameplayState(GameplayState.None);
                 break;
 
             case GameplayState.NewTurn:
-                TurnController.Instance.NewTurn();
+                FieldCellLineManager.Instance.NewTurn();
+                foreach (Card card in PlayerManager.Instance.GetCurrentPlayer().FullDeckPool)
+                {
+                    card.Info.CardBonusManacost = 0;
+                }
                 PlayerManager.Instance.NextPlayer();
                 UIController.Instance.NewTurn(false);
                 ManaManager.Instance.SetBonusMana(0);
@@ -81,33 +84,37 @@ public class GameplayManager : Singleton<GameplayManager>
 
                 if (PlayerManager.Instance.GetCurrentPlayer().EntityType.Equals(PlayerType.AI))
                 {
-                    TurnController.Instance.PlaceInCell(AIManager.Instance.GenerateNewTurn(PlayerManager.Instance.GetCurrentPlayer().SideId));
+                    FieldCellLineManager.Instance.PlaceInCell(AIManager.Instance.GenerateNewTurn(PlayerManager.Instance.GetCurrentPlayer().SideId));
                     Debug.LogFormat("Current tactic : {0}",AIManager.Instance.BotAggression);
 
-                    TurnController.Instance.MasterChecker((CellFigure)PlayerManager.Instance.GetCurrentPlayer().SideId);
-                    SetGameplayState(GameplayState.NewTurn);
+                    FieldCellLineManager.Instance.MasterChecker((CellFigure)PlayerManager.Instance.GetCurrentPlayer().SideId);
+                    //SetGameplayState(GameplayState.NewTurn);
                 }
                 else
                 {
-                    SlotManager.Instance.AddCard(PlayerManager.Instance.GetCurrentPlayer());
-                    SlotManager.Instance.AddCard(PlayerManager.Instance.GetCurrentPlayer());
-                    SlotManager.Instance.ResetRechanher();
-                    SlotManager.Instance.UpdateCardPosition(false);
                     SetGameplayState(GameplayState.None);
                 }
+
+                SlotManager.Instance.NewTurn(PlayerManager.Instance.GetCurrentPlayer());
+                TurnTimerManager.Instance.StartNewTurnTimer(PlayerManager.Instance.GetCurrentPlayer().EntityType);
                 break;
             case GameplayState.GameOver:
                 UIController.Instance.StateGameOverPanel(true);
                 break;
             case GameplayState.RestartGame:
+                EffectManager.Instance.ClearEffect();
                 for (int i =0; i< PlayerManager.Instance.Players.Count;i++)
                 {
                     SlotManager.Instance.ResetHandPool(PlayerManager.Instance.Players[i]);
                 }
+                SlotManager.Instance.NewTurn(PlayerManager.Instance.GetCurrentPlayer());
                 ScoreManager.Instance.ResetAllScore();
                 UIController.Instance.UpdateScore();
                 Field.Instance.Initialization();
-                SlotManager.Instance.UpdateCardPosition();
+                SlotManager.Instance.UpdateCardPosition(false);
+
+
+                TurnTimerManager.Instance.StartNewTurnTimer(PlayerManager.Instance.GetCurrentPlayer().EntityType);
                 break;
 
 

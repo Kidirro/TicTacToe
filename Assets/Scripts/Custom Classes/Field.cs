@@ -644,7 +644,6 @@ public class Field : Singleton<Field>
 
     public bool IsCellEmpty(Vector2Int id)
     {
-        Debug.Log(id);
         return CellList[id.x][id.y].Figure == CellFigure.none;
     } 
     public bool IsCellBlocked(Vector2Int id)

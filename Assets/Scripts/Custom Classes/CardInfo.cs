@@ -27,12 +27,15 @@ public class CardInfo : ScriptableObject
     public CardTypeImpact CardType;
     public CardBonusType CardBonus;
     public Vector2Int CardAreaSize;
+    public int CardCount;
 
     public bool IsNeedShowTip;
     public string TipText;
 
     [Range(0, 5)]
     public int CardManacost;
+    [HideInInspector]
+    public int CardBonusManacost=0;
     public UnityEvent ÑardAction;
 
 
@@ -64,10 +67,10 @@ public class CardInfo : ScriptableObject
         {
             for (int y = (int)CurrentArea.y; y <= CurrentArea.w; y++)
             {
-                TurnController.Instance.PlaceInCell(new Vector2Int(x,y));
+                FieldCellLineManager.Instance.PlaceInCell(new Vector2Int(x,y));
             }
         }
-        TurnController.Instance.MasterChecker((CellFigure)PlayerManager.Instance.GetCurrentPlayer().SideId);
+        FieldCellLineManager.Instance.MasterChecker((CellFigure)PlayerManager.Instance.GetCurrentPlayer().SideId);
 
         SlotManager.Instance.AddCard(PlayerManager.Instance.GetCurrentPlayer());
     }
@@ -79,19 +82,19 @@ public class CardInfo : ScriptableObject
         {
             for (int y = (int)CurrentArea.y; y <= CurrentArea.w; y++)
             {
-                TurnController.Instance.PlaceInCell(new Vector2Int(x, y));
+                FieldCellLineManager.Instance.PlaceInCell(new Vector2Int(x, y));
             }
         }
-        TurnController.Instance.MasterChecker((CellFigure)PlayerManager.Instance.GetCurrentPlayer().SideId);
+        FieldCellLineManager.Instance.MasterChecker((CellFigure)PlayerManager.Instance.GetCurrentPlayer().SideId);
     }
 
     public void PlaceRandom5()
     {
         for (int i = 0; i <5; i++)
         {
-            TurnController.Instance.PlaceInCell(AIManager.Instance.GenerateRandomPosition(Field.Instance.FieldSize));
+            FieldCellLineManager.Instance.PlaceInCell(AIManager.Instance.GenerateRandomPosition(Field.Instance.FieldSize));
         }
-        TurnController.Instance.MasterChecker((CellFigure)PlayerManager.Instance.GetCurrentPlayer().SideId);
+        FieldCellLineManager.Instance.MasterChecker((CellFigure)PlayerManager.Instance.GetCurrentPlayer().SideId);
     }  
     
     public void AddBonusMana_Effected()
@@ -103,8 +106,8 @@ public class CardInfo : ScriptableObject
 
     public void AddFigure_Effected()
     {
-        Action f = delegate () { TurnController.Instance.PlaceInCell(AIManager.Instance.GenerateRandomPosition(Field.Instance.FieldSize));
-            TurnController.Instance.MasterChecker((CellFigure)PlayerManager.Instance.GetCurrentPlayer().SideId);
+        Action f = delegate () { FieldCellLineManager.Instance.PlaceInCell(AIManager.Instance.GenerateRandomPosition(Field.Instance.FieldSize));
+            FieldCellLineManager.Instance.MasterChecker((CellFigure)PlayerManager.Instance.GetCurrentPlayer().SideId);
         };
         Effect effect = new Effect(f, 3, PlayerManager.Instance.GetCurrentPlayer().SideId);
         EffectManager.Instance.AddEffect(effect);
