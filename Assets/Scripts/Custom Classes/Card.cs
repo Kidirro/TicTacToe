@@ -321,7 +321,6 @@ public class Card : MonoBehaviour
         {
             Field.Instance.UnhighlightZone(ChosedCell, Info.CardAreaSize);
         }
-        if (Info.IsNeedShowTip) _cardTip.HideTip(false);
         SlotManager.Instance.HideRechanger();
         stopWatch.Stop();
         _canvas.overrideSorting = false;
@@ -375,8 +374,10 @@ public class Card : MonoBehaviour
         }
         else
         {
+
             _cardObj.SetActive(true);
         }
+        if (Info.IsNeedShowTip) _cardTip.HideTip(TypeFlag && TimeFlag && ManaFlag);
         SlotManager.Instance.UpdateCardPosition(SlotManager.Instance.CurrentPlayerSet, false);
     }
 
@@ -447,7 +448,7 @@ public class Card : MonoBehaviour
 
         if (FindObjectOfType<SlotManager>() != null)
         {
-            SlotManager.Instance.UpdateCardPosition(SlotManager.Instance.CurrentPlayerSet, !gameObject.activeSelf);
+            SlotManager.Instance.UpdateCardPosition(SlotManager.Instance.CurrentPlayerSet, !gameObject.activeInHierarchy);
         }
     }
 

@@ -30,13 +30,14 @@ public class ScreenManager : Singleton<ScreenManager>
 
     public float GetHeightRatio()
     {
-        return Camera.main.pixelHeight / _screenDefault.y;
+
+        return (Camera.main != null) ? Camera.main.pixelHeight / _screenDefault.y : 0;
     }
 
 
     public float GetWidthRatio()
     {
-        return Camera.main.pixelWidth / _screenDefault.x;
+        return (Camera.main != null) ? Camera.main.pixelWidth / _screenDefault.x : 0;
     }
 
 }

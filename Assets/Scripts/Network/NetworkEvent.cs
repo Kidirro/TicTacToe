@@ -47,7 +47,7 @@ public class NetworkEvent : MonoBehaviour, IOnEventCallback
         switch (photonEvent.Code)
         {
             case 2:
-                UIController.Instance.NewTurn(false);
+                UIManager.Instance.NewTurn(false);
                 FieldCellLineManager.Instance.NewTurn(true);
                 break;
             case 3:

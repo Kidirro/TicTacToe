@@ -16,29 +16,44 @@ public class CardManager : Singleton<CardManager>
     {
         get { return _cardList; }
     }
-    
 
-    [SerializeField]
-    private List<CardInfo> _cardInfoList = new List<CardInfo>();
+    private static List<CardInfo> _cardInfoListStatic = new List<CardInfo>();
 
-    public void Initialization()
+    public static int CardListCount()
     {
-        foreach (CardInfo cardInfo in _cardInfoList)
+        if (_cardInfoListStatic == null) _cardInfoListStatic = new List<CardInfo>();
+        return _cardInfoListStatic.Count;
+    }
+
+    public static void CardListAdd(CardInfo card)
+    {
+        if (_cardInfoListStatic == null) _cardInfoListStatic = new List<CardInfo>();
+        if (_cardInfoListStatic.IndexOf(card) == -1)
         {
-            for (int i = 0; i < cardInfo.CardCount; i++)
-            {
-                Card card = GameObject.Instantiate(_cardPrefab);
-                card.SetCardInfo(cardInfo);
-                card.gameObject.SetActive(false);
-                card.SetTransformParent(transform);
-                _cardList.Add(card);
-            }
+            _cardInfoListStatic.Add(card);
         }
-    } 
+
+    }
+
+    public static void CardListRemove(CardInfo card)
+    {
+        if (_cardInfoListStatic == null) _cardInfoListStatic = new List<CardInfo>();
+        if (_cardInfoListStatic.IndexOf(card) != -1)
+        {
+            _cardInfoListStatic.Remove(card);
+        }
+
+    }
+
+    public static void CardListClear()
+    {
+        _cardInfoListStatic = new List<CardInfo>();
+    }
+
     public List<Card> CreateDeck()
     {
         List<Card> newDeck = new List<Card>();
-        foreach (CardInfo cardInfo in _cardInfoList)
+        foreach (CardInfo cardInfo in _cardInfoListStatic)
         {
             for (int i = 0; i < cardInfo.CardCount; i++)
             {
@@ -46,7 +61,8 @@ public class CardManager : Singleton<CardManager>
                 //card.name = card.Info.CardName;
                 Debug.Log(card);
                 card.SetCardInfo(cardInfo);
-                card.gameObject.SetActive(false); 
+                card.Info.CardBonusManacost = 0;
+                card.gameObject.SetActive(false);
                 card.SetTransformParent(transform);
                 newDeck.Add(card);
             }

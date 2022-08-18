@@ -24,6 +24,7 @@ public class CardInfo : ScriptableObject
     [Space]
     [Space]
 
+    public bool IsDefaultUnlock;
     public CardTypeImpact CardType;
     public CardBonusType CardBonus;
     public Vector2Int CardAreaSize;

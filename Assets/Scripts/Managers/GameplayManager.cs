@@ -27,7 +27,7 @@ public class GameplayManager : Singleton<GameplayManager>
         {
             SetGameplayState(GameplayState.GameOver);
         }
-        UIController.Instance.UpdateScore();
+        UIManager.Instance.UpdateScore();
     }
 
     public void CheckGameplayState()
@@ -56,13 +56,15 @@ public class GameplayManager : Singleton<GameplayManager>
                 }
                 SlotManager.Instance.NewTurn(PlayerManager.Instance.GetCurrentPlayer());
                 ThemeManager.Instance.Initialization();
-                UIController.Instance.Initialization();
+                UIManager.Instance.Initialization();
                 Field.Instance.Initialization();
 
                 ManaManager.Instance.ResetMana();
                 ManaManager.Instance.UpdateManaUI();
+
                 TurnTimerManager.Instance.StartNewTurnTimer(PlayerManager.Instance.GetCurrentPlayer().EntityType);
 
+                UIManager.Instance.NewTurn(false);
                 SetGameplayState(GameplayState.None);
                 break;
 
@@ -73,7 +75,6 @@ public class GameplayManager : Singleton<GameplayManager>
                     card.Info.CardBonusManacost = 0;
                 }
                 PlayerManager.Instance.NextPlayer();
-                UIController.Instance.NewTurn(false);
                 ManaManager.Instance.SetBonusMana(0);
 
                 EffectManager.Instance.UpdateEffectTurn();
@@ -97,9 +98,11 @@ public class GameplayManager : Singleton<GameplayManager>
 
                 SlotManager.Instance.NewTurn(PlayerManager.Instance.GetCurrentPlayer());
                 TurnTimerManager.Instance.StartNewTurnTimer(PlayerManager.Instance.GetCurrentPlayer().EntityType);
+                UIManager.Instance.NewTurn(false);
                 break;
             case GameplayState.GameOver:
-                UIController.Instance.StateGameOverPanel(true);
+                UIManager.Instance.StateGameOverPanel(true);
+                if (GameplayManager.TypeGame == GameType.SingleAI && PlayerManager.Instance.Players[ScoreManager.Instance.GetWinner() - 1].EntityType == PlayerType.Human) CoinManager.AllCoins += CoinManager.CoinPerWin;
                 break;
             case GameplayState.RestartGame:
                 EffectManager.Instance.ClearEffect();
@@ -109,12 +112,12 @@ public class GameplayManager : Singleton<GameplayManager>
                 }
                 SlotManager.Instance.NewTurn(PlayerManager.Instance.GetCurrentPlayer());
                 ScoreManager.Instance.ResetAllScore();
-                UIController.Instance.UpdateScore();
                 Field.Instance.Initialization();
                 SlotManager.Instance.UpdateCardPosition(false);
 
 
                 TurnTimerManager.Instance.StartNewTurnTimer(PlayerManager.Instance.GetCurrentPlayer().EntityType);
+                UIManager.Instance.UpdateScore();
                 break;
 
 

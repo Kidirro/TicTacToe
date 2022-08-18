@@ -40,7 +40,7 @@ public class ScoreManager : Singleton<ScoreManager>
     {
         foreach(int res in _currentScoreList.Keys)
         {
-            if (_currentScoreList[res] >= 100) return res;
+            if (_currentScoreList[res] >= 10) return res;
         }
         return -1;
     }

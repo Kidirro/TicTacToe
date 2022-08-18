@@ -25,6 +25,7 @@ public class Singleton<T> : MonoBehaviour where T: MonoBehaviour
                 if (!instance)
                 {
                     instance = new GameObject(typeof(T).ToString()).AddComponent<T>();
+                    //instance.transform.SetParent(GameObject.Find("Managers").transform);
                 }
             }
             return instance;
