@@ -26,7 +26,7 @@ public class MenuAction
     [MenuItem("TTTP Actions/Mana/Reset Mana")]
     public static void ResetMana()
     {
-        ManaManager.Instance.ResetMana();
+        ManaManager.Instance.ResetCurrentMana();
         ManaManager.Instance.UpdateManaUI();
     }
 

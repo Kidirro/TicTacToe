@@ -20,9 +20,8 @@ public class AIManager : Singleton<AIManager>
             for (int y = 0; y < Field.Instance.FieldSize.y; y++)
             {
                 Vector2Int currentId = new Vector2Int(x, y);
-                if (!Field.Instance.IsCellEmpty(currentId)) continue;
-                if (Field.Instance.IsCellBlocked(currentId)) continue;
-
+                if (!Field.Instance.IsCellEnableToPlace(currentId)) continue;
+              
                 int currentValue = GetCellValue(currentId, SideId);
                 if (currentValue == maxValue)
                 {
@@ -55,8 +54,7 @@ public class AIManager : Singleton<AIManager>
             for (int y = 0; y < Field.Instance.FieldSize.y; y++)
             {
                 Vector2Int currentId = new Vector2Int(x, y);
-                if (!Field.Instance.IsCellEmpty(currentId)) continue;
-                if (Field.Instance.IsCellBlocked(currentId)) continue;
+                if (!Field.Instance.IsCellEnableToPlace(currentId)) continue;
 
                 int currentValue = GetCellValue(currentId, SideId);
                 if (currentValue == maxValue)
@@ -82,7 +80,7 @@ public class AIManager : Singleton<AIManager>
     public Vector2Int GenerateRandomPosition(Vector2Int size)
     {
         Vector2Int result = new Vector2Int(Random.Range(0, size.x), Random.Range(0, size.y));
-        while (!Field.Instance.IsCellEmpty(result) || Field.Instance.IsCellBlocked(result))
+        while (!Field.Instance.IsCellEnableToPlace(result))
         {
             result = new Vector2Int(Random.Range(0, size.x), Random.Range(0, size.y));
         }

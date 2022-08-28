@@ -24,7 +24,7 @@ public class FieldCellLineManager : Singleton<FieldCellLineManager>
 
     public void PlaceInCell(Vector2Int id)
     {
-        if (Field.Instance.IsCellEmpty(id) && _isGamePlaying && _isPossibilityOfMove && !Field.Instance.IsCellBlocked(id))
+        if (_isGamePlaying && _isPossibilityOfMove && Field.Instance.IsCellEnableToPlace(id))
         {
             Field.Instance.CellList[id.x][id.y].SetFigure(PlayerManager.Instance.GetCurrentPlayer().SideId);
         }
@@ -144,10 +144,12 @@ public class FieldCellLineManager : Singleton<FieldCellLineManager>
             }
         }
 
+        bool isDeleteLine = false;
         foreach (List<Vector2Int> line in linesFind)
         {
             if (line.Count < CurrentGoalLine) continue;
             int i = 0;
+            isDeleteLine = true;
             foreach (Vector2Int cell in line)
             {
                 if (uniqueCell.IndexOf(cell) == -1)
@@ -158,6 +160,8 @@ public class FieldCellLineManager : Singleton<FieldCellLineManager>
             }
             Field.Instance.DrawFinishLine(line, i);
         }
+
+        if (!isDeleteLine && !Field.Instance.IsExistEmptyCell()) GameplayManager.Instance.SetGameplayState(GameplayState.GameOver); 
         Debug.LogFormat("All cell deleted {0}", uniqueCell.Count);
     }
 

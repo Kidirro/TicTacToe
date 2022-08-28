@@ -55,9 +55,9 @@ public class Cell : MonoBehaviour
     void Awake()
     {
         _transformRect = GetComponent<RectTransform>();
-        _subImage = GetComponent<Image>();
-        _image = transform.GetChild(0).GetComponent<Image>();
+        _subImage = transform.GetChild(0).GetComponent<Image>();
         _highlightImage = transform.GetChild(1).GetComponent<Image>();
+        _image = transform.GetChild(2).GetComponent<Image>();
     }
 
     public void SetFigure(int s)
@@ -141,13 +141,11 @@ public class Cell : MonoBehaviour
                 step = (_cellSize - _transformRect.sizeDelta.x) / 100f * _scaleSpeed;
                 i = 0;
             }
-            _image.rectTransform.sizeDelta = _transformRect.sizeDelta + new Vector2(step, step);
-            _subImage.rectTransform.sizeDelta = _transformRect.sizeDelta + new Vector2(step, step);
+           _transformRect.sizeDelta += new Vector2(step, step);
             i++;
             yield return null;
         }
-        _image.rectTransform.sizeDelta = new Vector2(_cellSize, _cellSize); 
-        _subImage.rectTransform.sizeDelta = new Vector2(_cellSize, _cellSize);
+        _transformRect.sizeDelta += new Vector2(step, step);
         Field.Instance.CellAnimating = Field.Instance.CellAnimating - 1;
         _isSizeCoroutineWork = false;
         yield break;

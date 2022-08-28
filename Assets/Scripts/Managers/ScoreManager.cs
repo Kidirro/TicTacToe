@@ -6,6 +6,8 @@ public class ScoreManager : Singleton<ScoreManager>
 {
     private Dictionary<int, int> _currentScoreList = new Dictionary<int, int>();
 
+    private const int _scoreForWin = 100;
+
     public int GetScore(int player)
     {
         return _currentScoreList[player];
@@ -19,11 +21,11 @@ public class ScoreManager : Singleton<ScoreManager>
     public void AddScore(int player, int value)
     {
         _currentScoreList[player] += value;
-    }  
-    
+    }
+
     public void AddPlayer(int player)
     {
-        _currentScoreList.Add(player,0);
+        _currentScoreList.Add(player, 0);
     }
 
     public void ResetAllScore()
@@ -35,13 +37,32 @@ public class ScoreManager : Singleton<ScoreManager>
             _currentScoreList[key] = 0;
         }
     }
-    
+
+    public bool IsExistWinner()
+    {
+        foreach (int res in _currentScoreList.Keys)
+        {
+            if (_currentScoreList[res] >= _scoreForWin) return true;
+        }
+        return false;
+    }
+
     public int GetWinner()
     {
-        foreach(int res in _currentScoreList.Keys)
+        int maxScore = -1;
+        int maxKey = -1;
+        foreach (int res in _currentScoreList.Keys)
         {
-            if (_currentScoreList[res] >= 10) return res;
+            if (_currentScoreList[res] > maxScore)
+            {
+                maxScore = _currentScoreList[res];
+                maxKey = res;
+            }
+            else if (_currentScoreList[res] == maxScore)
+            {
+                maxKey = -1;
+            }
         }
-        return -1;
+        return maxKey;
     }
 }

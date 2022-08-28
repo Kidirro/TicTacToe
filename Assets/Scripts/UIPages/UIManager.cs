@@ -5,19 +5,19 @@ using UnityEngine.UI;
 using TMPro;
 
 public class UIManager : Singleton<UIManager>
-{ 
+{
 
     [SerializeField]
     private TextMeshProUGUI _playerOneScoreText;
 
     [SerializeField]
-    private TextMeshProUGUI _playerTwoScorText;    
-    
+    private TextMeshProUGUI _playerTwoScorText;
+
     [SerializeField]
     private GameObject _newTurnBTN;
 
 
-    [Space, Header("GameOver Properties"), SerializeField]    
+    [Space, Header("GameOver Properties"), SerializeField]
     private GameObject _gameOverPanel;
 
     [SerializeField]
@@ -25,6 +25,15 @@ public class UIManager : Singleton<UIManager>
 
     [SerializeField]
     private TextMeshProUGUI _moneyValue;
+
+    [SerializeField]
+    private TextMeshProUGUI _winnerText;
+
+    [SerializeField]
+    private GameObject _winnerArea;
+
+    [SerializeField]
+    private GameObject _drawArea;
 
 
     [Space, Header("Timer Properties"), SerializeField]
@@ -71,16 +80,17 @@ public class UIManager : Singleton<UIManager>
         }
     }
 
-    public void StateGameOverPanel(bool state)
+    public void StateGameOverPanel(bool state, int value = 0)
     {
         _gameOverPanel.SetActive(state);
         if (state)
         {
-            _gameOverLogo.sprite = ThemeManager.Instance.GetSprite((CellFigure)ScoreManager.Instance.GetWinner());
+            _winnerText.text = (ScoreManager.Instance.GetWinner() != -1) ? "Winner!" : "Draw!";
+            _moneyValue.text = "+" + value.ToString();
+            _drawArea.SetActive(ScoreManager.Instance.GetWinner() == -1);
+            _winnerArea.SetActive(ScoreManager.Instance.GetWinner() != -1);
+            if (ScoreManager.Instance.GetWinner() != -1) _gameOverLogo.sprite = ThemeManager.Instance.GetSprite((CellFigure)ScoreManager.Instance.GetWinner());
 
-            int moneyValue = (GameplayManager.TypeGame == GameType.SingleAI && PlayerManager.Instance.Players[ScoreManager.Instance.GetWinner() - 1].EntityType == PlayerType.Human) ? CoinManager.CoinPerWin : 0;
-
-            _moneyValue.text = "+" + moneyValue.ToString();
         }
         //      Debug.Log(ThemeManager.Instance.GetSprite((CellFigure)PlayerManager.Instance.GetCurrentPlayer().SideId));
     }
@@ -101,7 +111,7 @@ public class UIManager : Singleton<UIManager>
         yield return new WaitForSeconds(TurnTimerManager.Instance.TimeLeft - _timerStartAnimationTime);
         while (TurnTimerManager.Instance.TimeLeft >= 0)
         {
-            _timerFilledImg.fillAmount =TurnTimerManager.Instance.TimeLeft / _timerStartAnimationTime   ;
+            _timerFilledImg.fillAmount = TurnTimerManager.Instance.TimeLeft / _timerStartAnimationTime;
             yield return new WaitForSeconds(0.1f);
         }
     }

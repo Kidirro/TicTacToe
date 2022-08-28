@@ -17,8 +17,9 @@ public class CollectionManager : MonoBehaviour
 
     private void Start()
     {
-        CreateCardPull();
+
         _cardUnlockValue.text = CoinManager.CoinPerUnlock.ToString();
+        CreateCardPull();
     }
 
     private void OnEnable()
@@ -32,8 +33,9 @@ public class CollectionManager : MonoBehaviour
         foreach (CardCollection card in _cardCollections) card.UpdateUI();
     }
 
-    private void UpdateTexts()
+    public void UpdateTexts()
     {
+        _cardUnlockValue.text = CoinManager.CoinPerUnlock.ToString();
         _moneyValue.text = CoinManager.AllCoins.ToString();
     }
 
@@ -58,5 +60,6 @@ public class CollectionManager : MonoBehaviour
         CoinManager.AllCoins -= CoinManager.CoinPerUnlock;
 
         _moneyValue.text = CoinManager.AllCoins.ToString();
+        CreateCardPull();
     }
 }

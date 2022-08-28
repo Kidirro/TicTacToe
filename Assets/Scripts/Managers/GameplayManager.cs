@@ -1,4 +1,4 @@
-    using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -23,7 +23,7 @@ public class GameplayManager : Singleton<GameplayManager>
     public void AddScore(int value, int sideId)
     {
         ScoreManager.Instance.AddScore(sideId, value);
-        if (ScoreManager.Instance.GetWinner()!=-1)
+        if (ScoreManager.Instance.IsExistWinner())
         {
             SetGameplayState(GameplayState.GameOver);
         }
@@ -60,6 +60,7 @@ public class GameplayManager : Singleton<GameplayManager>
                 Field.Instance.Initialization();
 
                 ManaManager.Instance.ResetMana();
+                ManaManager.Instance.ResetCurrentMana();
                 ManaManager.Instance.UpdateManaUI();
 
                 TurnTimerManager.Instance.StartNewTurnTimer(PlayerManager.Instance.GetCurrentPlayer().EntityType);
@@ -77,16 +78,23 @@ public class GameplayManager : Singleton<GameplayManager>
                 PlayerManager.Instance.NextPlayer();
                 ManaManager.Instance.SetBonusMana(0);
 
+
                 EffectManager.Instance.UpdateEffectTurn();
 
+                if (PlayerManager.Instance.Players[0].Equals(PlayerManager.Instance.GetCurrentPlayer()))
+                {
+                    Field.Instance.GrowField();
 
-                ManaManager.Instance.ResetMana();
+                    ManaManager.Instance.GrowMana();
+                }
+
+                ManaManager.Instance.ResetCurrentMana();
                 ManaManager.Instance.UpdateManaUI();
 
                 if (PlayerManager.Instance.GetCurrentPlayer().EntityType.Equals(PlayerType.AI))
                 {
                     FieldCellLineManager.Instance.PlaceInCell(AIManager.Instance.GenerateNewTurn(PlayerManager.Instance.GetCurrentPlayer().SideId));
-                    Debug.LogFormat("Current tactic : {0}",AIManager.Instance.BotAggression);
+                    Debug.LogFormat("Current tactic : {0}", AIManager.Instance.BotAggression);
 
                     FieldCellLineManager.Instance.MasterChecker((CellFigure)PlayerManager.Instance.GetCurrentPlayer().SideId);
                     //SetGameplayState(GameplayState.NewTurn);
@@ -101,14 +109,22 @@ public class GameplayManager : Singleton<GameplayManager>
                 UIManager.Instance.NewTurn(false);
                 break;
             case GameplayState.GameOver:
-                UIManager.Instance.StateGameOverPanel(true);
-                if (GameplayManager.TypeGame == GameType.SingleAI && PlayerManager.Instance.Players[ScoreManager.Instance.GetWinner() - 1].EntityType == PlayerType.Human) CoinManager.AllCoins += CoinManager.CoinPerWin;
+                int valueMoney = 0;
+                if (GameplayManager.TypeGame == GameType.SingleAI && ScoreManager.Instance.GetWinner() != -1 && PlayerManager.Instance.Players[ScoreManager.Instance.GetWinner() - 1].EntityType == PlayerType.Human) valueMoney = CoinManager.CoinPerWin;
+                else if (GameplayManager.TypeGame == GameType.SingleAI && ScoreManager.Instance.GetWinner() == -1) valueMoney = CoinManager.CoinPerWin / 2;
+
+                CoinManager.AllCoins += valueMoney;
+                UIManager.Instance.StateGameOverPanel(true, valueMoney);
                 break;
             case GameplayState.RestartGame:
                 EffectManager.Instance.ClearEffect();
-                for (int i =0; i< PlayerManager.Instance.Players.Count;i++)
+                for (int i = 0; i < PlayerManager.Instance.Players.Count; i++)
                 {
                     SlotManager.Instance.ResetHandPool(PlayerManager.Instance.Players[i]);
+                    foreach (Card card in PlayerManager.Instance.Players[i].DeckPool)
+                    {
+                        card.Info.CardBonusManacost = 0;
+                    }
                 }
                 SlotManager.Instance.NewTurn(PlayerManager.Instance.GetCurrentPlayer());
                 ScoreManager.Instance.ResetAllScore();
@@ -117,6 +133,10 @@ public class GameplayManager : Singleton<GameplayManager>
 
 
                 TurnTimerManager.Instance.StartNewTurnTimer(PlayerManager.Instance.GetCurrentPlayer().EntityType);
+
+                ManaManager.Instance.ResetMana();
+                ManaManager.Instance.ResetCurrentMana();
+                ManaManager.Instance.UpdateManaUI();
                 UIManager.Instance.UpdateScore();
                 break;
 
@@ -135,7 +155,7 @@ public enum GameplayState
     NewTurn,
 
     GameOver,
-    
+
     RestartGame
 }
 

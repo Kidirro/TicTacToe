@@ -5,13 +5,13 @@ using UnityEngine;
 public class CoinManager : MonoBehaviour
 {
 
-    public const int CoinPerWin = 500;
+    public static int CoinPerWin = 20;
 
-    public const int CoinPerUnlock = 450;
+    public static int CoinPerUnlock = 150;
 
     public static int AllCoins
     {
-        get => PlayerPrefs.GetInt("PlayerAllMoney", 2000);
+        get => PlayerPrefs.GetInt("PlayerAllMoney", 0);
         set => PlayerPrefs.SetInt("PlayerAllMoney", value);
     }
 }

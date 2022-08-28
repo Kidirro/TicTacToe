@@ -117,55 +117,56 @@ public class CardInfo : ScriptableObject
 
     public void FreezeCell_Efected()
     {
-        Vector2Int posCard = Card.ChosedCell;
+        Cell posCard = Field.Instance.CellList[Card.ChosedCell.x][Card.ChosedCell.y];
 
         Sprite sprite = (PlayerManager.Instance.GetCurrentPlayer().SideId == 1) ? CardHighlightP1 : CardHighlightP2;
         Action f = delegate () {
-            Field.Instance.SetSubStateZone(posCard,
+            Field.Instance.SetSubStateZone(posCard.Id,
                                             CardAreaSize,
                                             sprite,
-                                            Color.white,
+                                            Color.black,
                                             CellSubState.block
                                           );
         };
         Action d = delegate () {
-            Field.Instance.ResetSubStateZone(posCard,
+
+            Field.Instance.ResetSubStateZone(posCard.Id,
                                             CardAreaSize
                                           );
         };
         f.Invoke();
         Effect effect = new Effect(f, 2, PlayerManager.Instance.GetCurrentPlayer().SideId, d);
         EffectManager.Instance.AddEffect(effect);
+        FieldCellLineManager.Instance.MasterChecker((CellFigure)PlayerManager.Instance.GetCurrentPlayer().SideId);
     }
     
     
     public void FreezeCellGroup_Efected()
     {
-        List<Vector2Int> _posList = new List<Vector2Int>();
+        List<Cell> _posList = new List<Cell>();
         for (int i = 0; i < 3; i++)
         {
             Vector2Int result = new Vector2Int(Random.Range(0, Field.Instance.FieldSize.x), Random.Range(0, Field.Instance.FieldSize.y));
-            while(_posList.IndexOf(result)!=-1|| Field.Instance.IsCellBlocked(result) || !Field.Instance.IsCellEmpty(result)) result = new Vector2Int(Random.Range(0, Field.Instance.FieldSize.x), Random.Range(0, Field.Instance.FieldSize.y));
-            _posList.Add(result);
+            while(_posList.IndexOf(Field.Instance.CellList[result.x][result.y])!=-1|| !Field.Instance.IsCellEnableToPlace(result)) result = new Vector2Int(Random.Range(0, Field.Instance.FieldSize.x), Random.Range(0, Field.Instance.FieldSize.y));
+            _posList.Add(Field.Instance.CellList[result.x][result.y]);
         }
         Sprite sprite = (PlayerManager.Instance.GetCurrentPlayer().SideId == 1) ? CardHighlightP1 : CardHighlightP2;
         Action f = delegate () {
 
-            Debug.LogFormat("_posList: {0}", _posList.Count);
-            foreach (Vector2Int pos in _posList)
+            foreach (Cell pos in _posList)
             {
-                Field.Instance.SetSubStateZone(pos,
+                Field.Instance.SetSubStateZone(pos.Id,
                                                 CardAreaSize,
                                                 sprite,
-                                                Color.white,
+                                                Color.black,
                                                 CellSubState.block
                                               );
             }
         };
         Action d = delegate () {
-            foreach (Vector2Int pos in _posList)
+            foreach (Cell pos in _posList)
             {
-                Field.Instance.ResetSubStateZone(pos,
+                Field.Instance.ResetSubStateZone(pos.Id,
                                             CardAreaSize
                                           );
             }
@@ -173,6 +174,7 @@ public class CardInfo : ScriptableObject
         f.Invoke();
         Effect effect = new Effect(f, 2, PlayerManager.Instance.GetCurrentPlayer().SideId, d);
         EffectManager.Instance.AddEffect(effect);
+        FieldCellLineManager.Instance.MasterChecker((CellFigure)PlayerManager.Instance.GetCurrentPlayer().SideId);
     }
 
     public void Prikol()

@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class TurnTimerManager : Singleton<TurnTimerManager>
 {
-    public const float PlayerTurnTime = 25F;
+    public const float PlayerTurnTime = 205F;
     public const float BotTurnTime = 5f;
 
     private float _timeLeft = 0f;

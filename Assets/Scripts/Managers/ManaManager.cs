@@ -4,16 +4,17 @@ using UnityEngine;
 
 public class ManaManager : Singleton<ManaManager>
 {
-    /// <summary>
-    /// 
-    /// </summary>
-    [SerializeField]
-    private int _maxMana;
 
-    /// <summary>
-    /// 
-    /// </summary>
     [SerializeField]
+    private int _startManapool;
+
+    private  bool _isManaGrow = true;
+
+
+    private int _maxManaGrow = 5;
+
+    private int _manapool =1;
+
     private int _bonusMana;
 
     /// <summary>
@@ -43,9 +44,16 @@ public class ManaManager : Singleton<ManaManager>
         _currentMana -= mana;
     }
 
+    public void ResetCurrentMana()
+    {
+      
+        _currentMana = _manapool + _bonusMana;
+    }
+    
     public void ResetMana()
     {
-        _currentMana = _maxMana + _bonusMana;
+        _manapool = _startManapool;
+        _bonusMana = 0;
     }
 
     public void UpdateManaUI()
@@ -53,7 +61,7 @@ public class ManaManager : Singleton<ManaManager>
         for (int i = 0; i < _manaPoints.Count; i++)
         {
             _manaPointsFill[i].SetActive(i + 1 <= _currentMana);
-            _manaPoints[i].SetActive(i + 1 <= _maxMana + _bonusMana);
+            _manaPoints[i].SetActive(i + 1 <= _manapool + _bonusMana);
         }
     }  
     
@@ -66,4 +74,17 @@ public class ManaManager : Singleton<ManaManager>
     {
         _bonusMana += mana;
     }
+
+    public void GrowMana()
+    {
+        if (_isManaGrow)
+        {
+            if (_maxManaGrow > _manapool)
+            {
+                _manapool += 1;
+            }
+        }
+    }
+
+
 }

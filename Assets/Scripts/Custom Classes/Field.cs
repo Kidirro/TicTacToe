@@ -6,24 +6,36 @@ using System;
 public class Field : Singleton<Field>
 {
 
-    [SerializeField] private bool _isNeedGizmos;
+    [SerializeField]
+    private bool _isNeedGizmos;
 
-
     [Space]
     [Space]
     [Space]
     [Space]
 
-    [SerializeField] private GameObject _lineParent;
-    [SerializeField] private GameObject _cellParent;
+    [SerializeField]
+    private GameObject _lineParent;
+
+    [SerializeField]
+    private GameObject _cellParent;
 
     [Space]
 
     //In screen cord
-    [SerializeField] private Vector2 _screenBorderX;
-    [SerializeField] private Vector2 _screenBorderY;
+    [SerializeField]
+    private Vector2 _screenBorderX;
 
-    [SerializeField] private Vector2Int _startFieldSize;
+    [SerializeField]
+    private Vector2 _screenBorderY;
+
+    [SerializeField]
+    private static Vector2Int _startFieldSize = new Vector2Int(3, 3);
+
+    [SerializeField]
+    private Vector2Int _growSizeMax = new Vector2Int(6, 6);
+
+
     private Vector2Int _fieldSize;
 
     public Vector2Int FieldSize
@@ -69,6 +81,11 @@ public class Field : Singleton<Field>
     private float _remainX;
     private float _remainY;
 
+
+    private bool _isFieldGrow_Dew = true;
+
+    private int _cyclePerGrow = 2;
+    private int _currenCycle = 0;
 
 
     [HideInInspector]
@@ -258,6 +275,7 @@ public class Field : Singleton<Field>
 
     private void InitializeField()
     {
+        _currenCycle = 0;
         GetStartPosition();
         if (_cellList.Count != 0)
         {
@@ -373,23 +391,6 @@ public class Field : Singleton<Field>
         }
     }
 
-    public void RestartGame()
-    {
-        ResetField();
-        InitializeLine();
-    }
-
-    private void ResetField()
-    {
-        for (int i = 0; i < _cellList.Count; i++)
-        {
-            for (int j = 0; j < _cellList[i].Count; j++)
-            {
-                _cellList[i][j].SetFigure(CellFigure.none);
-            }
-        }
-    }
-
     /// <summary>
     /// 
     /// </summary>
@@ -434,35 +435,7 @@ public class Field : Singleton<Field>
             _cellList[1][0] = kk;
             NewCellSize(_fieldSize, false);
         }
-/*
-        if (Input.GetKeyDown(KeyCode.Mouse3))
-        {
-            if (GetIdFromPosition(Input.mousePosition, false) != new Vector2(-1, -1))
-            {
 
-                AIManager.Instance.BotAggression = BotGameType.Defense;
-
-                Debug.LogFormat("In {0} mode. Check {1}", AIManager.Instance.BotAggression.ToString(), GetIdFromPosition(Input.mousePosition, false));
-                Debug.LogFormat("Value Result : {0}", AIManager.Instance.GetCellValue(GetIdFromPosition(Input.mousePosition, false), PlayerManager.Instance.GetCurrentPlayer().SideId));
-            }
-        }
-        if (Input.GetKeyDown(KeyCode.Mouse4))
-        {
-            AIManager.Instance.BotAggression = BotGameType.Attack;
-            AIManager.Instance.GenerateNewTurn(PlayerManager.Instance.GetCurrentPlayer().SideId);
-        }
-*/
-
-        /*        if (Input.GetKeyDown(KeyCode.Mouse1))
-                {
-                    Debug.Log(GetIdFromPosition(Input.mousePosition, false));
-                    Debug.Log(AreaManager.GetArea(GetIdFromPosition(Input.mousePosition, false), new Vector2Int(1, 1)));
-                }
-
-                if (Input.GetKeyDown(KeyCode.Mouse0))
-                {
-                    Debug.Log(GetIdFromPosition(Input.mousePosition, false));
-                }*/
     }
 
     public void SwapVerticalLines(int fl, int sl, bool instantly = true)
@@ -478,14 +451,6 @@ public class Field : Singleton<Field>
 
         NewCellSize(_fieldSize, instantly);
 
-        /*        TurnController.MasterChecker(new Vector2Int(fl, 0));
-                TurnController.MasterChecker(new Vector2Int(sl, 0), false);
-                for (int i = 1; i < _fieldSize.y; i++)
-                {
-                    TurnController.MasterChecker(new Vector2Int(fl, i), false);
-                    TurnController.MasterChecker(new Vector2Int(sl, i), false);
-                }*/
-
     }
 
     public void SwapHorizontalLines(int fl, int sl, bool instantly = true)
@@ -500,14 +465,7 @@ public class Field : Singleton<Field>
         }
 
         NewCellSize(_fieldSize, instantly);
-        /*
-                TurnController.MasterChecker(new Vector2Int(0, fl));
-                TurnController.MasterChecker(new Vector2Int(0, sl), false);
-                for (int i = 1; i < _fieldSize.x; i++)
-                {
-                    TurnController.MasterChecker(new Vector2Int(i, fl), false);
-                    TurnController.MasterChecker(new Vector2Int(i, sl), false);
-                }*/
+
 
     }
 
@@ -591,14 +549,14 @@ public class Field : Singleton<Field>
         }
     }
 
-    public void SetSubStateZone(Vector2Int Position, Vector2Int AreaSize, Sprite sprite,Color color, CellSubState cellSubState)
+    public void SetSubStateZone(Vector2Int Position, Vector2Int AreaSize, Sprite sprite, Color color, CellSubState cellSubState)
     {
         Vector4 CurrentArea = AreaManager.GetArea(Position, AreaSize);
         for (int x = (int)CurrentArea.x; x <= CurrentArea.z; x++)
         {
             for (int y = (int)CurrentArea.y; y <= CurrentArea.w; y++)
             {
-                CellList[x][y].SetSubState(sprite,color, cellSubState);
+                CellList[x][y].SetSubState(sprite, color, cellSubState);
             }
         }
     }
@@ -645,15 +603,31 @@ public class Field : Singleton<Field>
     public bool IsCellEmpty(Vector2Int id)
     {
         return CellList[id.x][id.y].Figure == CellFigure.none;
-    } 
+    }
+    
+    public bool IsCellEmpty(int x, int y)
+    {
+        return CellList[x][y].Figure == CellFigure.none;
+    }
+
     public bool IsCellBlocked(Vector2Int id)
     {
         return CellList[id.x][id.y].SubState == CellSubState.block;
     }
 
-    public bool IsCellEmpty(int x, int y)
+    public bool IsCellBlocked(int x, int y)
     {
-        return CellList[x][y].Figure == CellFigure.none && CellList[x][y].SubState != CellSubState.block;
+        return CellList[x][y].SubState == CellSubState.block;
+    }
+
+    public bool IsCellEnableToPlace(Vector2Int id)
+    {
+        return IsCellEmpty(id) && !IsCellBlocked(id);
+    }
+
+    public bool IsCellEnableToPlace(int x, int y)
+    {
+        return IsCellEmpty(x,y) && !IsCellBlocked(x,y);
     }
 
     public Cell GetNextCell(Vector2Int currentId, Vector2Int step)
@@ -663,5 +637,40 @@ public class Field : Singleton<Field>
         if (Field.Instance.CellList[nextId.x][nextId.y].Figure == CellFigure.none) return null;
 
         return Field.Instance.CellList[nextId.x][nextId.y];
+    }
+
+    public static void SetStartSize(Vector2Int newSize)
+    {
+        _startFieldSize = newSize;
+    }
+
+    public void GrowField()
+    {
+        if (_isFieldGrow_Dew)
+        {
+            _currenCycle += 1;
+            if (_currenCycle == _cyclePerGrow)
+            {
+             
+                if (_fieldSize.y < _growSizeMax.y)
+                {
+                    AddLineDown();
+                    AddLineRight();
+                }
+                _currenCycle = 0;
+            }
+        }
+    }
+
+    public bool IsExistEmptyCell()
+    {
+        for (int i = 0; i < _cellList.Count; i++)
+        {
+            for (int j = 0; j < _cellList[i].Count; j++)
+            {
+                if (IsCellEnableToPlace(i,j)) return true;
+            }
+        }
+        return false;
     }
 }
