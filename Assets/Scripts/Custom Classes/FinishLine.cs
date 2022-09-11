@@ -1,10 +1,18 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Managers;
 
 public class FinishLine : Line
 {
-    private float _finishLineSpeed = 4f;
+    private static float _finishLineSpeed = 4f;
+
+    public static float AnimationTime
+    {
+
+        get => 100 / Mathf.Max(_finishLineSpeed) * Time.deltaTime;
+    }
+
 
     public IEnumerator FinishLineCleaning(List<Vector2Int> ids, int score)
     {
@@ -27,7 +35,7 @@ public class FinishLine : Line
 
         foreach (Vector2Int id in ids)
         {
-            Field.Instance.CellList[id.x][id.y].SetFigure(CellFigure.none);
+            Field.Instance.CellList[id.x][id.y].SetFigure(CellFigure.none,false);
         }
 
         while (j > 0)

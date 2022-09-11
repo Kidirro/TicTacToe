@@ -2,63 +2,68 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PlayerManager : Singleton<PlayerManager>
+
+namespace Managers
 {
-    private List<PlayerInfo> _players = new List<PlayerInfo>();
 
-    public List<PlayerInfo> Players
+    public class PlayerManager : Singleton<PlayerManager>
     {
-        get { return _players; }
-    }
+        private List<PlayerInfo> _players = new List<PlayerInfo>();
 
-    private int _currentPlayer=0;
-
-    public void AddPlayer(PlayerType type)
-    {
-        PlayerInfo player = new PlayerInfo();
-        _players.Add(player);
-
-        player.EntityType = type;
-        player.SideId = _players.Count;
-        player.FullDeckPool =CardManager.Instance.CreateDeck();
-        player.DeckPool = player.FullDeckPool;
-        player.HandPool = new List<Card>();
-
-    }
-    public void AddPlayer(PlayerType type, int side)
-    {
-        PlayerInfo player = new PlayerInfo();
-        player.EntityType = type;
-        player.SideId = side;
-        player.FullDeckPool = CardManager.Instance.CreateDeck();
-        player.DeckPool = player.FullDeckPool;
-        player.HandPool = new List<Card>();
-        _players.Add(player);
-    }
-
-
-    public PlayerInfo GetCurrentPlayer()
-    {
-        try
+        public List<PlayerInfo> Players
         {
-            return _players[_currentPlayer];
+            get { return _players; }
         }
-        catch
+
+        private int _currentPlayer = 0;
+
+        public void AddPlayer(PlayerType type)
         {
-            return null;
+            PlayerInfo player = new PlayerInfo();
+            _players.Add(player);
+
+            player.EntityType = type;
+            player.SideId = _players.Count;
+            player.FullDeckPool = CardManager.Instance.CreateDeck();
+            player.DeckPool = player.FullDeckPool;
+            player.HandPool = new List<Card>();
+
         }
-    }
+        public void AddPlayer(PlayerType type, int side)
+        {
+            PlayerInfo player = new PlayerInfo();
+            player.EntityType = type;
+            player.SideId = side;
+            player.FullDeckPool = CardManager.Instance.CreateDeck();
+            player.DeckPool = player.FullDeckPool;
+            player.HandPool = new List<Card>();
+            _players.Add(player);
+        }
 
-    public void NextPlayer()
-    {
-        _currentPlayer += 1;
-        if (_currentPlayer == _players.Count) _currentPlayer = 0;
-    }
 
-    public PlayerInfo GetNextPlayer()
-    {
-        int _nextPlayer = _currentPlayer + 1;
-        if (_nextPlayer == _players.Count) _nextPlayer = 0;
-        return _players[_nextPlayer];
+        public PlayerInfo GetCurrentPlayer()
+        {
+            try
+            {
+                return _players[_currentPlayer];
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        public void NextPlayer()
+        {
+            _currentPlayer += 1;
+            if (_currentPlayer == _players.Count) _currentPlayer = 0;
+        }
+
+        public PlayerInfo GetNextPlayer()
+        {
+            int _nextPlayer = _currentPlayer + 1;
+            if (_nextPlayer == _players.Count) _nextPlayer = 0;
+            return _players[_nextPlayer];
+        }
     }
 }

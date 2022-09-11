@@ -3,8 +3,9 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using Managers;
 
-public class UIManager : Singleton<UIManager>
+public class InGameUI : Singleton<InGameUI>
 {
 
     [SerializeField]
@@ -54,7 +55,7 @@ public class UIManager : Singleton<UIManager>
         _playerTwoScorText.text = "0";
     }
 
-    public void NewTurn(bool instantly = true)
+    public void NewTurn()
     {
         StopAllCoroutines();
         StartCoroutine(ITimerProcess());
@@ -69,14 +70,14 @@ public class UIManager : Singleton<UIManager>
 
     public void ReturnHome()
     {
-        GameSceneManager.Instance.SetGameScene(GameScene.MainMenu);
+        GameSceneManager.Instance.SetGameScene(GameSceneManager.GameScene.MainMenu);
     }
 
     public void EndButtonPressed()
     {
         if (FieldCellLineManager.Instance.CheckCanTurn())
         {
-            GameplayManager.Instance.SetGameplayState(GameplayState.NewTurn);
+            GameplayManager.Instance.AddNewTurn();
         }
     }
 
@@ -98,7 +99,7 @@ public class UIManager : Singleton<UIManager>
     public void RestartGame()
     {
         StateGameOverPanel(false);
-        GameplayManager.Instance.SetGameplayState(GameplayState.RestartGame);
+        GameplayManager.Instance.SetGameplayState(GameplayManager.GameplayState.RestartGame);
     }
 
     private IEnumerator ITimerProcess()
@@ -115,4 +116,5 @@ public class UIManager : Singleton<UIManager>
             yield return new WaitForSeconds(0.1f);
         }
     }
+
 }

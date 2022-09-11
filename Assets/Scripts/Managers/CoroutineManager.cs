@@ -2,43 +2,52 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class CoroutineManager : MonoBehaviour
+namespace Managers
 {
 
-    private Queue<IEnumerator> _coroutineQueue = new Queue<IEnumerator>();
-
-    void Start()
+    public class CoroutineManager : Singleton<CoroutineManager>
     {
-        StartCoroutine(CoroutineCoordinator());
-    }
 
-    void Update()
-    {
-        if (Input.GetKeyDown(KeyCode.Mouse0)) _coroutineQueue.Enqueue(TestCoroutine1());
-        if (Input.GetKeyDown(KeyCode.Mouse1)) _coroutineQueue.Enqueue(TestCoroutine2());
-    }
+        public Queue<IEnumerator> _coroutineQueue = new Queue<IEnumerator>();
 
-    IEnumerator CoroutineCoordinator()
-    {
-        while (true)
+        void Start()
         {
-            while (_coroutineQueue.Count > 0)
-                yield return StartCoroutine(_coroutineQueue.Dequeue());
-            yield return null;
+            StartCoroutine(CoroutineCoordinator());
         }
-    }
 
-    IEnumerator TestCoroutine1()
-    {
-        Debug.Log("Coroutine 1 Started");
-        yield return new WaitForSeconds(1);
-        Debug.Log("Coroutine 1 Ended");
-    }
+        IEnumerator CoroutineCoordinator()
+        {
+            while (true)
+            {
+                while (_coroutineQueue.Count > 0)
+                {
+                    Debug.Log("Star tCoroutine");
+                    yield return StartCoroutine(_coroutineQueue.Dequeue());
 
-    IEnumerator TestCoroutine2()
-    {
-        Debug.Log("Coroutine 2 Started");
-        yield return new WaitForSeconds(2);
-        Debug.Log("Coroutine 2 Ended");
+                    Debug.Log("End Coroutine");
+                }
+                yield return new WaitForEndOfFrame();
+            }
+        }
+
+        public void AddCoroutine(IEnumerator coroutine)
+        {
+            Debug.Log("Add coroutine");
+            _coroutineQueue.Enqueue(coroutine);
+        }
+
+        IEnumerator TestCoroutine1()
+        {
+            Debug.Log("Coroutine 1 Started");
+            yield return new WaitForSeconds(1);
+            Debug.Log("Coroutine 1 Ended");
+        }
+
+        IEnumerator TestCoroutine2()
+        {
+            Debug.Log("Coroutine 2 Started");
+            yield return new WaitForSeconds(2);
+            Debug.Log("Coroutine 2 Ended");
+        }
     }
 }

@@ -51,7 +51,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b4d07254928d0b64ca7031307fc8f232, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Info: {fileID: 11400000, guid: 70fa201857482b34cb02a4632bc83d7e, type: 2}
+  Info: {fileID: 0}
   _manapoints: {fileID: 523472384952850915}
   _cardDescription: {fileID: 523472384244550186}
   _cardObj: {fileID: 523472384321030905}

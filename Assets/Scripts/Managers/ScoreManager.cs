@@ -2,67 +2,72 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class ScoreManager : Singleton<ScoreManager>
+
+namespace Managers
 {
-    private Dictionary<int, int> _currentScoreList = new Dictionary<int, int>();
 
-    private const int _scoreForWin = 100;
-
-    public int GetScore(int player)
+    public class ScoreManager : Singleton<ScoreManager>
     {
-        return _currentScoreList[player];
-    }
+        private Dictionary<int, int> _currentScoreList = new Dictionary<int, int>();
 
-    public void SetScore(int player, int value)
-    {
-        _currentScoreList[player] = value;
-    }
+        public static int _scoreForWin = 100;
 
-    public void AddScore(int player, int value)
-    {
-        _currentScoreList[player] += value;
-    }
-
-    public void AddPlayer(int player)
-    {
-        _currentScoreList.Add(player, 0);
-    }
-
-    public void ResetAllScore()
-    {
-        List<int> keyList = new List<int>(_currentScoreList.Keys);
-
-        foreach (int key in keyList)
+        public int GetScore(int player)
         {
-            _currentScoreList[key] = 0;
+            return _currentScoreList[player];
         }
-    }
 
-    public bool IsExistWinner()
-    {
-        foreach (int res in _currentScoreList.Keys)
+        public void SetScore(int player, int value)
         {
-            if (_currentScoreList[res] >= _scoreForWin) return true;
+            _currentScoreList[player] = value;
         }
-        return false;
-    }
 
-    public int GetWinner()
-    {
-        int maxScore = -1;
-        int maxKey = -1;
-        foreach (int res in _currentScoreList.Keys)
+        public void AddScore(int player, int value)
         {
-            if (_currentScoreList[res] > maxScore)
+            _currentScoreList[player] += value;
+        }
+
+        public void AddPlayer(int player)
+        {
+            _currentScoreList.Add(player, 0);
+        }
+
+        public void ResetAllScore()
+        {
+            List<int> keyList = new List<int>(_currentScoreList.Keys);
+
+            foreach (int key in keyList)
             {
-                maxScore = _currentScoreList[res];
-                maxKey = res;
-            }
-            else if (_currentScoreList[res] == maxScore)
-            {
-                maxKey = -1;
+                _currentScoreList[key] = 0;
             }
         }
-        return maxKey;
+
+        public bool IsExistWinner()
+        {
+            foreach (int res in _currentScoreList.Keys)
+            {
+                if (_currentScoreList[res] >= _scoreForWin) return true;
+            }
+            return false;
+        }
+
+        public int GetWinner()
+        {
+            int maxScore = -1;
+            int maxKey = -1;
+            foreach (int res in _currentScoreList.Keys)
+            {
+                if (_currentScoreList[res] > maxScore)
+                {
+                    maxScore = _currentScoreList[res];
+                    maxKey = res;
+                }
+                else if (_currentScoreList[res] == maxScore)
+                {
+                    maxKey = -1;
+                }
+            }
+            return maxKey;
+        }
     }
 }

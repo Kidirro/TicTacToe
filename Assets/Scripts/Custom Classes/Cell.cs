@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using Managers;
 
 
 
@@ -9,6 +10,14 @@ public class Cell : MonoBehaviour
 {
     const float _scaleSpeed = 4;
     const float _positionSpeed = 4;
+    const float _figureSpeed = 4;
+
+    public static float AnimationTime
+    {
+
+        get => 100 / Mathf.Max(_scaleSpeed, _positionSpeed, _figureSpeed) * Time.deltaTime;
+    }
+
 
     public float CellSize
     {
@@ -24,6 +33,7 @@ public class Cell : MonoBehaviour
     }
     private Vector2 _position;
     private bool _isPositionCoroutineWork = false;
+    private bool _isFigureCoroutineWork = false;
 
     public Vector2Int Id
     {
@@ -48,6 +58,9 @@ public class Cell : MonoBehaviour
 
     private CellSubState _subState;
 
+    [HideInInspector]
+    public bool IsCellClear = false;
+
     private Image _image;
     private Image _subImage;
     private Image _highlightImage;
@@ -60,16 +73,54 @@ public class Cell : MonoBehaviour
         _image = transform.GetChild(2).GetComponent<Image>();
     }
 
-    public void SetFigure(int s)
+    public void SetFigure(int s, bool isQueue = true)
     {
-        _image.sprite = ThemeManager.Instance.GetSprite((CellFigure)s);
         _figure = (CellFigure)s;
+        switch ((CellFigure)s)
+        {
+            case CellFigure.none:
+                if (isQueue) CoroutineManager.Instance.AddCoroutine(IFigureFillProcess((CellFigure)s, true));
+                else StartCoroutine(IFigureFillProcess((CellFigure)s, true));
+                break;
+            case CellFigure.p1:
+                _image.fillMethod = Image.FillMethod.Vertical;
+                _image.fillOrigin = 0;
+                if (isQueue) CoroutineManager.Instance.AddCoroutine(IFigureFillProcess((CellFigure)s, false));
+                else StartCoroutine(IFigureFillProcess((CellFigure)s, false));
+                break;
+            case CellFigure.p2:
+                _image.fillMethod = Image.FillMethod.Radial360;
+                _image.fillOrigin = 0;
+                if (isQueue) CoroutineManager.Instance.AddCoroutine(IFigureFillProcess((CellFigure)s, false));
+                else StartCoroutine(IFigureFillProcess((CellFigure)s, false));
+                break;
+
+        }
     }
 
-    public void SetFigure(CellFigure s)
+    public void SetFigure(CellFigure s, bool isQueue = true)
     {
-        _image.sprite = ThemeManager.Instance.GetSprite(s);
         _figure = s;
+        switch (s)
+        {
+            case CellFigure.none:
+                if (isQueue) CoroutineManager.Instance.AddCoroutine(IFigureFillProcess(s, true));
+                else StartCoroutine(IFigureFillProcess(s, true));
+                break;
+            case CellFigure.p1:
+                _image.fillMethod = Image.FillMethod.Vertical;
+                _image.fillOrigin = 0;
+                if (isQueue) CoroutineManager.Instance.AddCoroutine(IFigureFillProcess(s, false));
+                else StartCoroutine(IFigureFillProcess(s, false));
+                break;
+            case CellFigure.p2:
+                _image.fillMethod = Image.FillMethod.Radial360;
+                _image.fillOrigin = 0;
+                if (isQueue) CoroutineManager.Instance.AddCoroutine(IFigureFillProcess(s, false));
+                else StartCoroutine(IFigureFillProcess(s, false));
+                break;
+
+        }
     }
 
     public void SetTransformSize(float reals, bool instantly = true)
@@ -96,23 +147,24 @@ public class Cell : MonoBehaviour
         else if (!_isPositionCoroutineWork) StartCoroutine(PositionIEnumerator());
     }
 
-    public void SetSubState(Sprite sprite,Color color, CellSubState cellSubState)
+    public void SetSubState(Sprite sprite, Color color, CellSubState cellSubState, bool isQueue = true)
     {
+        if (_subState == cellSubState && _subImage.sprite == sprite) return;
         _subState = cellSubState;
-        _subImage.sprite = sprite;
-        _subImage.color = color;
+        if (isQueue) CoroutineManager.Instance.AddCoroutine(ISubStateFillProcess(sprite, color, false));
+        else StartCoroutine(ISubStateFillProcess(sprite, color, false));
     }
 
-    public void ResetSubState()
+    public void ResetSubState(bool isQueue = true)
     {
         _subState = CellSubState.none;
-        _subImage.sprite = null;
         Color color = Color.white;
         color.a = 0;
-        _subImage.color = color;
-    } 
-    
-    public void HighlightCell(Sprite sprite,Color color)
+        if (isQueue) CoroutineManager.Instance.AddCoroutine(ISubStateFillProcess(null, color, true));
+        else StartCoroutine(ISubStateFillProcess(null, color, true));
+    }
+
+    public void HighlightCell(Sprite sprite, Color color)
     {
         _highlightImage.sprite = sprite;
         _highlightImage.color = color;
@@ -129,7 +181,6 @@ public class Cell : MonoBehaviour
     private IEnumerator ScaleIEnumerator()
     {
         _isSizeCoroutineWork = true;
-        Field.Instance.CellAnimating = Field.Instance.CellAnimating + 1;
         float prevS = _cellSize;
         float step = (_cellSize - _transformRect.sizeDelta.x) / 100f * _scaleSpeed;
         int i = 0;
@@ -141,12 +192,11 @@ public class Cell : MonoBehaviour
                 step = (_cellSize - _transformRect.sizeDelta.x) / 100f * _scaleSpeed;
                 i = 0;
             }
-           _transformRect.sizeDelta += new Vector2(step, step);
+            _transformRect.sizeDelta += new Vector2(step, step);
             i++;
             yield return null;
         }
         _transformRect.sizeDelta += new Vector2(step, step);
-        Field.Instance.CellAnimating = Field.Instance.CellAnimating - 1;
         _isSizeCoroutineWork = false;
         yield break;
     }
@@ -154,7 +204,6 @@ public class Cell : MonoBehaviour
     private IEnumerator PositionIEnumerator()
     {
         _isPositionCoroutineWork = true;
-        Field.Instance.CellAnimating = Field.Instance.CellAnimating + 1;
         Vector2 prevPos = _position;
 
         Vector2 currentPosition = _transformRect.localPosition;
@@ -176,12 +225,65 @@ public class Cell : MonoBehaviour
             yield return null;
         }
         _transformRect.localPosition = _position;
-        Field.Instance.CellAnimating = Field.Instance.CellAnimating - 1;
         _isPositionCoroutineWork = false;
         yield break;
     }
 
+    private IEnumerator IFigureFillProcess(CellFigure s, bool reverse)
+    {
 
+        if (!reverse)
+        {
+            _image.sprite = ThemeManager.Instance.GetSprite(s);
+
+        }
+        _isFigureCoroutineWork = true;
+        _image.fillAmount = (reverse) ? 1 : 0;
+        float step = (1) / 100f * _figureSpeed;
+        int i = 0;
+        while (i <= 100 / _figureSpeed)
+        {
+            _image.fillAmount += (reverse) ? -step : step;
+            i++;
+            yield return null;
+        }
+        _image.fillAmount = (reverse) ? 0 : 1;
+        if (reverse) _image.sprite = ThemeManager.Instance.GetSprite(s);
+        _isFigureCoroutineWork = false;
+        yield break;
+        //_figure = (CellFigure)s;
+
+    }
+
+    private IEnumerator ISubStateFillProcess(Sprite s, Color32 color, bool reverse)
+    {
+
+        if (!reverse)
+        {
+            _subImage.sprite = s;
+            _subImage.color = color;
+        }
+
+        _isFigureCoroutineWork = true;
+        _subImage.fillAmount = (reverse) ? 1 : 0;
+        float step = (1) / 100f * _figureSpeed;
+        int i = 0;
+        while (i <= 100 / _figureSpeed)
+        {
+            _subImage.fillAmount += (reverse) ? -step : step;
+            i++;
+            yield return null;
+        }
+        _subImage.fillAmount = (reverse) ? 0 : 1;
+        if (reverse)
+        {
+            _subImage.sprite = s;
+            _subImage.color = color;
+        }
+        _isFigureCoroutineWork = false;
+        yield break;
+        //_figure = (CellFigure)s;
+    }
 }
 
 public enum CellSubState

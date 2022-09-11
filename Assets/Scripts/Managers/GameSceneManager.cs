@@ -3,54 +3,59 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-public class GameSceneManager : Singleton<GameSceneManager>
+namespace Managers
 {
-    private GameScene _currentScene=0;
 
-    void Awake()
+    public class GameSceneManager : Singleton<GameSceneManager>
     {
-        DontDestroyOnLoad(this);
-        Application.targetFrameRate = 60;
-        SetGameScene(GameScene.MainMenu);
-    }
+        private GameScene _currentScene = 0;
 
-    public void SetGameScene(GameScene state)
-    {
-        GameSceneManager.Instance._currentScene = state;
-        CheckState();
-    }
-    public void CheckState()
-    {
-       switch (_currentScene)
+        void Awake()
         {
-            case GameScene.Game:
-                if (!IsCurrentScene("GameplayScene"))
-                {
-                    SceneManager.LoadScene("GameplayScene");
-                }
-                break;
-            case GameScene.MainMenu:
+            DontDestroyOnLoad(this);
+            Application.targetFrameRate = 60;
+            SetGameScene(GameScene.MainMenu);
+        }
 
-                if (!IsCurrentScene("MainMenu"))
-                {
-                    SceneManager.LoadScene("MainMenu");
-                }
-                break;
+        public void SetGameScene(GameScene state)
+        {
+            GameSceneManager.Instance._currentScene = state;
+            CheckState();
+        }
+        public void CheckState()
+        {
+            switch (_currentScene)
+            {
+                case GameScene.Game:
+                    if (!IsCurrentScene("GameplayScene"))
+                    {
+                        SceneManager.LoadScene("GameplayScene");
+                    }
+                    break;
+                case GameScene.MainMenu:
+
+                    if (!IsCurrentScene("MainMenu"))
+                    {
+                        SceneManager.LoadScene("MainMenu");
+                    }
+                    break;
+            }
+        }
+
+        private bool IsCurrentScene(string SceneName)
+        {
+            return SceneManager.GetActiveScene().name.Equals(SceneName);
+        }
+
+
+
+        public enum GameScene
+        {
+            None,
+
+            MainMenu,
+
+            Game
         }
     }
-
-    private bool IsCurrentScene(string SceneName)
-    {
-        return SceneManager.GetActiveScene().name.Equals(SceneName);
-    }
-
-}
-
-public enum GameScene
-{
-    None,
-    
-    MainMenu,
-
-    Game
 }

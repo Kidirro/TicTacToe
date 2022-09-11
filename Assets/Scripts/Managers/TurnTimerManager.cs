@@ -2,60 +2,65 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class TurnTimerManager : Singleton<TurnTimerManager>
+namespace Managers
 {
-    public const float PlayerTurnTime = 205F;
-    public const float BotTurnTime = 5f;
 
-    private float _timeLeft = 0f;
-
-    private IEnumerator _timerCoroutine;
-
-    private void Awake()
+    public class TurnTimerManager : Singleton<TurnTimerManager>
     {
-        _timerCoroutine = ITurnTimer();
-    }
+        public const float PlayerTurnTime = 205F;
+        public const float BotTurnTime = 1f;
 
-    public float TimeLeft
-    {
-        get { return _timeLeft; }
-    }
+        private float _timeLeft = 0f;
 
-    public void StartNewTurnTimer(float TurnTime)
-    {
+        private IEnumerator _timerCoroutine;
 
-
-        StopCoroutine(_timerCoroutine);
-        _timeLeft = TurnTime;
-        StartCoroutine(_timerCoroutine);
-
-    }
-    public void StartNewTurnTimer(PlayerType player)
-    {
-
-        Debug.Log("Started timer"); 
-        StopCoroutine(_timerCoroutine);
-        switch (player)
+        private void Awake()
         {
-            case PlayerType.AI:
-                _timeLeft = BotTurnTime;
-                break;
-            case PlayerType.Human:
-                _timeLeft = PlayerTurnTime;
-                break;
+            _timerCoroutine = ITurnTimer();
         }
-        _timerCoroutine = ITurnTimer();
-        StartCoroutine(_timerCoroutine);
 
-    }
-
-    private IEnumerator ITurnTimer()
-    {
-        while (_timeLeft > 0)
+        public float TimeLeft
         {
-            yield return new WaitForSecondsRealtime(0.1f);
-            _timeLeft -= 0.1f;
+            get { return _timeLeft; }
         }
-        GameplayManager.Instance.SetGameplayState(GameplayState.NewTurn);
+
+        public void StartNewTurnTimer(float TurnTime)
+        {
+
+
+            StopCoroutine(_timerCoroutine);
+            _timeLeft = TurnTime;
+            StartCoroutine(_timerCoroutine);
+
+        }
+        public void StartNewTurnTimer(PlayerType player)
+        {
+
+            Debug.Log("Started timer");
+            StopCoroutine(_timerCoroutine);
+            switch (player)
+            {
+                case PlayerType.AI:
+                    _timeLeft = BotTurnTime;
+                    break;
+                case PlayerType.Human:
+                    _timeLeft = PlayerTurnTime;
+                    break;
+            }
+            _timerCoroutine = ITurnTimer();
+            StartCoroutine(_timerCoroutine);
+
+        }
+
+        private IEnumerator ITurnTimer()
+        {
+            while (_timeLeft > 0)
+            {
+                yield return new WaitForSecondsRealtime(0.1f);
+                _timeLeft -= 0.1f;
+            }
+            /*GameplayManager.Instance.SetGameplayState(GameplayState.NewTurn);*/
+            //CoroutineManager.Instance.AddCoroutine(GameplayManager.Instance.INewTurnProcess());
+        }
     }
 }

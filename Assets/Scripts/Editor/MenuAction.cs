@@ -1,5 +1,5 @@
 using UnityEditor;
-using UnityEngine;
+using Managers;
 
 public class MenuAction 
 {
@@ -8,12 +8,26 @@ public class MenuAction
     {
         SlotManager.Instance.AddCard(PlayerManager.Instance.GetCurrentPlayer());
         SlotManager.Instance.UpdateCardPosition(false);
+    } 
+    
+    [MenuItem("TTTP Actions/Cards/Add Card in full hand")]
+    public static void AddFullHand()
+    {
+        SlotManager.Instance.NewTurn(PlayerManager.Instance.GetCurrentPlayer());
+        SlotManager.Instance.UpdateCardPosition(false);
     }
 
     [MenuItem("TTTP Actions/Cards/Remove Card from hand")]
     public static void RemoveHand()
     {
         SlotManager.Instance.RemoveCard(PlayerManager.Instance.GetCurrentPlayer(),0);
+        SlotManager.Instance.UpdateCardPosition(false);
+    }
+    
+    [MenuItem("TTTP Actions/Cards/Remove Card from full hand")]
+    public static void RemoveFullHand()
+    {
+        SlotManager.Instance.ResetHandPool(PlayerManager.Instance.GetCurrentPlayer());
         SlotManager.Instance.UpdateCardPosition(false);
     }
 
@@ -26,7 +40,7 @@ public class MenuAction
     [MenuItem("TTTP Actions/Mana/Reset Mana")]
     public static void ResetMana()
     {
-        ManaManager.Instance.ResetCurrentMana();
+        ManaManager.Instance.RestoreAllMana();
         ManaManager.Instance.UpdateManaUI();
     }
 

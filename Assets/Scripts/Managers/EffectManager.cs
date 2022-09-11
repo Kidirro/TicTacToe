@@ -3,57 +3,62 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class EffectManager : Singleton<EffectManager>
+namespace Managers
 {
 
-    private List<Effect> _effectList = new List<Effect>();
-
-    public void AddEffect(Effect effect)
+    public class EffectManager : Singleton<EffectManager>
     {
-        _effectList.Add(effect);
-    }
 
-    public void ClearEffect()
-    {
-        _effectList.Clear();
-    }
+        private List<Effect> _effectList = new List<Effect>();
 
-    public void UpdateEffectTurn()
-    {
-        foreach (Effect effect in _effectList)
+        public void AddEffect(Effect effect)
         {
-            Debug.Log("Checked effect");
-
-            if (effect.EffectSideId == PlayerManager.Instance.GetCurrentPlayer().SideId)
-            {
-                effect.EffectTurnCount -= 1;
-                Debug.Log("Effect turn delete");
-
-
-                effect.EffectAction.Invoke();
-                if (effect.EffectTurnCount == 0) effect.OnEffectDisable.Invoke();
-
-                Debug.Log("Effect Invoke");                
-            }
+            _effectList.Add(effect);
         }
-        _effectList.RemoveAll(Effect => Effect.EffectTurnCount == 0);
+
+        public void ClearEffect()
+        {
+            _effectList.Clear();
+        }
+
+        public IEnumerator UpdateEffectTurn()
+        {
+            foreach (Effect effect in _effectList)
+            {
+                Debug.Log("Checked effect");
+
+                if (effect.EffectSideId == PlayerManager.Instance.GetCurrentPlayer().SideId)
+                {
+                    effect.EffectTurnCount -= 1;
+                    Debug.Log("Effect turn delete");
+
+
+                    effect.EffectAction.Invoke();
+                    if (effect.EffectTurnCount == 0) effect.OnEffectDisable.Invoke();
+
+                    Debug.Log("Effect Invoke");
+                }
+            }
+            _effectList.RemoveAll(Effect => Effect.EffectTurnCount == 0);
+            yield return null;
+        }
     }
-}
 
-public class Effect
-{
-    public Action EffectAction;
-    public Action OnEffectDisable;
-    public int EffectTurnCount;
-    public int EffectSideId;
-
-    public Effect(Action action, int turnCount, int SideId, Action onDisable = null )   
+    public class Effect
     {
-        if (onDisable == null) onDisable = delegate () { };
+        public Action EffectAction;
+        public Action OnEffectDisable;
+        public int EffectTurnCount;
+        public int EffectSideId;
 
-        EffectAction = action;
-        OnEffectDisable = onDisable;
-        EffectTurnCount = turnCount;
-        EffectSideId = SideId;
+        public Effect(Action action, int turnCount, int SideId, Action onDisable = null)
+        {
+            if (onDisable == null) onDisable = delegate () { };
+
+            EffectAction = action;
+            OnEffectDisable = onDisable;
+            EffectTurnCount = turnCount;
+            EffectSideId = SideId;
+        }
     }
 }

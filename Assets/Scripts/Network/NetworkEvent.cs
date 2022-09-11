@@ -2,6 +2,7 @@ using ExitGames.Client.Photon;
 using UnityEngine;
 using Photon.Pun;
 using Photon.Realtime;
+using Managers;
 
 public class NetworkEvent : MonoBehaviour, IOnEventCallback
 {
@@ -47,7 +48,7 @@ public class NetworkEvent : MonoBehaviour, IOnEventCallback
         switch (photonEvent.Code)
         {
             case 2:
-                UIManager.Instance.NewTurn(false);
+                InGameUI.Instance.NewTurn();
                 FieldCellLineManager.Instance.NewTurn(true);
                 break;
             case 3:

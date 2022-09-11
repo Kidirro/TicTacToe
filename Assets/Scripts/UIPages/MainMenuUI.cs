@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
+using Managers;
 
 public class MainMenuUI : MonoBehaviour
 {
@@ -33,15 +34,15 @@ public class MainMenuUI : MonoBehaviour
     public void OnAIButtonStart()
     {
         Debug.Log("asdasd");
-        GameplayManager.TypeGame = GameType.SingleAI;
-        GameSceneManager.Instance.SetGameScene(GameScene.Game);
+        GameplayManager.TypeGame = GameplayManager.GameType.SingleAI;
+        GameSceneManager.Instance.SetGameScene(GameSceneManager.GameScene.Game);
     }
 
 
     public void OnHumanButtonStart()
     {
-        GameplayManager.TypeGame = GameType.SingleHuman;
-        GameSceneManager.Instance.SetGameScene(GameScene.Game);
+        GameplayManager.TypeGame = GameplayManager.GameType.SingleHuman;
+        GameSceneManager.Instance.SetGameScene(GameSceneManager.GameScene.Game);
     }
 
     public void DEV_ChangeFieldSize(int i)
@@ -96,6 +97,10 @@ public class MainMenuUI : MonoBehaviour
     public void DEV_SetCoinPerCard(string text)
     {
         CoinManager.CoinPerUnlock = int.Parse(text);
+    }
+       public void DEV_PointsPerWin(string text)
+    {
+        ScoreManager._scoreForWin = int.Parse(text);
     }
     
     public void ShowPreSettingMenu(bool state)

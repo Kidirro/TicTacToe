@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.Events;
 using System;
+using Managers;
 using Random = UnityEngine.Random;
 
 [CreateAssetMenu(fileName = "New card", menuName = "Card")]
@@ -100,7 +101,10 @@ public class CardInfo : ScriptableObject
     
     public void AddBonusMana_Effected()
     {
-        Action f = delegate () { ManaManager.Instance.AddBonusMana(1); };
+        Action f = delegate () { ManaManager.Instance.AddBonusMana(1);
+            ManaManager.Instance.RestoreAllMana();
+            ManaManager.Instance.UpdateManaUI();
+        };
         Effect effect = new Effect(f, 1, PlayerManager.Instance.GetCurrentPlayer().SideId);;
         EffectManager.Instance.AddEffect(effect);
     }
@@ -139,19 +143,20 @@ public class CardInfo : ScriptableObject
         EffectManager.Instance.AddEffect(effect);
         FieldCellLineManager.Instance.MasterChecker((CellFigure)PlayerManager.Instance.GetCurrentPlayer().SideId);
     }
-    
-    
+
+
     public void FreezeCellGroup_Efected()
     {
         List<Cell> _posList = new List<Cell>();
         for (int i = 0; i < 3; i++)
         {
             Vector2Int result = new Vector2Int(Random.Range(0, Field.Instance.FieldSize.x), Random.Range(0, Field.Instance.FieldSize.y));
-            while(_posList.IndexOf(Field.Instance.CellList[result.x][result.y])!=-1|| !Field.Instance.IsCellEnableToPlace(result)) result = new Vector2Int(Random.Range(0, Field.Instance.FieldSize.x), Random.Range(0, Field.Instance.FieldSize.y));
+            while (_posList.IndexOf(Field.Instance.CellList[result.x][result.y]) != -1 || !Field.Instance.IsCellEnableToPlace(result)) result = new Vector2Int(Random.Range(0, Field.Instance.FieldSize.x), Random.Range(0, Field.Instance.FieldSize.y));
             _posList.Add(Field.Instance.CellList[result.x][result.y]);
         }
         Sprite sprite = (PlayerManager.Instance.GetCurrentPlayer().SideId == 1) ? CardHighlightP1 : CardHighlightP2;
-        Action f = delegate () {
+        Action f = delegate ()
+        {
 
             foreach (Cell pos in _posList)
             {
@@ -159,15 +164,18 @@ public class CardInfo : ScriptableObject
                                                 CardAreaSize,
                                                 sprite,
                                                 Color.black,
-                                                CellSubState.block
+                                                CellSubState.block,
+                                                false
                                               );
             }
         };
-        Action d = delegate () {
+        Action d = delegate ()
+        {
             foreach (Cell pos in _posList)
             {
                 Field.Instance.ResetSubStateZone(pos.Id,
-                                            CardAreaSize
+                                            CardAreaSize,
+                                            false
                                           );
             }
         };
@@ -175,6 +183,18 @@ public class CardInfo : ScriptableObject
         Effect effect = new Effect(f, 2, PlayerManager.Instance.GetCurrentPlayer().SideId, d);
         EffectManager.Instance.AddEffect(effect);
         FieldCellLineManager.Instance.MasterChecker((CellFigure)PlayerManager.Instance.GetCurrentPlayer().SideId);
+    } 
+    
+    public void Restore1Mana()
+    {
+        ManaManager.Instance.RestoreMana(1);
+        ManaManager.Instance.UpdateManaUI();
+    }
+
+    public void RestoreAllMana()
+    {
+        ManaManager.Instance.RestoreAllMana();
+        ManaManager.Instance.UpdateManaUI();
     }
 
     public void Prikol()

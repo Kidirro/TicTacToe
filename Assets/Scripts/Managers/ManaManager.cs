@@ -2,89 +2,102 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class ManaManager : Singleton<ManaManager>
+namespace Managers
 {
 
-    [SerializeField]
-    private int _startManapool;
-
-    private  bool _isManaGrow = true;
-
-
-    private int _maxManaGrow = 5;
-
-    private int _manapool =1;
-
-    private int _bonusMana;
-
-    /// <summary>
-    /// 
-    /// </summary>
-    private int _currentMana;
-
-    /// <summary>
-    /// 
-    /// </summary>
-    [SerializeField]
-    private List<GameObject> _manaPoints;
-
-    /// <summary>
-    /// 
-    /// </summary>
-    [SerializeField]
-    private List<GameObject> _manaPointsFill;
-
-    public bool IsEnoughMana(int mana)
+    public class ManaManager : Singleton<ManaManager>
     {
-        return mana <= _currentMana;
-    }
+        private bool _isManaGrow = true;
 
-    public void DecreaseMana(int mana)
-    {
-        _currentMana -= mana;
-    }
+        [SerializeField]
+        private int _startManapool;
 
-    public void ResetCurrentMana()
-    {
-      
-        _currentMana = _manapool + _bonusMana;
-    }
-    
-    public void ResetMana()
-    {
-        _manapool = _startManapool;
-        _bonusMana = 0;
-    }
 
-    public void UpdateManaUI()
-    {
-        for (int i = 0; i < _manaPoints.Count; i++)
+        [SerializeField]
+        private int _maxManaGrow = 5;
+
+        private int _manapool = 1;
+
+        private int _bonusMana;
+
+        /// <summary>
+        /// 
+        /// </summary>
+        private int _currentMana;
+
+        /// <summary>
+        /// 
+        /// </summary>
+        [SerializeField]
+        private List<GameObject> _manaPoints;
+
+        /// <summary>
+        /// 
+        /// </summary>
+        [SerializeField]
+        private List<GameObject> _manaPointsFill;
+
+        public bool IsEnoughMana(int mana)
         {
-            _manaPointsFill[i].SetActive(i + 1 <= _currentMana);
-            _manaPoints[i].SetActive(i + 1 <= _manapool + _bonusMana);
+            return mana <= _currentMana;
         }
-    }  
-    
-    public void SetBonusMana(int mana)
-    {
-        _bonusMana = mana;
-    }
 
-    public void AddBonusMana(int mana)
-    {
-        _bonusMana += mana;
-    }
-
-    public void GrowMana()
-    {
-        if (_isManaGrow)
+        public void DecreaseMana(int mana)
         {
-            if (_maxManaGrow > _manapool)
+            _currentMana -= mana;
+        }
+
+        public void RestoreAllMana()
+        {
+
+            _currentMana = _manapool + _bonusMana;
+        }
+
+        public void ResetMana()
+        {
+            _manapool = _startManapool;
+            _bonusMana = 0;
+        }
+
+        public void UpdateManaUI()
+        {
+            for (int i = 0; i < _manaPoints.Count; i++)
             {
-                _manapool += 1;
+                _manaPointsFill[i].SetActive(i + 1 <= _currentMana);
+                _manaPoints[i].SetActive(i + 1 <= _manapool + _bonusMana);
             }
         }
+
+        public void SetBonusMana(int mana)
+        {
+            _bonusMana = mana;
+        }
+
+        public void AddBonusMana(int mana)
+        {
+            _bonusMana += mana;
+        }
+
+        public void GrowMana()
+        {
+            if (_isManaGrow)
+            {
+                if (_maxManaGrow > _manapool)
+                {
+                    _manapool += 1;
+                }
+            }
+        }
+
+        public void RestoreMana(int value)
+        {
+            _currentMana = Mathf.Min(_currentMana + value, _manapool + _bonusMana);
+            Debug.Log(_currentMana);
+        }
+
+        private void Update()
+        {
+            if (Input.GetKeyDown(KeyCode.S)) RestoreMana(1);
+        }
     }
-
-
 }

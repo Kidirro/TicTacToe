@@ -2,71 +2,75 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class CardManager : Singleton<CardManager>
+namespace Managers
 {
 
-    [SerializeField] private bool _isNeedGizmos;
-
-    [SerializeField]
-    private Card _cardPrefab;
-
-    private List<Card> _cardList = new List<Card>();
-
-    public List<Card> CardAvaible
+    public class CardManager : Singleton<CardManager>
     {
-        get { return _cardList; }
-    }
 
-    private static List<CardInfo> _cardInfoListStatic = new List<CardInfo>();
+        [SerializeField] private bool _isNeedGizmos;
 
-    public static int CardListCount()
-    {
-        if (_cardInfoListStatic == null) _cardInfoListStatic = new List<CardInfo>();
-        return _cardInfoListStatic.Count;
-    }
+        [SerializeField]
+        private Card _cardPrefab;
 
-    public static void CardListAdd(CardInfo card)
-    {
-        if (_cardInfoListStatic == null) _cardInfoListStatic = new List<CardInfo>();
-        if (_cardInfoListStatic.IndexOf(card) == -1)
+        private List<Card> _cardList = new List<Card>();
+
+        public List<Card> CardAvaible
         {
-            _cardInfoListStatic.Add(card);
+            get { return _cardList; }
         }
 
-    }
+        private static List<CardInfo> _cardInfoListStatic = new List<CardInfo>();
 
-    public static void CardListRemove(CardInfo card)
-    {
-        if (_cardInfoListStatic == null) _cardInfoListStatic = new List<CardInfo>();
-        if (_cardInfoListStatic.IndexOf(card) != -1)
+        public static int CardListCount()
         {
-            _cardInfoListStatic.Remove(card);
+            if (_cardInfoListStatic == null) _cardInfoListStatic = new List<CardInfo>();
+            return _cardInfoListStatic.Count;
         }
 
-    }
-
-    public static void CardListClear()
-    {
-        _cardInfoListStatic = new List<CardInfo>();
-    }
-
-    public List<Card> CreateDeck()
-    {
-        List<Card> newDeck = new List<Card>();
-        foreach (CardInfo cardInfo in _cardInfoListStatic)
+        public static void CardListAdd(CardInfo card)
         {
-            for (int i = 0; i < cardInfo.CardCount; i++)
+            if (_cardInfoListStatic == null) _cardInfoListStatic = new List<CardInfo>();
+            if (_cardInfoListStatic.IndexOf(card) == -1)
             {
-                Card card = GameObject.Instantiate(_cardPrefab);
-                //card.name = card.Info.CardName;
-                Debug.Log(card);
-                card.SetCardInfo(cardInfo);
-                card.Info.CardBonusManacost = 0;
-                card.gameObject.SetActive(false);
-                card.SetTransformParent(transform);
-                newDeck.Add(card);
+                _cardInfoListStatic.Add(card);
             }
+
         }
-        return newDeck;
+
+        public static void CardListRemove(CardInfo card)
+        {
+            if (_cardInfoListStatic == null) _cardInfoListStatic = new List<CardInfo>();
+            if (_cardInfoListStatic.IndexOf(card) != -1)
+            {
+                _cardInfoListStatic.Remove(card);
+            }
+
+        }
+
+        public static void CardListClear()
+        {
+            _cardInfoListStatic = new List<CardInfo>();
+        }
+
+        public List<Card> CreateDeck()
+        {
+            List<Card> newDeck = new List<Card>();
+            foreach (CardInfo cardInfo in _cardInfoListStatic)
+            {
+                for (int i = 0; i < cardInfo.CardCount; i++)
+                {
+                    Card card = GameObject.Instantiate(_cardPrefab);
+                    //card.name = card.Info.CardName;
+                    Debug.Log(card);
+                    card.SetCardInfo(cardInfo);
+                    card.Info.CardBonusManacost = 0;
+                    card.gameObject.SetActive(false);
+                    card.SetTransformParent(transform);
+                    newDeck.Add(card);
+                }
+            }
+            return newDeck;
+        }
     }
 }

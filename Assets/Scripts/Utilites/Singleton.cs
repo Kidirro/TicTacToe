@@ -5,7 +5,7 @@
 /// Singleton base class for single objects in the project. 
 /// </summary>
 /// <typeparam name="T">Type of object which is single in the project.</typeparam>
-public class Singleton<T> : MonoBehaviour where T: MonoBehaviour
+public class Singleton<T> : MonoBehaviour where T : MonoBehaviour
 {
     /// <summary>
     /// Encapsulated field for the instance of T.
@@ -24,8 +24,12 @@ public class Singleton<T> : MonoBehaviour where T: MonoBehaviour
                 instance = FindObjectOfType<T>();
                 if (!instance)
                 {
-                    instance = new GameObject(typeof(T).ToString()).AddComponent<T>();
-                    //instance.transform.SetParent(GameObject.Find("Managers").transform);
+                    instance = new GameObject(typeof(T).ToString()).AddComponent<T>();/*
+                    if (!_managers)
+                    {
+                        _managers = GameObject.Find("Managers").transform;
+                    }
+                    if (_managers) instance.transform.SetParent(_managers);*/
                 }
             }
             return instance;

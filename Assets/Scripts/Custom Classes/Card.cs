@@ -6,6 +6,7 @@ using System.Diagnostics;
 using TMPro;
 using Debug = UnityEngine.Debug;
 using System.Collections.Generic;
+using Managers;
 
 public class Card : MonoBehaviour
 {
@@ -350,7 +351,7 @@ public class Card : MonoBehaviour
                 TypeFlag = Field.Instance.IsInFieldHeight(_cardPosition.y) && ChosedCell != new Vector2(-1, -1);
                 break;
             case CardTypeImpact.OnAreaWithCheck:
-                TypeFlag = Field.Instance.IsInFieldHeight(_cardPosition.y) && ChosedCell != new Vector2(-1, -1) && Field.Instance.IsZoneEmpty(ChosedCell, Info.CardAreaSize);
+                TypeFlag = Field.Instance.IsInFieldHeight(_cardPosition.y) && ChosedCell != new Vector2(-1, -1) && Field.Instance.IsZoneEnableToPlace(ChosedCell, Info.CardAreaSize);
                 break;
         }
 
@@ -362,6 +363,7 @@ public class Card : MonoBehaviour
             ManaManager.Instance.UpdateManaUI();
 
             Info.ÑardAction.Invoke();
+            HistoryManager.Instance.AddHistoryCard(PlayerManager.Instance.GetCurrentPlayer(), Info);
 
             if (Info.CardCount > 1)
             {
