@@ -4850,13 +4850,18 @@ MonoBehaviour:
   _cardsList:
   - {fileID: 11400000, guid: 70fa201857482b34cb02a4632bc83d7e, type: 2}
   - {fileID: 11400000, guid: 8eed4fb2689ad364a98e931ef0a91d80, type: 2}
+  - {fileID: 11400000, guid: bbd519ff97eee924da914b4c2dabcc8f, type: 2}
+  - {fileID: 11400000, guid: 5e12b83828153cf47ab055bafb10823f, type: 2}
   - {fileID: 11400000, guid: d27c5a5af0d07f34dbc4f79f6a74d380, type: 2}
   - {fileID: 11400000, guid: 3d078ee5b340c7043b1b42fd382dce9b, type: 2}
+  - {fileID: 11400000, guid: cca5eba4d275ea0468ab34df1d54532c, type: 2}
   - {fileID: 11400000, guid: bf2f2ec6defab5541bef361fc04f40c1, type: 2}
   - {fileID: 11400000, guid: 2ffea5590798737449ee703f724f3fcf, type: 2}
   - {fileID: 11400000, guid: 123891a21a64c644db5159da9e1a0616, type: 2}
+  - {fileID: 11400000, guid: 6ebf45dd87655694d85042489bf92d40, type: 2}
   - {fileID: 11400000, guid: 053afd877e5e4234db824400d5dd711d, type: 2}
   - {fileID: 11400000, guid: ed07de7145bb7494397e5ef2fe87f616, type: 2}
+  - {fileID: 11400000, guid: 4c2f7ed4639232a4c9aeb633e48cbdac, type: 2}
   _collectionParent: {fileID: 903892679}
   _cardPrefab: {fileID: 523472384096669092, guid: 7e415cb8c62703d4ca9414938bc77725, type: 3}
   _cardUnlockValue: {fileID: 291440989}

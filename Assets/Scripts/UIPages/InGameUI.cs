@@ -75,10 +75,7 @@ public class InGameUI : Singleton<InGameUI>
 
     public void EndButtonPressed()
     {
-        if (FieldCellLineManager.Instance.CheckCanTurn())
-        {
-            GameplayManager.Instance.AddNewTurn();
-        }
+        GameplayManager.Instance.SetGamePlayStateQueue(GameplayManager.GameplayState.NewTurn);
     }
 
     public void StateGameOverPanel(bool state, int value = 0)
@@ -99,7 +96,7 @@ public class InGameUI : Singleton<InGameUI>
     public void RestartGame()
     {
         StateGameOverPanel(false);
-        GameplayManager.Instance.SetGameplayState(GameplayManager.GameplayState.RestartGame);
+        GameplayManager.Instance.SetGamePlayStateQueue(GameplayManager.GameplayState.RestartGame);
     }
 
     private IEnumerator ITimerProcess()

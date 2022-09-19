@@ -11,7 +11,7 @@ namespace Managers
 
         public static GameType TypeGame = 0;
 
-        private bool _isNewTurnInList = false;
+        private bool _isNewStateInQueue = false;
 
         private void Start()
         {
@@ -76,9 +76,8 @@ namespace Managers
                     break;
 
                 case GameplayState.NewTurn:
-                    _isNewTurnInList = false;
+                    _isNewStateInQueue = false;
                     HistoryManager.Instance.AddHistoryNewTurn(PlayerManager.Instance.GetCurrentPlayer());
-                    FieldCellLineManager.Instance.NewTurn();
                     foreach (Card card in PlayerManager.Instance.GetCurrentPlayer().FullDeckPool)
                     {
                         card.Info.CardBonusManacost = 0;
@@ -95,19 +94,23 @@ namespace Managers
                         ManaManager.Instance.GrowMana();
                     }
 
-                    CoroutineManager.Instance.AddCoroutine(EffectManager.Instance.UpdateEffectTurn());
+                   CoroutineManager.Instance.AddCoroutine(EffectManager.Instance.UpdateEffectTurn());
                     ManaManager.Instance.RestoreAllMana();
                     ManaManager.Instance.UpdateManaUI();
+
+                    SlotManager.Instance.NewTurn(PlayerManager.Instance.GetCurrentPlayer());
+                    TurnTimerManager.Instance.StartNewTurnTimer(PlayerManager.Instance.GetCurrentPlayer().EntityType);
+                    InGameUI.Instance.NewTurn();
 
                     if (PlayerManager.Instance.GetCurrentPlayer().EntityType.Equals(PlayerType.AI))
                     {
                         Debug.Log("AI TURN START");
-                        FieldCellLineManager.Instance.PlaceInCell(AIManager.Instance.GenerateNewTurn(PlayerManager.Instance.GetCurrentPlayer().SideId));
+                        Field.Instance.PlaceInCell(AIManager.Instance.GenerateNewTurn(PlayerManager.Instance.GetCurrentPlayer().SideId));
                         Debug.LogFormat("Current tactic : {0}", AIManager.Instance.BotAggression);
 
-                        FieldCellLineManager.Instance.MasterChecker((CellFigure)PlayerManager.Instance.GetCurrentPlayer().SideId);
+                        FinishLineManager.Instance.MasterChecker((CellFigure)PlayerManager.Instance.GetCurrentPlayer().SideId);
 
-                        AddNewTurn();
+                        SetGamePlayStateQueue(GameplayState.NewTurn);
                         //SetGameplayState(GameplayState.NewTurn);
                     }
                     else
@@ -115,9 +118,6 @@ namespace Managers
                         SetGameplayState(GameplayState.None);
                     }
 
-                    SlotManager.Instance.NewTurn(PlayerManager.Instance.GetCurrentPlayer());
-                    TurnTimerManager.Instance.StartNewTurnTimer(PlayerManager.Instance.GetCurrentPlayer().EntityType);
-                    InGameUI.Instance.NewTurn();
                     break;
                 case GameplayState.GameOver:
                     int valueMoney = 0;
@@ -157,21 +157,22 @@ namespace Managers
             }
         }
 
-        public void AddNewTurn()
+        public void SetGamePlayStateQueue(GameplayState state)
         {
-            if (!_isNewTurnInList)
+            
+            if (!_isNewStateInQueue)
             {
-                _isNewTurnInList = true;
-                CoroutineManager.Instance.AddCoroutine(INewTurnProcess());
+                _isNewStateInQueue = true;
+                CoroutineManager.Instance.AddCoroutine(ISetStateQueueProcess(state));
             }
         }
 
-        public IEnumerator INewTurnProcess()
+        private IEnumerator ISetStateQueueProcess(GameplayState state)
         {
 
+            SetGameplayState(state);
+            _isNewStateInQueue = false;
             yield return null;
-            Debug.Log("Coroutine New Turn");
-            GameplayManager.Instance.SetGameplayState(GameplayState.NewTurn);
         }
 
 

@@ -341,6 +341,7 @@ public class Card : MonoBehaviour
         bool TimeFlag = stopWatch.ElapsedMilliseconds > 80;
         bool TypeFlag = false;
         bool ManaFlag = ManaManager.Instance.IsEnoughMana(Info.CardManacost + Info.CardBonusManacost);
+        bool AnimFlag = CoroutineManager.IsQueueEmpty;
 
         switch (Info.CardType)
         {
@@ -355,7 +356,7 @@ public class Card : MonoBehaviour
                 break;
         }
 
-        if (TypeFlag && TimeFlag && ManaFlag)
+        if (TypeFlag && TimeFlag && ManaFlag && AnimFlag)
         {
             SlotManager.Instance.RemoveCard(PlayerManager.Instance.GetCurrentPlayer(), this);
             SlotManager.Instance.UpdateCardPosition(false);

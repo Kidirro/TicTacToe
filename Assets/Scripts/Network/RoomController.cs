@@ -13,7 +13,7 @@ public class RoomController : MonoBehaviourPunCallbacks
         Debug.Log(newPlayer.NickName);
         if (PhotonNetwork.CurrentRoom.PlayerCount == 2)
         {
-            FieldCellLineManager.Instance.Restart();
+            //FinishLineManager.Instance.Restart();
             Debug.Log("2 players!!");
         }
     }
@@ -23,7 +23,7 @@ public class RoomController : MonoBehaviourPunCallbacks
         base.OnJoinedRoom();
         if (PhotonNetwork.CurrentRoom.PlayerCount == 2)
         {
-            FieldCellLineManager.Instance.Restart();
+            //FinishLineManager.Instance.Restart();
             Debug.Log("2 players!!");
         }
     }

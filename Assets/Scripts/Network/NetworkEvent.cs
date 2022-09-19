@@ -49,7 +49,6 @@ public class NetworkEvent : MonoBehaviour, IOnEventCallback
         {
             case 2:
                 InGameUI.Instance.NewTurn();
-                FieldCellLineManager.Instance.NewTurn(true);
                 break;
             case 3:
                 Vector2Int id = (Vector2Int)photonEvent.CustomData;

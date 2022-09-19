@@ -81,6 +81,7 @@ namespace Managers
 
         public Vector2Int GenerateRandomPosition(Vector2Int size)
         {
+            if (!Field.Instance.IsExistEmptyCell()) return new Vector2Int(-1, -1);
             Vector2Int result = new Vector2Int(Random.Range(0, size.x), Random.Range(0, size.y));
             while (!Field.Instance.IsCellEnableToPlace(result))
             {

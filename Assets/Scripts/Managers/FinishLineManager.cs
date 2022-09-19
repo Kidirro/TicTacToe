@@ -6,12 +6,8 @@ using Managers;
 namespace Managers
 {
 
-    public class FieldCellLineManager : Singleton<FieldCellLineManager>
+    public class FinishLineManager : Singleton<FinishLineManager>
     {
-        public bool IsGamePlayimg
-        {
-            get { return _isGamePlaying; }
-        }
 
         public int CurrentGoalLine
         {
@@ -20,22 +16,12 @@ namespace Managers
 
         private int _currentGoalLine = 3;
 
-        private bool _isGamePlaying = true;
-
-        private bool _isPossibilityOfMove = true;
-
         private List<List<Vector2Int>> _lineForClearing = new List<List<Vector2Int>>();
-
-        public void PlaceInCell(Vector2Int id)
-        {
-            if (_isGamePlaying && _isPossibilityOfMove && Field.Instance.IsCellEnableToPlace(id))
-            {
-                Field.Instance.CellList[id.x][id.y].SetFigure(PlayerManager.Instance.GetCurrentPlayer().SideId);
-            }
-        }
 
         public void MasterChecker(CellFigure figure)
         {
+            Debug.Log("Begin Check!");
+
             List<Vector2Int> verticalList = new List<Vector2Int>();
             List<Vector2Int> horizontalList = new List<Vector2Int>();
             List<Vector2Int> diagonalRightList = new List<Vector2Int>();
@@ -163,8 +149,12 @@ namespace Managers
             }
 
 
-            if (linesRes.Count > 0)
-                CoroutineManager.Instance.AddCoroutine(IDrawFinishLine(linesRes));
+            if (linesRes.Count > 0) CoroutineManager.Instance.AddCoroutine(IDrawFinishLine(linesRes));
+            else
+            {
+                if (!Field.Instance.IsExistEmptyCell()) GameplayManager.Instance.SetGamePlayStateQueue(GameplayManager.GameplayState.GameOver);
+            }
+            Debug.Log("End Check!");
         }
 
         private Vector2Int GetNextCellId(Vector2Int currentId, Vector2Int step)
@@ -178,27 +168,9 @@ namespace Managers
             return nextId;
         }
 
-
-        public void Restart()
-        {
-            _isGamePlaying = true;
-        }
-
-        public void NewTurn(bool IsEvent = false)
-        {
-
-            _isPossibilityOfMove = true;
-            //_enableManaPoint = 3;
-            //if (IsEvent == false) NetworkEvent.RaiseEventEndTurn();
-        }
-
-        public bool CheckCanTurn()
-        {
-            return _isGamePlaying;//&& CheckIsCurrentPlayer();
-        }
-
         public IEnumerator IDrawFinishLine(List<List<Vector2Int>> linesFind)
         {
+            Debug.Log("Begin Finish!");
             List<Vector2Int> uniqueCell = new List<Vector2Int>();
             foreach (List<Vector2Int> line in linesFind)
             {
@@ -217,9 +189,6 @@ namespace Managers
             }
             yield return new WaitForSeconds(FinishLine.AnimationTime);
 
-
-            if (!Field.Instance.IsExistEmptyCell()) GameplayManager.Instance.SetGameplayState(GameplayManager.GameplayState.GameOver);
-            yield return null;
         }
     }
 }

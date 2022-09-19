@@ -8,7 +8,9 @@ namespace Managers
     public class CoroutineManager : Singleton<CoroutineManager>
     {
 
-        public Queue<IEnumerator> _coroutineQueue = new Queue<IEnumerator>();
+        private Queue<IEnumerator> _coroutineQueue = new Queue<IEnumerator>();
+
+        public static bool IsQueueEmpty = true;
 
         void Start()
         {
@@ -21,12 +23,13 @@ namespace Managers
             {
                 while (_coroutineQueue.Count > 0)
                 {
-                    Debug.Log("Star tCoroutine");
-                    yield return StartCoroutine(_coroutineQueue.Dequeue());
+                    IsQueueEmpty = false;
+                    Debug.Log(_coroutineQueue);
+                    yield return  StartCoroutine(_coroutineQueue.Dequeue());
 
-                    Debug.Log("End Coroutine");
                 }
                 yield return new WaitForEndOfFrame();
+                IsQueueEmpty = true;
             }
         }
 
@@ -36,18 +39,5 @@ namespace Managers
             _coroutineQueue.Enqueue(coroutine);
         }
 
-        IEnumerator TestCoroutine1()
-        {
-            Debug.Log("Coroutine 1 Started");
-            yield return new WaitForSeconds(1);
-            Debug.Log("Coroutine 1 Ended");
-        }
-
-        IEnumerator TestCoroutine2()
-        {
-            Debug.Log("Coroutine 2 Started");
-            yield return new WaitForSeconds(2);
-            Debug.Log("Coroutine 2 Ended");
-        }
     }
 }

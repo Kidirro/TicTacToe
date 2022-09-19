@@ -46,6 +46,11 @@ namespace Managers
         {
             _currentMana -= mana;
         }
+                
+        public void IncreaseMaxMana(int mana)
+        {
+            _manapool += mana;
+        }
 
         public void RestoreAllMana()
         {
@@ -99,5 +104,7 @@ namespace Managers
         {
             if (Input.GetKeyDown(KeyCode.S)) RestoreMana(1);
         }
+
+        
     }
 }

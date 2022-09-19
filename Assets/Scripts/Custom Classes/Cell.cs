@@ -164,6 +164,12 @@ public class Cell : MonoBehaviour
         else StartCoroutine(ISubStateFillProcess(null, color, true));
     }
 
+    public void ResetSubStateWithPlace(CellFigure s, bool isQueue = true)
+    {
+        if (isQueue) CoroutineManager.Instance.AddCoroutine(IResetSubStateWitthPlaceFigure(s));
+        else StartCoroutine(IResetSubStateWitthPlaceFigure(s));
+    }
+
     public void HighlightCell(Sprite sprite, Color color)
     {
         _highlightImage.sprite = sprite;
@@ -231,7 +237,7 @@ public class Cell : MonoBehaviour
 
     private IEnumerator IFigureFillProcess(CellFigure s, bool reverse)
     {
-
+        Debug.Log("Place Begn!");
         if (!reverse)
         {
             _image.sprite = ThemeManager.Instance.GetSprite(s);
@@ -250,7 +256,6 @@ public class Cell : MonoBehaviour
         _image.fillAmount = (reverse) ? 0 : 1;
         if (reverse) _image.sprite = ThemeManager.Instance.GetSprite(s);
         _isFigureCoroutineWork = false;
-        yield break;
         //_figure = (CellFigure)s;
 
     }
@@ -281,8 +286,16 @@ public class Cell : MonoBehaviour
             _subImage.color = color;
         }
         _isFigureCoroutineWork = false;
-        yield break;
         //_figure = (CellFigure)s;
+    }
+
+    private IEnumerator IResetSubStateWitthPlaceFigure(CellFigure s)
+    {
+        ResetSubState(false);
+        yield return new WaitForSeconds(AnimationTime);
+        SetFigure(s, false);
+        yield return new WaitForSeconds(AnimationTime);
+
     }
 }
 

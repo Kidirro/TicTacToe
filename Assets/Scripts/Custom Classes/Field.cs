@@ -552,6 +552,18 @@ namespace Managers
             }
         }
 
+        public void ResetSubStateWithPlaceZone(Vector2Int Position, Vector2Int AreaSize, CellFigure cellFigure, bool IsQueue = true)
+        {
+            Vector4 CurrentArea = AreaManager.GetArea(Position, AreaSize);
+            for (int x = (int)CurrentArea.x; x <= CurrentArea.z; x++)
+            {
+                for (int y = (int)CurrentArea.y; y <= CurrentArea.w; y++)
+                {
+                    CellList[x][y].ResetSubStateWithPlace(cellFigure, IsQueue);
+                }
+            }
+        }
+
         public void SetSubStateZone(Vector2Int Position, Vector2Int AreaSize, Sprite sprite, Color color, CellSubState cellSubState, bool isQueue = true)
         {
             Vector4 CurrentArea = AreaManager.GetArea(Position, AreaSize);
@@ -602,7 +614,7 @@ namespace Managers
             }
             return true;
         }
-        
+
         public bool IsZoneEnableToPlace(Vector2Int Position, Vector2Int AreaSize)
         {
             Vector4 CurrentArea = AreaManager.GetArea(Position, AreaSize);
@@ -689,5 +701,47 @@ namespace Managers
             }
             return false;
         }
+
+        public void PlaceInCell(Vector2Int id)
+        {
+            if (IsCellEnableToPlace(id))
+            {
+                CellList[id.x][id.y].SetFigure(PlayerManager.Instance.GetCurrentPlayer().SideId);
+            }
+        }
+
+        public void PlaceInCell(Cell cell)
+        {
+            if (IsCellEnableToPlace(cell.Id))
+            {
+                CellList[cell.Id.x][cell.Id.y].SetFigure(PlayerManager.Instance.GetCurrentPlayer().SideId);
+            }
+        }
+
+        public void FreezeCell(Vector2Int id, Sprite sprite, Vector2Int areaSize)
+        {
+            Cell posCard = CellList[id.x][id.y];
+
+            Action f = delegate ()
+            {
+                Debug.Log("PosCard = " + posCard.Id);
+                SetSubStateZone(posCard.Id,
+                                areaSize,
+                                sprite,
+                                Color.black,
+                                CellSubState.block, false);
+            };
+            Action d = delegate ()
+            {
+                ResetSubStateWithPlaceZone(posCard.Id, areaSize, (CellFigure)PlayerManager.Instance.GetCurrentPlayer().SideId, false);
+            };
+            f.Invoke();
+            Effect effect = new Effect(f, 2, PlayerManager.Instance.GetCurrentPlayer().SideId, Effect.EffectTypes.Parallel, 2, d, Cell.AnimationTime, Cell.AnimationTime * 2);
+            EffectManager.Instance.AddEffect(effect);
+        }
+
+
     }
+
+
 }
