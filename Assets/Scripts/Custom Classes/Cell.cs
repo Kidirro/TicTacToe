@@ -73,52 +73,71 @@ public class Cell : MonoBehaviour
         _image = transform.GetChild(2).GetComponent<Image>();
     }
 
-    public void SetFigure(int s, bool isQueue = true)
+    public void SetFigure(int s, bool isNeedPlace = true, bool isQueue = true)
     {
         _figure = (CellFigure)s;
         switch ((CellFigure)s)
         {
             case CellFigure.none:
-                if (isQueue) CoroutineManager.Instance.AddCoroutine(IFigureFillProcess((CellFigure)s, true));
-                else StartCoroutine(IFigureFillProcess((CellFigure)s, true));
+                if (isNeedPlace)
+                {
+                    if (isQueue) CoroutineManager.Instance.AddCoroutine(IFigureFillProcess((CellFigure)s, true));
+                    else StartCoroutine(IFigureFillProcess((CellFigure)s, true));
+                }
                 break;
             case CellFigure.p1:
                 _image.fillMethod = Image.FillMethod.Vertical;
-                _image.fillOrigin = 0;
-                if (isQueue) CoroutineManager.Instance.AddCoroutine(IFigureFillProcess((CellFigure)s, false));
-                else StartCoroutine(IFigureFillProcess((CellFigure)s, false));
+                _image.fillOrigin = 0; 
+                if (isNeedPlace)
+                {
+                    if (isQueue) CoroutineManager.Instance.AddCoroutine(IFigureFillProcess((CellFigure)s, false));
+                    else StartCoroutine(IFigureFillProcess((CellFigure)s, false));
+                }
                 break;
             case CellFigure.p2:
                 _image.fillMethod = Image.FillMethod.Radial360;
                 _image.fillOrigin = 0;
-                if (isQueue) CoroutineManager.Instance.AddCoroutine(IFigureFillProcess((CellFigure)s, false));
-                else StartCoroutine(IFigureFillProcess((CellFigure)s, false));
+                if (isNeedPlace)
+                {
+                    if (isQueue) CoroutineManager.Instance.AddCoroutine(IFigureFillProcess((CellFigure)s, false));
+                    else StartCoroutine(IFigureFillProcess((CellFigure)s, false));
+                }
                 break;
 
         }
     }
 
-    public void SetFigure(CellFigure s, bool isQueue = true)
+    public void SetFigure(CellFigure s, bool isNeedPlace = true, bool isQueue = true)
     {
         _figure = s;
         switch (s)
         {
             case CellFigure.none:
-                if (isQueue) CoroutineManager.Instance.AddCoroutine(IFigureFillProcess(s, true));
-                else StartCoroutine(IFigureFillProcess(s, true));
+                if (isNeedPlace)
+                {
+                    if (isQueue) CoroutineManager.Instance.AddCoroutine(IFigureFillProcess((CellFigure)s, true));
+                    else StartCoroutine(IFigureFillProcess((CellFigure)s, true));
+                }
                 break;
             case CellFigure.p1:
                 _image.fillMethod = Image.FillMethod.Vertical;
                 _image.fillOrigin = 0;
-                if (isQueue) CoroutineManager.Instance.AddCoroutine(IFigureFillProcess(s, false));
-                else StartCoroutine(IFigureFillProcess(s, false));
+                if (isNeedPlace)
+                {
+                    if (isQueue) CoroutineManager.Instance.AddCoroutine(IFigureFillProcess((CellFigure)s, false));
+                    else StartCoroutine(IFigureFillProcess((CellFigure)s, false));
+                }
                 break;
             case CellFigure.p2:
                 _image.fillMethod = Image.FillMethod.Radial360;
                 _image.fillOrigin = 0;
-                if (isQueue) CoroutineManager.Instance.AddCoroutine(IFigureFillProcess(s, false));
-                else StartCoroutine(IFigureFillProcess(s, false));
+                if (isNeedPlace)
+                {
+                    if (isQueue) CoroutineManager.Instance.AddCoroutine(IFigureFillProcess((CellFigure)s, false));
+                    else StartCoroutine(IFigureFillProcess((CellFigure)s, false));
+                }
                 break;
+
 
         }
     }
@@ -164,10 +183,30 @@ public class Cell : MonoBehaviour
         else StartCoroutine(ISubStateFillProcess(null, color, true));
     }
 
-    public void ResetSubStateWithPlace(CellFigure s, bool isQueue = true)
+
+    public void ResetSubStateWithPlace(CellFigure cellFigure)
     {
-        if (isQueue) CoroutineManager.Instance.AddCoroutine(IResetSubStateWitthPlaceFigure(s));
-        else StartCoroutine(IResetSubStateWitthPlaceFigure(s));
+        Color color = Color.white;
+        color.a = 0;
+        _subState = CellSubState.none;
+        SetFigure(cellFigure, false);
+        StartCoroutine(IQueueCoroutineInCell(
+             ISubStateFillProcess(null, color, true),
+             IFigureFillProcess(cellFigure, false)
+             ));
+    } 
+    
+    public void ResetFigureWithPlaceState(Sprite sprite,
+                                Color color,
+                                CellSubState cellSub)
+    {
+        
+        _subState = cellSub;
+        SetFigure(CellFigure.none, false);
+        StartCoroutine(IQueueCoroutineInCell(
+            IFigureFillProcess(CellFigure.none,true),
+            ISubStateFillProcess(sprite,color,false)
+             ));
     }
 
     public void HighlightCell(Sprite sprite, Color color)
@@ -288,14 +327,13 @@ public class Cell : MonoBehaviour
         _isFigureCoroutineWork = false;
         //_figure = (CellFigure)s;
     }
-
-    private IEnumerator IResetSubStateWitthPlaceFigure(CellFigure s)
+    
+    public IEnumerator IQueueCoroutineInCell(params IEnumerator[] enumerators)
     {
-        ResetSubState(false);
-        yield return new WaitForSeconds(AnimationTime);
-        SetFigure(s, false);
-        yield return new WaitForSeconds(AnimationTime);
-
+        for (int i = 0; i < enumerators.Length; i++)
+        {
+            yield return StartCoroutine(enumerators[i]);
+        }
     }
 }
 

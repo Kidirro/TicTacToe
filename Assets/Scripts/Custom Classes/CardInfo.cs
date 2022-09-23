@@ -73,7 +73,7 @@ public class CardInfo : ScriptableObject
             }
         }
 
-          FinishLineManager.Instance.MasterChecker((CellFigure)PlayerManager.Instance.GetCurrentPlayer().SideId);
+        FinishLineManager.Instance.MasterChecker((CellFigure)PlayerManager.Instance.GetCurrentPlayer().SideId);
 
         SlotManager.Instance.AddCard(PlayerManager.Instance.GetCurrentPlayer());
     }
@@ -110,7 +110,7 @@ public class CardInfo : ScriptableObject
             ManaManager.Instance.RestoreAllMana();
             ManaManager.Instance.UpdateManaUI();
         };
-        Effect effect = new Effect(f, 1, PlayerManager.Instance.GetCurrentPlayer().SideId, Effect.EffectTypes.Parallel,0); 
+        Effect effect = new Effect(f, 1, PlayerManager.Instance.GetCurrentPlayer().SideId, Effect.EffectTypes.Parallel, 0);
         EffectManager.Instance.AddEffect(effect);
     }
 
@@ -120,11 +120,11 @@ public class CardInfo : ScriptableObject
         {
             Vector2Int position = AIManager.Instance.GenerateRandomPosition(Field.Instance.FieldSize);
             if (position == new Vector2Int(-1, -1)) return;
-            
-                Field.Instance.PlaceInCell(position);               
-            
+
+            Field.Instance.PlaceInCell(position);
+
         };
-        Effect effect = new Effect(f, 3, PlayerManager.Instance.GetCurrentPlayer().SideId,Effect.EffectTypes.Consistently,1);
+        Effect effect = new Effect(f, 3, PlayerManager.Instance.GetCurrentPlayer().SideId, Effect.EffectTypes.Consistently, 1);
         EffectManager.Instance.AddEffect(effect);
 
     }
@@ -139,7 +139,7 @@ public class CardInfo : ScriptableObject
             ManaManager.Instance.RestoreAllMana();
             ManaManager.Instance.UpdateManaUI();
         };
-        Effect effect = new Effect(delegate () { }, 3, PlayerManager.Instance.GetCurrentPlayer().SideId,Effect.EffectTypes.Parallel,0, d);
+        Effect effect = new Effect(delegate () { }, 3, PlayerManager.Instance.GetCurrentPlayer().SideId, Effect.EffectTypes.Parallel, 0, d);
         EffectManager.Instance.AddEffect(effect);
 
     }
@@ -154,7 +154,7 @@ public class CardInfo : ScriptableObject
             ManaManager.Instance.RestoreAllMana();
             ManaManager.Instance.UpdateManaUI();
         };
-        Effect effect = new Effect(delegate () { }, 3, PlayerManager.Instance.GetCurrentPlayer().SideId,Effect.EffectTypes.Parallel,0, d);
+        Effect effect = new Effect(delegate () { }, 3, PlayerManager.Instance.GetCurrentPlayer().SideId, Effect.EffectTypes.Parallel, 0, d);
         EffectManager.Instance.AddEffect(effect);
 
     }
@@ -167,7 +167,7 @@ public class CardInfo : ScriptableObject
             ManaManager.Instance.RestoreAllMana();
             ManaManager.Instance.UpdateManaUI();
         };
-        Effect effect = new Effect(f, 1, PlayerManager.Instance.GetCurrentPlayer().SideId,Effect.EffectTypes.Parallel,0);
+        Effect effect = new Effect(f, 1, PlayerManager.Instance.GetCurrentPlayer().SideId, Effect.EffectTypes.Parallel, 0);
         EffectManager.Instance.AddEffect(effect);
 
     }
@@ -189,10 +189,12 @@ public class CardInfo : ScriptableObject
         };
 
 
-        Effect effect = new Effect(f, 2, PlayerManager.Instance.GetCurrentPlayer().SideId,Effect.EffectTypes.Parallel,0, d);
+        Effect effect = new Effect(f, 2, PlayerManager.Instance.GetCurrentPlayer().SideId, Effect.EffectTypes.Parallel, 0, d);
         EffectManager.Instance.AddEffect(effect);
 
     }
+
+    #region Freeze
 
     public void FreezeCell()
     {
@@ -208,14 +210,14 @@ public class CardInfo : ScriptableObject
         {
             Vector2Int result = AIManager.Instance.GenerateRandomPosition(Field.Instance.FieldSize);
             if (result == new Vector2Int(-1, -1)) continue;
-            
-                while (_posList.IndexOf(Field.Instance.CellList[result.x][result.y]) != -1) result = AIManager.Instance.GenerateRandomPosition(Field.Instance.FieldSize);
 
-                Field.Instance.FreezeCell(result, (PlayerManager.Instance.GetCurrentPlayer().SideId == 1) ? CardHighlightP1 : CardHighlightP2, CardAreaSize);
-                _posList.Add(Field.Instance.CellList[result.x][result.y]);
-            
+            while (_posList.IndexOf(Field.Instance.CellList[result.x][result.y]) != -1) result = AIManager.Instance.GenerateRandomPosition(Field.Instance.FieldSize);
+
+            Field.Instance.FreezeCell(result, (PlayerManager.Instance.GetCurrentPlayer().SideId == 1) ? CardHighlightP1 : CardHighlightP2, CardAreaSize);
+            _posList.Add(Field.Instance.CellList[result.x][result.y]);
+
         }
-       FinishLineManager.Instance.MasterChecker((CellFigure)PlayerManager.Instance.GetCurrentPlayer().SideId);
+        FinishLineManager.Instance.MasterChecker((CellFigure)PlayerManager.Instance.GetCurrentPlayer().SideId);
     }
 
 
@@ -227,12 +229,81 @@ public class CardInfo : ScriptableObject
             Vector2Int position = AIManager.Instance.GenerateRandomPosition(Field.Instance.FieldSize);
             if (position == new Vector2Int(-1, -1)) return;
 
-            Field.Instance.FreezeCell(position, (PlayerManager.Instance.GetCurrentPlayer().SideId == 1) ? CardHighlightP1 : CardHighlightP2, CardAreaSize);            
+            Field.Instance.FreezeCell(position, (PlayerManager.Instance.GetCurrentPlayer().SideId == 1) ? CardHighlightP1 : CardHighlightP2, CardAreaSize);
         };
 
-        Effect effect = new Effect(f, 3, PlayerManager.Instance.GetCurrentPlayer().SideId,Effect.EffectTypes.Parallel,3,null,Cell.AnimationTime);
+        Effect effect = new Effect(f, 3, PlayerManager.Instance.GetCurrentPlayer().SideId, Effect.EffectTypes.Parallel, 3, null, Cell.AnimationTime);
         EffectManager.Instance.AddEffect(effect);
     }
+
+    public void FreezeFigure()
+    {
+        List<Cell> AllCells = Field.Instance.GetAllCellWithFigure((CellFigure)PlayerManager.Instance.GetCurrentPlayer().SideId);
+        List<Cell> resultCells = new List<Cell>();
+        while (AllCells.Count > 0 && resultCells.Count < 5)
+        {
+            int randValue = Random.Range(0, AllCells.Count);
+            resultCells.Add(AllCells[randValue]);
+            AllCells.Remove(AllCells[randValue]);
+        }
+
+        Sprite sprite = (PlayerManager.Instance.GetCurrentPlayer().SideId == 1) ? CardHighlightP1 : CardHighlightP2;
+        for (int i = 0; i < resultCells.Count; i++)
+        {
+            Field.Instance.FreezeCell(resultCells[i].Id, sprite, CardAreaSize);
+        }
+
+    }
+
+    public void BreakIce()
+    {
+        List<Effect> effects = EffectManager.Instance.EffectList.FindAll(x => x.EffectPriority == 2);
+        List<Effect> resultEffects = new List<Effect>();
+        while (effects.Count > 0 && resultEffects.Count < 6)
+        {
+            int randValue = Random.Range(0, effects.Count);
+            resultEffects.Add(effects[randValue]);
+            effects.Remove(effects[randValue]);
+        }
+        if (resultEffects.Count == 0) return;
+        for (int i = 0; i < resultEffects.Count; i++)
+        {
+            resultEffects[i].OnEffectDisable.Invoke();
+            EffectManager.Instance.EffectList.Remove(resultEffects[i]);
+        }
+        CoroutineManager.Instance.AddAwaitTime(resultEffects[0].EffectTimeDisable);
+        FinishLineManager.Instance.MasterChecker((CellFigure)PlayerManager.Instance.GetCurrentPlayer().SideId);
+
+    }
+
+    public void FreezeAllMana()
+    {
+        while (ManaManager.Instance.IsEnoughMana(1))
+        {
+            ManaManager.Instance.DecreaseMana(1);
+            for (int i =0; i<2; i++)
+            {
+                Vector2Int result = AIManager.Instance.GenerateRandomPosition(Field.Instance.FieldSize);
+                if (result == new Vector2Int(-1, -1)) break;
+                Field.Instance.FreezeCell(result, (PlayerManager.Instance.GetCurrentPlayer().SideId == 1) ? CardHighlightP1 : CardHighlightP2, CardAreaSize);
+            }
+
+        }
+        ManaManager.Instance.UpdateManaUI();
+        CoroutineManager.Instance.AddAwaitTime(Cell.AnimationTime);        
+        FinishLineManager.Instance.MasterChecker((CellFigure)PlayerManager.Instance.GetCurrentPlayer().SideId);
+
+    }
+
+    public void ManaPerIce()
+    {
+        List<Effect> effects = EffectManager.Instance.EffectList.FindAll(x => x.EffectPriority == 2);
+        int resultMana = effects.Count / 3;
+        ManaManager.Instance.IncreaseMana(resultMana, true);
+        ManaManager.Instance.UpdateManaUI();
+    }
+
+    #endregion
 
     public void Restore1Mana()
     {

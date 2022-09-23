@@ -39,5 +39,14 @@ namespace Managers
             _coroutineQueue.Enqueue(coroutine);
         }
 
+        public void AddAwaitTime(float time)
+        {
+            AddCoroutine(IAwaitProcess(time));
+        }
+
+        private IEnumerator IAwaitProcess(float time)
+        {
+            yield return new WaitForSeconds(time);
+        }
     }
 }

@@ -76,6 +76,12 @@ public class CardCollection : MonoBehaviour
         }
     }
 
+    public void RewerseState()
+    {
+            PlayerPrefs.SetInt("IsCard" + Info.name + "Unlocked", IsUnlock?0:1);
+        UpdateUI();
+    }
+
     public void UnlockCard()
     {
         PlayerPrefs.SetInt("IsCard" + Info.name + "Unlocked", 1);

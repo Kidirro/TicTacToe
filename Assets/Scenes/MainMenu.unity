@@ -4862,6 +4862,10 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 053afd877e5e4234db824400d5dd711d, type: 2}
   - {fileID: 11400000, guid: ed07de7145bb7494397e5ef2fe87f616, type: 2}
   - {fileID: 11400000, guid: 4c2f7ed4639232a4c9aeb633e48cbdac, type: 2}
+  - {fileID: 11400000, guid: 54fc6bdb89f9440478cbb07cfa7d6798, type: 2}
+  - {fileID: 11400000, guid: 5e5a04362323a4f4691da174b340ae6e, type: 2}
+  - {fileID: 11400000, guid: e739927c69717194d8f46acfc0335992, type: 2}
+  - {fileID: 11400000, guid: 79639e15a87688143aa77b4bd886eadb, type: 2}
   _collectionParent: {fileID: 903892679}
   _cardPrefab: {fileID: 523472384096669092, guid: 7e415cb8c62703d4ca9414938bc77725, type: 3}
   _cardUnlockValue: {fileID: 291440989}

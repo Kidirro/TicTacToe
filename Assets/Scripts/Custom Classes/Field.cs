@@ -519,6 +519,16 @@ namespace Managers
                    pos.y >= (_startPositionY + _remainY) & pos.y <= (_endPositionY - _remainY);
         }
 
+        public List<Cell> GetAllCellWithFigure(CellFigure figure)
+        {
+            List<Cell> result = new List<Cell>();
+            for (int i =0; i < CellList.Count; i++)
+            {
+                result.AddRange(CellList[i].FindAll(x => x.Figure == figure));
+            }
+            return result;
+        }
+
         public bool IsInFieldHeight(float h)
         {
 
@@ -548,18 +558,6 @@ namespace Managers
                 for (int y = (int)CurrentArea.y; y <= CurrentArea.w; y++)
                 {
                     CellList[x][y].ResetSubState(IsQueue);
-                }
-            }
-        }
-
-        public void ResetSubStateWithPlaceZone(Vector2Int Position, Vector2Int AreaSize, CellFigure cellFigure, bool IsQueue = true)
-        {
-            Vector4 CurrentArea = AreaManager.GetArea(Position, AreaSize);
-            for (int x = (int)CurrentArea.x; x <= CurrentArea.z; x++)
-            {
-                for (int y = (int)CurrentArea.y; y <= CurrentArea.w; y++)
-                {
-                    CellList[x][y].ResetSubStateWithPlace(cellFigure, IsQueue);
                 }
             }
         }
@@ -724,20 +722,54 @@ namespace Managers
 
             Action f = delegate ()
             {
-                Debug.Log("PosCard = " + posCard.Id);
-                SetSubStateZone(posCard.Id,
-                                areaSize,
-                                sprite,
-                                Color.black,
-                                CellSubState.block, false);
+                if (CellList[posCard.Id.x][posCard.Id.y].Figure == CellFigure.none)
+                {
+                    SetSubStateZone(posCard.Id,
+                                    areaSize,
+                                    sprite,
+                                    Color.black,
+                                    CellSubState.block, false);
+                }
+                else
+                {
+                    ResetFigureWithPlaceSubState(posCard.Id,
+                                                 areaSize,
+                                                 sprite,
+                                                 Color.black,
+                                                 CellSubState.block);
+                }
             };
             Action d = delegate ()
             {
-                ResetSubStateWithPlaceZone(posCard.Id, areaSize, (CellFigure)PlayerManager.Instance.GetCurrentPlayer().SideId, false);
+                ResetSubStateWithPlaceFigure(posCard.Id, areaSize, (CellFigure) PlayerManager.Instance.GetCurrentPlayer().SideId);
             };
             f.Invoke();
             Effect effect = new Effect(f, 2, PlayerManager.Instance.GetCurrentPlayer().SideId, Effect.EffectTypes.Parallel, 2, d, Cell.AnimationTime, Cell.AnimationTime * 2);
             EffectManager.Instance.AddEffect(effect);
+        }
+
+        public void ResetSubStateWithPlaceFigure(Vector2Int Position, Vector2Int AreaSize, CellFigure figure)
+        {
+            Vector4 CurrentArea = AreaManager.GetArea(Position, AreaSize);
+            for (int x = (int)CurrentArea.x; x <= CurrentArea.z; x++)
+            {
+                for (int y = (int)CurrentArea.y; y <= CurrentArea.w; y++)
+                {
+                    CellList[x][y].ResetSubStateWithPlace((CellFigure)PlayerManager.Instance.GetCurrentPlayer().SideId);
+                }
+            }
+        }
+
+        public void ResetFigureWithPlaceSubState(Vector2Int Position, Vector2Int AreaSize, Sprite sprite, Color color, CellSubState cellSubState)
+        {
+            Vector4 CurrentArea = AreaManager.GetArea(Position, AreaSize);
+            for (int x = (int)CurrentArea.x; x <= CurrentArea.z; x++)
+            {
+                for (int y = (int)CurrentArea.y; y <= CurrentArea.w; y++)
+                {
+                    CellList[x][y].ResetFigureWithPlaceState(sprite,color,cellSubState);
+                }
+            }
         }
 
 

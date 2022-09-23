@@ -7,7 +7,7 @@ namespace Managers
 
     public class TurnTimerManager : Singleton<TurnTimerManager>
     {
-        public const float PlayerTurnTime = 205F;
+        public const float PlayerTurnTime = 60F;
         public const float BotTurnTime = 1f;
 
         private float _timeLeft = 0f;
@@ -60,7 +60,7 @@ namespace Managers
                 _timeLeft -= 0.1f;
             }
             /*GameplayManager.Instance.SetGameplayState(GameplayState.NewTurn);*/
-            //CoroutineManager.Instance.AddCoroutine(GameplayManager.Instance.INewTurnProcess());
+            GameplayManager.Instance.SetGamePlayStateQueue(GameplayManager.GameplayState.NewTurn);
         }
     }
 }

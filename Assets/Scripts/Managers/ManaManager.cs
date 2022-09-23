@@ -25,6 +25,11 @@ namespace Managers
         /// </summary>
         private int _currentMana;
 
+        public int CurrentMana
+        {
+            get => _currentMana;
+        }
+
         /// <summary>
         /// 
         /// </summary>
@@ -46,10 +51,29 @@ namespace Managers
         {
             _currentMana -= mana;
         }
-                
+
         public void IncreaseMaxMana(int mana)
         {
             _manapool += mana;
+        }
+
+        public void IncreaseMana(int mana, bool isOverMax = false)
+        {
+            if (_currentMana + mana > _manapool + _bonusMana)
+            {
+                int diff = _currentMana + mana - _manapool - _bonusMana;
+                _currentMana += mana;
+                if (isOverMax)
+                {
+                    AddBonusMana(diff);
+                }
+                else
+                {
+                    _currentMana -= diff;
+                }
+            }
+            else
+                _currentMana = _currentMana + mana;
         }
 
         public void RestoreAllMana()
@@ -105,6 +129,6 @@ namespace Managers
             if (Input.GetKeyDown(KeyCode.S)) RestoreMana(1);
         }
 
-        
+
     }
 }

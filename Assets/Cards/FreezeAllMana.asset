@@ -10,17 +10,19 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 280c217edb247014c88a71e11514f438, type: 3}
-  m_Name: Freeze3CellEffected
+  m_Name: FreezeAllMana
   m_EditorClassIdentifier: 
   CardImageP1: {fileID: 21300000, guid: a9d2cf1ef434bbf40ac5f495c4a1b5bd, type: 3}
   CardImageP2: {fileID: 21300000, guid: a9d2cf1ef434bbf40ac5f495c4a1b5bd, type: 3}
   CardHighlightP1: {fileID: 21300000, guid: 141f96d606ffefa4ebb54873c2c2dd03, type: 3}
   CardHighlightP2: {fileID: 21300000, guid: 141f96d606ffefa4ebb54873c2c2dd03, type: 3}
   CardHighlightColor: {r: 0, g: 0, b: 0, a: 0.14901961}
-  CardName: Freeze 3 Cell Effected
-  CardDescription: "3 \u0441\u043B\u0435\u0434\u0443\u044E\u0449\u0438\u0445 \u0445\u043E\u0434\u0430
-    \u0432 \u043D\u0430\u0447\u0430\u043B\u0435 \u0445\u043E\u0434\u0430 \u043F\u043E\u044F\u0432\u043B\u0435\u044F\u0435\u0442\u0441\u044F
-    \u043B\u0451\u0434"
+  CardName: Freeze All Mana
+  CardDescription: "\u0442\u0440\u0430\u0442\u0438\u0442 (\u0440\u0430\u0441\u0445\u043E\u0434\u0443\u0435\u0442)
+    \u0432\u0441\u044E \u043E\u0441\u0442\u0430\u0432\u0448\u0443\u044E\u0441\u044F
+    \u0432\u0430\u0448\u0443 \u043C\u0430\u043D\u0443 \u0438 \u0441\u0442\u0430\u0432\u0438\u0442
+    2 \u043B\u044C\u0434\u0430 \u0437\u0430 \u043A\u0430\u0436\u0434\u0443\u044E
+    \u0435\u0434\u0438\u043D\u0438\u0446\u0443"
   IsDefaultUnlock: 0
   CardType: 0
   CardBonus: 1
@@ -30,14 +32,14 @@ MonoBehaviour:
   TipText: "\u0417\u0430\u043C\u043E\u0440\u043E\u0437\u043A\u0430: \u0444\u0438\u0433\u0443\u0440\u0443
     \u043D\u0435\u043B\u044C\u0437\u044F \u0443\u0431\u0440\u0430\u0442\u044C \u0441
     \u043F\u043E\u043B\u044F 2 \u0445\u043E\u0434\u0430"
-  CardManacost: 2
+  CardManacost: 3
   CardBonusManacost: 0
   "\u0421ardAction":
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 11400000}
         m_TargetAssemblyTypeName: CardInfo, Assembly-CSharp
-        m_MethodName: Freeze3Cell_Effected
+        m_MethodName: FreezeAllMana
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}

@@ -12,6 +12,12 @@ namespace Managers
         public static bool IsEffectManagerDone = true;
 
         private List<Effect> _effectList = new List<Effect>();
+        
+        public List<Effect> EffectList
+        {
+            get => _effectList;
+            set => _effectList = value;
+        }
 
         public void AddEffect(Effect effect)
         {

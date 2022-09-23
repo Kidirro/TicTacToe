@@ -35,7 +35,7 @@ public class FinishLine : Line
 
         foreach (Vector2Int id in ids)
         {
-            Field.Instance.CellList[id.x][id.y].SetFigure(CellFigure.none,false);
+            Field.Instance.CellList[id.x][id.y].SetFigure(CellFigure.none,isQueue:false);
         }
 
         while (j > 0)
