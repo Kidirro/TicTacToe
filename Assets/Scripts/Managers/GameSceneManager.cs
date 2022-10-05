@@ -10,16 +10,9 @@ namespace Managers
     {
         private GameScene _currentScene = 0;
 
-        void Awake()
-        {
-            DontDestroyOnLoad(this);
-            Application.targetFrameRate = 60;
-            SetGameScene(GameScene.MainMenu);
-        }
-
         public void SetGameScene(GameScene state)
         {
-            GameSceneManager.Instance._currentScene = state;
+            _currentScene = state;
             CheckState();
         }
         public void CheckState()
@@ -29,14 +22,15 @@ namespace Managers
                 case GameScene.Game:
                     if (!IsCurrentScene("GameplayScene"))
                     {
-                        SceneManager.LoadScene("GameplayScene");
+                     
+                     SceneManager.LoadScene("GameplayScene");
                     }
                     break;
                 case GameScene.MainMenu:
 
                     if (!IsCurrentScene("MainMenu"))
                     {
-                        SceneManager.LoadScene("MainMenu");
+                      SceneManager.LoadScene("MainMenu");
                     }
                     break;
             }
@@ -51,8 +45,6 @@ namespace Managers
 
         public enum GameScene
         {
-            None,
-
             MainMenu,
 
             Game

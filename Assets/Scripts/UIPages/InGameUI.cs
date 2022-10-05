@@ -41,6 +41,9 @@ public class InGameUI : Singleton<InGameUI>
     private GameObject _timerPanel;
 
     [SerializeField]
+    private TextMeshProUGUI _timerPanelText;
+
+    [SerializeField]
     private Image _timerFilledImg;
 
     [SerializeField]
@@ -59,7 +62,7 @@ public class InGameUI : Singleton<InGameUI>
     {
         StopAllCoroutines();
         StartCoroutine(ITimerProcess());
-        _newTurnBTN.SetActive(PlayerManager.Instance.GetCurrentPlayer().EntityType != PlayerType.AI);
+        _newTurnBTN.SetActive(SlotManager.Instance.IsCurrentPlayerOnSlot);
     }
 
     public void UpdateScore()
@@ -70,12 +73,15 @@ public class InGameUI : Singleton<InGameUI>
 
     public void ReturnHome()
     {
+        if (GameplayManager.TypeGame == GameplayManager.GameType.MultiplayerHuman) RoomManager.LeaveRoom();
         GameSceneManager.Instance.SetGameScene(GameSceneManager.GameScene.MainMenu);
     }
 
     public void EndButtonPressed()
     {
+        if (GameplayManager.IsOnline && PlayerManager.Instance.GetCurrentPlayer().SideId != Photon.Pun.PhotonNetwork.LocalPlayer.ActorNumber) return;
         GameplayManager.Instance.SetGamePlayStateQueue(GameplayManager.GameplayState.NewTurn);
+        NetworkEventManager.RaiseEventEndTurn();
     }
 
     public void StateGameOverPanel(bool state, int value = 0)
@@ -102,16 +108,21 @@ public class InGameUI : Singleton<InGameUI>
     private IEnumerator ITimerProcess()
     {
         _timerPanel.SetActive(false);
-        yield return new WaitForSeconds(TurnTimerManager.Instance.TimeLeft - _timerEnableTime);
+        yield return new WaitForSecondsRealtime(TurnTimerManager.Instance.TimeLeft - _timerEnableTime);
         _timerFilledImg.fillAmount = 1;
         _timerPanel.SetActive(true);
-
-        yield return new WaitForSeconds(TurnTimerManager.Instance.TimeLeft - _timerStartAnimationTime);
+        Debug.Log($"TimeLeft{TurnTimerManager.Instance.TimeLeft}");
+        yield return new WaitForSecondsRealtime(TurnTimerManager.Instance.TimeLeft - _timerStartAnimationTime);
         while (TurnTimerManager.Instance.TimeLeft >= 0)
         {
             _timerFilledImg.fillAmount = TurnTimerManager.Instance.TimeLeft / _timerStartAnimationTime;
-            yield return new WaitForSeconds(0.1f);
+            yield return new WaitForSecondsRealtime(0.1f);
         }
+    }
+    
+    public void SetTimeText(float time)
+    {
+        _timerPanelText.text = time.ToString();    
     }
 
 }

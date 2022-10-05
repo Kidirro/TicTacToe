@@ -10,6 +10,8 @@ namespace Managers
         [Header("Cards"), SerializeField]
         private List<CardInfo> _cardsList = new List<CardInfo>();
 
+        private static List<CardInfo> _cardListStat = new List<CardInfo>();
+
         [SerializeField]
         private Transform _collectionParent;
 
@@ -27,6 +29,11 @@ namespace Managers
 
         private void Start()
         {
+            _cardListStat = new List<CardInfo>(_cardsList);
+            for (int i = 0; i < _cardListStat.Count; i++)
+            {
+                _cardListStat[i].CardId = i;
+            }
             if (_cardCollections.Count == 0) CreateCollectionList();
             CreateCardPull();
 
@@ -52,14 +59,14 @@ namespace Managers
             {
                 if (card.IsUnlock) CardManager.CardListAdd(card.Info);
             }
-        }     
-        
+        }
+
         private void CreateCollectionList()
         {
-            foreach (CardInfo card in _cardsList)
+            for (int i = 0; i < _cardListStat.Count; i++)
             {
                 CardCollection cardCollection = Instantiate(_cardPrefab, _collectionParent).GetComponent<CardCollection>();
-                cardCollection.Info = card;
+                cardCollection.Info = _cardListStat[i];
                 _cardCollections.Add(cardCollection);
             }
         }
@@ -77,6 +84,11 @@ namespace Managers
 
             _moneyValue.text = CoinManager.AllCoins.ToString();
             CreateCardPull();
+        }
+        public static CardInfo GetCardFromId(int id)
+        {
+           
+            return (id > 0 && id < _cardListStat.Count)?_cardListStat[id]:null; 
         }
     }
 }

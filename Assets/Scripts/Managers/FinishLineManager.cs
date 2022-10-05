@@ -18,6 +18,11 @@ namespace Managers
 
         private List<List<Vector2Int>> _lineForClearing = new List<List<Vector2Int>>();
 
+        public void MasterChecker(int figure)
+        {
+            MasterChecker((CellFigure)figure);
+        }
+
         public void MasterChecker(CellFigure figure)
         {
             Debug.Log("Begin Check!");

@@ -340,7 +340,7 @@ public class Cell : MonoBehaviour
 public enum CellSubState
 {
     none,
-    block
+    freeze
 }
 
 public enum CellFigure

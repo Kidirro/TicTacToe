@@ -106,6 +106,7 @@ namespace Managers
         private bool _isRechangerUsed = false;
 
 
+        public bool IsCurrentPlayerOnSlot => _currentPlayerSet.SideId == PlayerManager.Instance.GetCurrentPlayer().SideId;
 
         #endregion
 
@@ -210,14 +211,14 @@ namespace Managers
 
         public void UpdateCardPosition(bool instantly = true, Card card = null)
         {
-            float currentCount = PlayerManager.Instance.GetCurrentPlayer().HandPool.Count;
-            int curIndex = PlayerManager.Instance.GetCurrentPlayer().HandPool.IndexOf(card);
+            float currentCount = _currentPlayerSet.HandPool.Count;
+            int curIndex = _currentPlayerSet.HandPool.IndexOf(card);
             if (curIndex != -1)
             {
                 currentCount -= 1;
-                PlayerManager.Instance.GetCurrentPlayer().HandPool.Remove(card);
+                _currentPlayerSet.HandPool.Remove(card);
 
-                PlayerManager.Instance.GetCurrentPlayer().HandPool.Add(card);
+                _currentPlayerSet.HandPool.Add(card);
             }
 
             float PositionY = ScreenManager.Instance.GetHeight(_buttonBorder);
@@ -228,16 +229,16 @@ namespace Managers
             {
                 float posY = PositionY + (Mathf.Sin(Mathf.PI * (i + 1) / (currentCount + 1))) * _heightDelta * ScreenManager.Instance.GetHeightRatio();
                 Vector2 finPosition = new Vector2((_widthBorder + StepPos * (i + 1) - _widthCard * currentCount / 2) * ScreenManager.Instance.GetWidthRatio(), posY);
-                PlayerManager.Instance.GetCurrentPlayer().HandPool[i].HandPosition = finPosition;
-                PlayerManager.Instance.GetCurrentPlayer().HandPool[i].SetTransformPosition(finPosition.x, finPosition.y, instantly);
+                _currentPlayerSet.HandPool[i].HandPosition = finPosition;
+                _currentPlayerSet.HandPool[i].SetTransformPosition(finPosition.x, finPosition.y, instantly);
 
-                PlayerManager.Instance.GetCurrentPlayer().HandPool[i].SetTransformSize(0.7f, instantly);
+                _currentPlayerSet.HandPool[i].SetTransformSize(0.7f, instantly);
 
-                PlayerManager.Instance.GetCurrentPlayer().HandPool[i].HandRotation = _angleDelta - StepRot * (i + 1);
-                PlayerManager.Instance.GetCurrentPlayer().HandPool[i].SetTransformRotation(_angleDelta - StepRot * (i + 1), instantly);
+                _currentPlayerSet.HandPool[i].HandRotation = _angleDelta - StepRot * (i + 1);
+                _currentPlayerSet.HandPool[i].SetTransformRotation(_angleDelta - StepRot * (i + 1), instantly);
 
 
-                PlayerManager.Instance.GetCurrentPlayer().HandPool[i].SetSideCard(PlayerManager.Instance.GetCurrentPlayer().SideId);
+                _currentPlayerSet.HandPool[i].SetSideCard(_currentPlayerSet.SideId);
 
 
             }
@@ -294,6 +295,7 @@ namespace Managers
                 }
             }
             _currentPlayerSet = player;
+            Debug.Log("Current side id:"+_currentPlayerSet.SideId);
             for (int i = 0; i < _currentPlayerSet.HandPool.Count; i++)
             {
                 _currentPlayerSet.HandPool[i].gameObject.SetActive(true);
@@ -301,10 +303,10 @@ namespace Managers
 
             for (int i = 0; i < _cardPerTurn; i++)
             {
-                SlotManager.Instance.AddCard(_currentPlayerSet);
+               AddCard(_currentPlayerSet);
             }
 
-            SlotManager.Instance.UpdateCardPosition(false);
+            UpdateCardPosition(false);
             ResetRechanher();
         }
 

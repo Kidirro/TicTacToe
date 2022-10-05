@@ -13,6 +13,8 @@ namespace Managers
 
         private bool _isNewStateInQueue = false;
 
+        public static bool IsOnline;
+
         private void Start()
         {
             SetGameplayState(GameplayState.NewGame);
@@ -47,19 +49,31 @@ namespace Managers
                     switch (TypeGame)
                     {
                         case GameType.SingleAI:
+                            IsOnline = false;
                             PlayerManager.Instance.AddPlayer(PlayerType.Human);
                             ScoreManager.Instance.AddPlayer(1);
                             PlayerManager.Instance.AddPlayer(PlayerType.AI);
                             ScoreManager.Instance.AddPlayer(2);
+                            SlotManager.Instance.NewTurn(PlayerManager.Instance.Players[0]);
                             break;
                         case GameType.SingleHuman:
+                            IsOnline = false;
                             PlayerManager.Instance.AddPlayer(PlayerType.Human);
                             ScoreManager.Instance.AddPlayer(1);
                             PlayerManager.Instance.AddPlayer(PlayerType.Human);
                             ScoreManager.Instance.AddPlayer(2);
+                            SlotManager.Instance.NewTurn(PlayerManager.Instance.Players[0]);
+                            break;
+                        case GameType.MultiplayerHuman:
+                            IsOnline = true;
+                            PlayerManager.Instance.AddPlayer(PlayerType.Human);
+                            ScoreManager.Instance.AddPlayer(1);
+                            PlayerManager.Instance.AddPlayer(PlayerType.Human);
+                            ScoreManager.Instance.AddPlayer(2);
+                            Debug.Log("Current RoomController.Instance.GetCurrentPlayerSide()" + RoomManager.GetCurrentPlayerSide());
+                            SlotManager.Instance.NewTurn(PlayerManager.Instance.Players[RoomManager.GetCurrentPlayerSide() - 1]);
                             break;
                     }
-                    SlotManager.Instance.NewTurn(PlayerManager.Instance.GetCurrentPlayer());
                     ThemeManager.Instance.Initialization();
                     InGameUI.Instance.Initialization();
                     Field.Instance.Initialization();
@@ -69,7 +83,7 @@ namespace Managers
                     ManaManager.Instance.RestoreAllMana();
                     ManaManager.Instance.UpdateManaUI();
 
-                    TurnTimerManager.Instance.StartNewTurnTimer(PlayerManager.Instance.GetCurrentPlayer().EntityType);
+                    TurnTimerManager.Instance.StartNewTurnTimer(PlayerManager.Instance.GetCurrentPlayer().EntityType, !IsOnline || PlayerManager.Instance.GetCurrentPlayer().SideId == Photon.Pun.PhotonNetwork.LocalPlayer.ActorNumber);
 
                     InGameUI.Instance.NewTurn();
                     SetGameplayState(GameplayState.None);
@@ -94,12 +108,15 @@ namespace Managers
                         ManaManager.Instance.GrowMana();
                     }
 
-                   CoroutineManager.Instance.AddCoroutine(EffectManager.Instance.UpdateEffectTurn());
-                    ManaManager.Instance.RestoreAllMana();
-                    ManaManager.Instance.UpdateManaUI();
 
-                    SlotManager.Instance.NewTurn(PlayerManager.Instance.GetCurrentPlayer());
-                    TurnTimerManager.Instance.StartNewTurnTimer(PlayerManager.Instance.GetCurrentPlayer().EntityType);
+                    if (!IsOnline || PlayerManager.Instance.GetCurrentPlayer().SideId == Photon.Pun.PhotonNetwork.LocalPlayer.ActorNumber) { SlotManager.Instance.NewTurn(PlayerManager.Instance.GetCurrentPlayer());
+                        CoroutineManager.Instance.AddCoroutine(EffectManager.Instance.UpdateEffectTurn());
+                    }
+                    TurnTimerManager.Instance.StartNewTurnTimer(PlayerManager.Instance.GetCurrentPlayer().EntityType, !IsOnline || PlayerManager.Instance.GetCurrentPlayer().SideId == Photon.Pun.PhotonNetwork.LocalPlayer.ActorNumber);
+  
+                    ManaManager.Instance.RestoreAllMana();
+                    ManaManager.Instance.UpdateManaUI(); 
+                    
                     InGameUI.Instance.NewTurn();
 
                     if (PlayerManager.Instance.GetCurrentPlayer().EntityType.Equals(PlayerType.AI))
@@ -108,7 +125,7 @@ namespace Managers
                         Field.Instance.PlaceInCell(AIManager.Instance.GenerateNewTurn(PlayerManager.Instance.GetCurrentPlayer().SideId));
                         Debug.LogFormat("Current tactic : {0}", AIManager.Instance.BotAggression);
 
-                        FinishLineManager.Instance.MasterChecker((CellFigure)PlayerManager.Instance.GetCurrentPlayer().SideId);
+                        FinishLineManager.Instance.MasterChecker(PlayerManager.Instance.GetCurrentPlayer().SideId);
 
                         SetGamePlayStateQueue(GameplayState.NewTurn);
                         //SetGameplayState(GameplayState.NewTurn);
@@ -157,9 +174,18 @@ namespace Managers
             }
         }
 
+        private void Update()
+        {
+
+            if (Input.GetKeyDown(KeyCode.I))
+                Debug.Log(RoomManager.GetPlayerInfo());
+            //if (Input.GetKeyDown(KeyCode.S)) NetworkEventManager.RaiseEventCardInvoke(PlayerManager.Instance.GetCurrentPlayer().HandPool[0].Info);
+            if (Input.GetKeyDown(KeyCode.K)) NetworkEventManager.RaiseEventEndTurn();
+        }
+
         public void SetGamePlayStateQueue(GameplayState state)
         {
-            
+
             if (!_isNewStateInQueue)
             {
                 _isNewStateInQueue = true;
@@ -194,7 +220,9 @@ namespace Managers
         {
             SingleAI,
 
-            SingleHuman
+            SingleHuman,
+
+            MultiplayerHuman
         }
     }
 }

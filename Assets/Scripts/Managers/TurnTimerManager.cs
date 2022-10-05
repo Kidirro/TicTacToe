@@ -7,17 +7,12 @@ namespace Managers
 
     public class TurnTimerManager : Singleton<TurnTimerManager>
     {
-        public const float PlayerTurnTime = 60F;
-        public const float BotTurnTime = 1f;
+        public const float PlayerTurnTime = 20f;
+        public const float BotTurnTime = 6f;
 
         private float _timeLeft = 0f;
 
         private IEnumerator _timerCoroutine;
-
-        private void Awake()
-        {
-            _timerCoroutine = ITurnTimer();
-        }
 
         public float TimeLeft
         {
@@ -33,11 +28,11 @@ namespace Managers
             StartCoroutine(_timerCoroutine);
 
         }
-        public void StartNewTurnTimer(PlayerType player)
+        public void StartNewTurnTimer(PlayerType player, bool isNeedAddToQueue = true)
         {
 
             Debug.Log("Started timer");
-            StopCoroutine(_timerCoroutine);
+            if (_timerCoroutine!=null)StopCoroutine(_timerCoroutine);
             switch (player)
             {
                 case PlayerType.AI:
@@ -47,20 +42,24 @@ namespace Managers
                     _timeLeft = PlayerTurnTime;
                     break;
             }
-            _timerCoroutine = ITurnTimer();
+            _timerCoroutine = ITurnTimer(isNeedAddToQueue);
             StartCoroutine(_timerCoroutine);
 
         }
 
-        private IEnumerator ITurnTimer()
+        private IEnumerator ITurnTimer(bool isNeedAddtoQueue)
         {
             while (_timeLeft > 0)
             {
-                yield return new WaitForSecondsRealtime(0.1f);
-                _timeLeft -= 0.1f;
+                yield return null;
+                InGameUI.Instance.SetTimeText(_timeLeft);
+                _timeLeft -= Time.deltaTime;
             }
             /*GameplayManager.Instance.SetGameplayState(GameplayState.NewTurn);*/
-            GameplayManager.Instance.SetGamePlayStateQueue(GameplayManager.GameplayState.NewTurn);
+            if (isNeedAddtoQueue) { GameplayManager.Instance.SetGamePlayStateQueue(GameplayManager.GameplayState.NewTurn);
+                NetworkEventManager.RaiseEventEndTurn();
+            
+            }
         }
     }
 }

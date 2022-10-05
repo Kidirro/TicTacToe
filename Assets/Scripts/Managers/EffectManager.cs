@@ -12,7 +12,7 @@ namespace Managers
         public static bool IsEffectManagerDone = true;
 
         private List<Effect> _effectList = new List<Effect>();
-        
+
         public List<Effect> EffectList
         {
             get => _effectList;
@@ -82,11 +82,9 @@ namespace Managers
                 }
             }
             _effectList.RemoveAll(x => x.EffectTurnCount == 0);
-            Debug.Log("Effect: Begin " + maxTime);
             yield return new WaitForSeconds(maxTime);
-            Debug.Log("Effect: Begin Master Checker");
-            FinishLineManager.Instance.MasterChecker((CellFigure)PlayerManager.Instance.GetCurrentPlayer().SideId);
-            Debug.Log("Effect: End Master Checker");
+            FinishLineManager.Instance.MasterChecker(PlayerManager.Instance.GetCurrentPlayer().SideId);
+            NetworkEventManager.RaiseEventMasterChecker();
         }
 
         private IEnumerator IEffectAwaitAsync(List<Effect> effects, float startAwait = 0)
@@ -109,8 +107,22 @@ namespace Managers
             Debug.Log("Effect Invoke");
 
         }
-    }
 
+        public void AddFigureEffect()
+        {
+            Action f = delegate ()
+            {
+                Vector2Int position = AIManager.Instance.GenerateRandomPosition(Field.Instance.FieldSize);
+                if (position == new Vector2Int(-1, -1)) return;
+
+                Field.Instance.PlaceInCell(position);
+                NetworkEventManager.RaiseEventPlaceInCell(position);
+
+            };
+            Effect effect = new Effect(f, 3, PlayerManager.Instance.GetCurrentPlayer().SideId, Effect.EffectTypes.Consistently, 1);
+        }
+    }
+ 
     public class Effect
     {
         public Action EffectAction;

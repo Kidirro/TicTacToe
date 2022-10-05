@@ -1,10 +1,11 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 using TMPro;
 using Managers;
 
-public class MainMenuUI : MonoBehaviour
+public class MainMenuUI : Singleton<MainMenuUI>
 {
     [SerializeField]
     private TextMeshProUGUI _moneyValue;
@@ -18,7 +19,17 @@ public class MainMenuUI : MonoBehaviour
     [SerializeField]
     private GameObject _preSettings;
 
+    [Header("Buttons"), SerializeField]
+    private Button _multiplayerButton;
+
     private bool _showPre = false;
+
+    private void Awake()
+    {
+        _multiplayerButton.interactable = MasterConecctorManager.IsConnected;
+        QualitySettings.vSyncCount = 0;
+        Application.targetFrameRate = 60;
+    }
 
     private void OnEnable()
     {
@@ -44,6 +55,12 @@ public class MainMenuUI : MonoBehaviour
         GameplayManager.TypeGame = GameplayManager.GameType.SingleHuman;
         GameSceneManager.Instance.SetGameScene(GameSceneManager.GameScene.Game);
     }
+    
+    public void OnMultiplierOButtonStart()
+    {
+        GameplayManager.TypeGame = GameplayManager.GameType.MultiplayerHuman;
+        GameSceneManager.Instance.SetGameScene(GameSceneManager.GameScene.Game);
+    }
 
     public void DEV_ChangeFieldSize(int i)
     {
@@ -66,6 +83,16 @@ public class MainMenuUI : MonoBehaviour
     public void SetMana(string value)
     {
      //   ManaManager.Manapool = int.Parse(value);
+    }
+
+    public void ChangeMultiplayerButtonState(bool state)
+    {
+        _multiplayerButton.interactable = state;
+    }
+
+    public void UpdateNetworkUI(bool isConnected)
+    {
+        ChangeMultiplayerButtonState(isConnected);
     }
 
     public void SetGrowTurn(string value)

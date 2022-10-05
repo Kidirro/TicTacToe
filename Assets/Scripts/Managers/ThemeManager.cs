@@ -9,6 +9,8 @@ namespace Managers
     {
         private Dictionary<CellFigure, Sprite> _cellSprites = new Dictionary<CellFigure, Sprite>();
 
+        private Dictionary<CellSubState, Sprite> _subStateSprites = new Dictionary<CellSubState, Sprite>();
+
         [SerializeField]
         private Sprite _blankSprite;
 
@@ -17,6 +19,9 @@ namespace Managers
 
         [SerializeField]
         private Sprite _p2Sprite;
+
+        [SerializeField]
+        private Sprite _freezeSprite;
 
         public void Initialization()
         {

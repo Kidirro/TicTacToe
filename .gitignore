@@ -73,3 +73,8 @@ InitTestScene*.unity
 
 # End of https://www.toptal.com/developers/gitignore/api/unity
 *.meta
+Assets/AddressableAssetsData
+Assets/TextMesh Pro
+TicTAc_BurstDebugInformation_DoNotShip
+TicTAc_BackUpThisFolder_ButDontShipItWithYourGame
+Tic tac toe_Data

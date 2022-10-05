@@ -47,11 +47,6 @@ namespace Managers
             return mana <= _currentMana;
         }
 
-        public void DecreaseMana(int mana)
-        {
-            _currentMana -= mana;
-        }
-
         public void IncreaseMaxMana(int mana)
         {
             _manapool += mana;

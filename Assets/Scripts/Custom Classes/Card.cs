@@ -231,6 +231,7 @@ public class Card : MonoBehaviour
     public void SetSideCard(int side)
     {
         _cardImage.sprite = (side == 1) ? Info.CardImageP1 : Info.CardImageP2;
+        Debug.Log("Current side:" + side);
     }
 
 
@@ -249,7 +250,7 @@ public class Card : MonoBehaviour
         stopWatch.Reset();
         stopWatch.Start();
         if (Info.IsNeedShowTip) _cardTip.ShowTip(Info.TipText, false);
-        SlotManager.Instance.ShowRechanger();
+        if (SlotManager.Instance.IsCurrentPlayerOnSlot) SlotManager.Instance.ShowRechanger();
         _magnitudePosition = positionVect;
     }
 
@@ -326,12 +327,6 @@ public class Card : MonoBehaviour
         stopWatch.Stop();
         _canvas.overrideSorting = false;
 
-        if (SlotManager.Instance.CurrentPlayerSet != PlayerManager.Instance.GetCurrentPlayer())
-        {
-            SlotManager.Instance.UpdateCardPosition(SlotManager.Instance.CurrentPlayerSet, false);
-            return;
-        }
-
         if (SlotManager.Instance.IsOnRechanger(_cardPosition.y - ScreenManager.Instance.GetHeight(_fingerDistance.y)))
         {
             SlotManager.Instance.UseRechanger(this);
@@ -342,6 +337,7 @@ public class Card : MonoBehaviour
         bool TypeFlag = false;
         bool ManaFlag = ManaManager.Instance.IsEnoughMana(Info.CardManacost + Info.CardBonusManacost);
         bool AnimFlag = CoroutineManager.IsQueueEmpty;
+        bool PlayerFlag = SlotManager.Instance.CurrentPlayerSet == PlayerManager.Instance.GetCurrentPlayer();
 
         switch (Info.CardType)
         {
@@ -356,14 +352,16 @@ public class Card : MonoBehaviour
                 break;
         }
 
-        if (TypeFlag && TimeFlag && ManaFlag && AnimFlag)
+        if (TypeFlag && TimeFlag && ManaFlag && AnimFlag && PlayerFlag)
         {
             SlotManager.Instance.RemoveCard(PlayerManager.Instance.GetCurrentPlayer(), this);
             SlotManager.Instance.UpdateCardPosition(false);
-            ManaManager.Instance.DecreaseMana(Info.CardManacost + Info.CardBonusManacost);
+            ManaManager.Instance.IncreaseMana(-Info.CardManacost - Info.CardBonusManacost);
+            NetworkEventManager.RaiseEventIncreaseMana(-Info.CardManacost - Info.CardBonusManacost);
             ManaManager.Instance.UpdateManaUI();
 
             Info.ÑardAction.Invoke();
+            NetworkEventManager.RaiseEventCardInvoke(Info);
             HistoryManager.Instance.AddHistoryCard(PlayerManager.Instance.GetCurrentPlayer(), Info);
 
             if (Info.CardCount > 1)

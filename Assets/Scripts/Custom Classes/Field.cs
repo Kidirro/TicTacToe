@@ -638,12 +638,12 @@ namespace Managers
 
         public bool IsCellBlocked(Vector2Int id)
         {
-            return CellList[id.x][id.y].SubState == CellSubState.block;
+            return CellList[id.x][id.y].SubState == CellSubState.freeze;
         }
 
         public bool IsCellBlocked(int x, int y)
         {
-            return CellList[x][y].SubState == CellSubState.block;
+            return CellList[x][y].SubState == CellSubState.freeze;
         }
 
         public bool IsCellEnableToPlace(Vector2Int id)
@@ -716,36 +716,42 @@ namespace Managers
             }
         }
 
-        public void FreezeCell(Vector2Int id, Sprite sprite, Vector2Int areaSize)
+        public void FreezeCell(Vector2Int id, Sprite sprite)
         {
             Cell posCard = CellList[id.x][id.y];
 
             Action f = delegate ()
             {
-                if (CellList[posCard.Id.x][posCard.Id.y].Figure == CellFigure.none)
-                {
-                    SetSubStateZone(posCard.Id,
-                                    areaSize,
-                                    sprite,
-                                    Color.black,
-                                    CellSubState.block, false);
-                }
-                else
-                {
-                    ResetFigureWithPlaceSubState(posCard.Id,
-                                                 areaSize,
-                                                 sprite,
-                                                 Color.black,
-                                                 CellSubState.block);
-                }
+                FreezeCellDisableEffect(posCard.Id, sprite);
             };
             Action d = delegate ()
             {
-                ResetSubStateWithPlaceFigure(posCard.Id, areaSize, (CellFigure) PlayerManager.Instance.GetCurrentPlayer().SideId);
+                ResetSubStateWithPlaceFigure(posCard.Id, Vector2Int.one, (CellFigure) PlayerManager.Instance.GetCurrentPlayer().SideId);
             };
             f.Invoke();
             Effect effect = new Effect(f, 2, PlayerManager.Instance.GetCurrentPlayer().SideId, Effect.EffectTypes.Parallel, 2, d, Cell.AnimationTime, Cell.AnimationTime * 2);
             EffectManager.Instance.AddEffect(effect);
+            /**///NetworkEventManager.RaiseEventFreezeCell(new EffectTest());
+        }
+
+        public void FreezeCellDisableEffect(Vector2Int id, Sprite sprite)
+        {
+            if (CellList[id.x][id.y].Figure == CellFigure.none)
+            {
+                SetSubStateZone(id,
+                                Vector2Int.one,
+                                sprite,
+                                Color.black,
+                                CellSubState.freeze, false);
+            }
+            else
+            {
+                ResetFigureWithPlaceSubState(id,
+                                             Vector2Int.one,
+                                             sprite,
+                                             Color.black,
+                                             CellSubState.freeze);
+            }
         }
 
         public void ResetSubStateWithPlaceFigure(Vector2Int Position, Vector2Int AreaSize, CellFigure figure)
