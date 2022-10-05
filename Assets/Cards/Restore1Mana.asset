@@ -12,13 +12,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 280c217edb247014c88a71e11514f438, type: 3}
   m_Name: Restore1Mana
   m_EditorClassIdentifier: 
-  CardImageP1: {fileID: 21300000, guid: 7af33364b1218d44da1bc0fb1bcd4700, type: 3}
-  CardImageP2: {fileID: 21300000, guid: 4003fc22641b97547946e32f2d9569ac, type: 3}
-  CardHighlightP1: {fileID: 21300000, guid: cfb6d025372a2104d814c38534c1619b, type: 3}
-  CardHighlightP2: {fileID: 21300000, guid: c3c20710043075846b6cbe2bfc70dc33, type: 3}
+  CardId: 0
+  CardImageP1: {fileID: 21300000, guid: f772be7b6fc9ba34e8505f887b20c43f, type: 3}
+  CardImageP2: {fileID: 21300000, guid: f772be7b6fc9ba34e8505f887b20c43f, type: 3}
+  CardHighlightP1: {fileID: 0}
+  CardHighlightP2: {fileID: 0}
   CardHighlightColor: {r: 0, g: 0, b: 0, a: 0.14901961}
   CardName: Restore 1 Mana
-  CardDescription: "\u0432\u043E\u0441\u0441\u0442\u0430\u043D\u0430\u0432\u043B\u0438\u0432\u0430\u0435\u0442
+  CardDescription: "\u0412\u043E\u0441\u0441\u0442\u0430\u043D\u0430\u0432\u043B\u0438\u0432\u0430\u0435\u0442
     1 \u043C\u0430\u043D\u044B"
   IsDefaultUnlock: 0
   CardType: 0

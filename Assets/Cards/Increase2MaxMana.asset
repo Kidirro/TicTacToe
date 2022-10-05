@@ -12,13 +12,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 280c217edb247014c88a71e11514f438, type: 3}
   m_Name: Increase2MaxMana
   m_EditorClassIdentifier: 
-  CardImageP1: {fileID: 21300000, guid: c06821d56243f074faf9f318fc9247ba, type: 3}
-  CardImageP2: {fileID: 21300000, guid: c06821d56243f074faf9f318fc9247ba, type: 3}
+  CardId: 0
+  CardImageP1: {fileID: 21300000, guid: 3d22fed53dedfed4b8239bf88dc4cfa8, type: 3}
+  CardImageP2: {fileID: 21300000, guid: 3d22fed53dedfed4b8239bf88dc4cfa8, type: 3}
   CardHighlightP1: {fileID: 0}
   CardHighlightP2: {fileID: 0}
   CardHighlightColor: {r: 0, g: 0, b: 0, a: 0}
   CardName: Increase 2 Max Mana
-  CardDescription: "\u0432 \u0442\u0435\u0447\u0435\u043D\u0438\u0438 \u0441\u043B\u0435\u0434\u0443\u044E\u0449\u0438\u0445
+  CardDescription: "\u0412 \u0442\u0435\u0447\u0435\u043D\u0438\u0438 \u0441\u043B\u0435\u0434\u0443\u044E\u0449\u0438\u0445
     \u0434\u0432\u0443\u0445 \u0445\u043E\u0434\u043E\u0432 \u0434\u043B\u044F \u043E\u0431\u043E\u0438\u0445
     \u0438\u0433\u0440\u043E\u043A\u043E\u0432 \u043C\u0430\u043D\u0430 \u0443\u0432\u0435\u043B\u0438\u0447\u0435\u0438\u0432\u0430\u0435\u0442\u0441\u044F
     \u043D\u0430 2"
