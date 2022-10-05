@@ -168,8 +168,9 @@ public class CardInfo : ScriptableObject
 
     public void FreezeCell()
     {
-        Field.Instance.FreezeCell(Card.ChosedCell, (PlayerManager.Instance.GetCurrentPlayer().SideId == 1) ? CardHighlightP1 : CardHighlightP2);
-        NetworkEventManager.RaiseEventSetSubState(Card.ChosedCell, CardId);
+        Field.Instance.FreezeCell(Card.ChosedCell);
+        EffectManager.Instance.FreezeCell_Effect(Card.ChosedCell);
+       /* NetworkEventManager.RaiseEventSetSubState(Card.ChosedCell, CardId);*/
         FinishLineManager.Instance.MasterChecker(PlayerManager.Instance.GetCurrentPlayer().SideId);
     }
 
@@ -184,8 +185,9 @@ public class CardInfo : ScriptableObject
 
             while (_posList.IndexOf(Field.Instance.CellList[result.x][result.y]) != -1) result = AIManager.Instance.GenerateRandomPosition(Field.Instance.FieldSize);
 
-            Field.Instance.FreezeCell(result, (PlayerManager.Instance.GetCurrentPlayer().SideId == 1) ? CardHighlightP1 : CardHighlightP2);
-            NetworkEventManager.RaiseEventSetSubState(result, CardId);
+            Field.Instance.FreezeCell(result);
+            EffectManager.Instance.FreezeCell_Effect(result); 
+           /* NetworkEventManager.RaiseEventSetSubState(result, CardId);*/
             _posList.Add(Field.Instance.CellList[result.x][result.y]);
 
         }
@@ -202,8 +204,9 @@ public class CardInfo : ScriptableObject
             Vector2Int position = AIManager.Instance.GenerateRandomPosition(Field.Instance.FieldSize);
             if (position == new Vector2Int(-1, -1)) return;
 
-            Field.Instance.FreezeCell(position, (PlayerManager.Instance.GetCurrentPlayer().SideId == 1) ? CardHighlightP1 : CardHighlightP2);
-            NetworkEventManager.RaiseEventSetSubState(position, CardId);
+            Field.Instance.FreezeCell(position);
+            EffectManager.Instance.FreezeCell_Effect(Card.ChosedCell);
+            /*NetworkEventManager.RaiseEventSetSubState(position, CardId);*/
         };
 
         Effect effect = new Effect(f, 3, PlayerManager.Instance.GetCurrentPlayer().SideId, Effect.EffectTypes.Parallel, 3, null, Cell.AnimationTime);
@@ -224,7 +227,8 @@ public class CardInfo : ScriptableObject
         Sprite sprite = (PlayerManager.Instance.GetCurrentPlayer().SideId == 1) ? CardHighlightP1 : CardHighlightP2;
         for (int i = 0; i < resultCells.Count; i++)
         {
-            Field.Instance.FreezeCell(resultCells[i].Id, sprite);
+            Field.Instance.FreezeCell(resultCells[i].Id);
+            EffectManager.Instance.FreezeCell_Effect(resultCells[i].Id);
             NetworkEventManager.RaiseEventSetSubState(resultCells[i].Id, CardId);
         }
 
@@ -261,7 +265,8 @@ public class CardInfo : ScriptableObject
             {
                 Vector2Int result = AIManager.Instance.GenerateRandomPosition(Field.Instance.FieldSize);
                 if (result == new Vector2Int(-1, -1)) break;
-                Field.Instance.FreezeCell(result, (PlayerManager.Instance.GetCurrentPlayer().SideId == 1) ? CardHighlightP1 : CardHighlightP2);
+                Field.Instance.FreezeCell(result);
+                EffectManager.Instance.FreezeCell_Effect(result);
             }
 
         }

@@ -222,9 +222,9 @@ public class NetworkEventManager : Singleton<NetworkEventManager>, IOnEventCallb
                 Vector3Int data_50 = (Vector3Int)photonEvent.CustomData;
                 Vector2Int position = new Vector2Int(data_50.x, data_50.y);
                 CardInfo card = CollectionManager.GetCardFromId(data_50.z);
-                Field.Instance.FreezeCellDisableEffect(
+               /* Field.Instance.FreezeCellDisableEffect(
                                position,
-                               PlayerManager.Instance.GetCurrentPlayer().SideId == 1 ? card.CardHighlightP1 : card.CardHighlightP2);
+                               PlayerManager.Instance.GetCurrentPlayer().SideId == 1 ? card.CardHighlightP1 : card.CardHighlightP2);*/
                 break;
             case 51:
                 Vector2Int data_51 = (Vector2Int)photonEvent.CustomData;

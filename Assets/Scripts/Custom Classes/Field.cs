@@ -716,7 +716,7 @@ namespace Managers
             }
         }
 
-        public void FreezeCellDisableEffect(Vector2Int id, Sprite sprite)
+        public void FreezeCell(Vector2Int id, Sprite sprite)
         {
             if (CellList[id.x][id.y].Figure == CellFigure.none)
             {
@@ -736,7 +736,7 @@ namespace Managers
             }
         }
         
-        public void FreezeCellDisableEffect(Vector2Int id)
+        public void FreezeCell(Vector2Int id)
         {
             if (CellList[id.x][id.y].Figure == CellFigure.none)
             {
