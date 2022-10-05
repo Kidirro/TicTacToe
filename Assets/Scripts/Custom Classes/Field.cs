@@ -716,24 +716,6 @@ namespace Managers
             }
         }
 
-        public void FreezeCell(Vector2Int id, Sprite sprite)
-        {
-            Cell posCard = CellList[id.x][id.y];
-
-            Action f = delegate ()
-            {
-                FreezeCellDisableEffect(posCard.Id, sprite);
-            };
-            Action d = delegate ()
-            {
-                ResetSubStateWithPlaceFigure(posCard.Id, Vector2Int.one, (CellFigure) PlayerManager.Instance.GetCurrentPlayer().SideId);
-            };
-            f.Invoke();
-            Effect effect = new Effect(f, 2, PlayerManager.Instance.GetCurrentPlayer().SideId, Effect.EffectTypes.Parallel, 2, d, Cell.AnimationTime, Cell.AnimationTime * 2);
-            EffectManager.Instance.AddEffect(effect);
-            /**///NetworkEventManager.RaiseEventFreezeCell(new EffectTest());
-        }
-
         public void FreezeCellDisableEffect(Vector2Int id, Sprite sprite)
         {
             if (CellList[id.x][id.y].Figure == CellFigure.none)
@@ -749,6 +731,26 @@ namespace Managers
                 ResetFigureWithPlaceSubState(id,
                                              Vector2Int.one,
                                              sprite,
+                                             Color.black,
+                                             CellSubState.freeze);
+            }
+        }
+        
+        public void FreezeCellDisableEffect(Vector2Int id)
+        {
+            if (CellList[id.x][id.y].Figure == CellFigure.none)
+            {
+                SetSubStateZone(id,
+                                Vector2Int.one,
+                                ThemeManager.Instance.GetSprite(CellSubState.freeze),
+                                Color.black,
+                                CellSubState.freeze, false);
+            }
+            else
+            {
+                ResetFigureWithPlaceSubState(id,
+                                             Vector2Int.one,
+                                             ThemeManager.Instance.GetSprite(CellSubState.freeze),
                                              Color.black,
                                              CellSubState.freeze);
             }

@@ -28,11 +28,19 @@ namespace Managers
             _cellSprites.Add(CellFigure.none, _blankSprite);
             _cellSprites.Add(CellFigure.p1, _p1Sprite);
             _cellSprites.Add(CellFigure.p2, _p2Sprite);
+
+            _subStateSprites.Add(CellSubState.freeze, _freezeSprite);
+            _subStateSprites.Add(CellSubState.none, _blankSprite);
         }
 
         public Sprite GetSprite(CellFigure i)
         {
             return _cellSprites[i];
+        }
+        
+        public Sprite GetSprite(CellSubState i)
+        {
+            return _subStateSprites[i];
         }
     }
 }

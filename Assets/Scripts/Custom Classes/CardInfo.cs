@@ -117,7 +117,7 @@ public class CardInfo : ScriptableObject
 
     public void AddFigure_Effected()
     {
-        EffectManager.Instance.AddFigureEffect();
+        EffectManager.Instance.AddFigure_Effect();
 /**/
     }  
     
@@ -125,16 +125,9 @@ public class CardInfo : ScriptableObject
 
     public void AddBonusMana_Effected()
     {
-        Action f = delegate ()
-        {
-            ManaManager.Instance.AddBonusMana(1);
-            NetworkEventManager.RaiseEventAddBonusMana(1);
+        EffectManager.Instance.AddBonusMana_Effect();
 
-            ManaManager.Instance.RestoreAllMana();
-            ManaManager.Instance.UpdateManaUI();
-        };
-        Effect effect = new Effect(f, 1, PlayerManager.Instance.GetCurrentPlayer().SideId, Effect.EffectTypes.Parallel, 0);
-        EffectManager.Instance.AddEffect(effect);
+      /**/
     }
 
     public void Decrease2MaxMana()
@@ -142,17 +135,8 @@ public class CardInfo : ScriptableObject
         ManaManager.Instance.IncreaseMaxMana(-2);
         NetworkEventManager.RaiseEventIncreaseMaxMana(-2);
         ManaManager.Instance.UpdateManaUI();
-        Action d = delegate ()
-        {
-            ManaManager.Instance.IncreaseMaxMana(2);
-            NetworkEventManager.RaiseEventIncreaseMaxMana(2);
-
-            ManaManager.Instance.RestoreAllMana();
-            ManaManager.Instance.UpdateManaUI();
-        };
-        Effect effect = new Effect(delegate () { }, 3, PlayerManager.Instance.GetCurrentPlayer().SideId, Effect.EffectTypes.Parallel, 0, d);
-        EffectManager.Instance.AddEffect(effect);
-
+        EffectManager.Instance.Decrease2MaxMana_Effect();   
+/**/
     }
 
     public void Increase2MaxMana()
@@ -161,59 +145,21 @@ public class CardInfo : ScriptableObject
         NetworkEventManager.RaiseEventIncreaseMaxMana(2);
 
         ManaManager.Instance.UpdateManaUI();
-        Action d = delegate ()
-        {
-            ManaManager.Instance.IncreaseMaxMana(-2);
-            NetworkEventManager.RaiseEventIncreaseMaxMana(-2);
-
-            ManaManager.Instance.RestoreAllMana();
-            ManaManager.Instance.UpdateManaUI();
-        };
-        Effect effect = new Effect(delegate () { }, 3, PlayerManager.Instance.GetCurrentPlayer().SideId, Effect.EffectTypes.Parallel, 0, d);
-        EffectManager.Instance.AddEffect(effect);
+        EffectManager.Instance.Increase2MaxMana_Effect();
+/**/
 
     }
 
     public void Random2Mana()
     {
-        Action f = delegate ()
-        {
-            int randValue = Random.Range(0, 2) == 0 ? -2 : 2;
-            ManaManager.Instance.AddBonusMana(randValue);
-            NetworkEventManager.RaiseEventAddBonusMana(randValue);
-
-            ManaManager.Instance.RestoreAllMana();
-            ManaManager.Instance.UpdateManaUI();
-        };
-        Effect effect = new Effect(f, 1, PlayerManager.Instance.GetCurrentPlayer().SideId, Effect.EffectTypes.Parallel, 0);
-        EffectManager.Instance.AddEffect(effect);
-
+        EffectManager.Instance.Random2Mana_Effect();
+        /**/
     }
+
     public void DecreaseIncrease2Mana()
     {
-        Action f = delegate ()
-        {
-            ManaManager.Instance.AddBonusMana(-2);
-            NetworkEventManager.RaiseEventAddBonusMana(-2);
-
-            ManaManager.Instance.RestoreAllMana();
-            ManaManager.Instance.UpdateManaUI();
-        };
-        Action d = delegate ()
-        {
-
-
-            ManaManager.Instance.AddBonusMana(4);
-            NetworkEventManager.RaiseEventAddBonusMana(4);
-
-            ManaManager.Instance.RestoreAllMana();
-            ManaManager.Instance.UpdateManaUI();
-        };
-
-
-        Effect effect = new Effect(f, 2, PlayerManager.Instance.GetCurrentPlayer().SideId, Effect.EffectTypes.Parallel, 0, d);
-        EffectManager.Instance.AddEffect(effect);
-
+        EffectManager.Instance.DecreaseIncrease2Mana_Effect();
+/**/
     }
 
     #endregion
@@ -348,23 +294,6 @@ public class CardInfo : ScriptableObject
         ManaManager.Instance.RestoreAllMana();
         NetworkEventManager.RaiseEventRestoreMana(-1);
         ManaManager.Instance.UpdateManaUI();
-    }
-
-    public void Prikol()
-    {
-        int i = 0;
-        Action f = delegate ()
-        {
-            i++;
-            Debug.LogFormat("Action Up: {0}", i);
-        };
-        Action d = delegate ()
-        {
-            i++;
-            Debug.LogFormat("Action dis: {0}", i);
-        };
-        //Effect effect = new Effect(f, 3, PlayerManager.Instance.GetCurrentPlayer().SideId, d);
-        //EffectManager.Instance.AddEffect(effect);
     }
 }
 

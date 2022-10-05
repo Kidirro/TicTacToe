@@ -13,6 +13,13 @@ namespace Managers
 
         private List<Effect> _effectList = new List<Effect>();
 
+        private List<Action> actions = new List<Action>();
+
+        private void Awake()
+        {
+            actions.Add(ClearEffect);
+        }
+
         public List<Effect> EffectList
         {
             get => _effectList;
@@ -108,7 +115,7 @@ namespace Managers
 
         }
 
-        public void AddFigureEffect()
+        public void AddFigure_Effect()
         {
             Action f = delegate ()
             {
@@ -120,6 +127,105 @@ namespace Managers
 
             };
             Effect effect = new Effect(f, 3, PlayerManager.Instance.GetCurrentPlayer().SideId, Effect.EffectTypes.Consistently, 1);
+            AddEffect(effect);
+        }
+
+        public void AddBonusMana_Effect()
+        {
+            Action f = delegate ()
+            {
+                ManaManager.Instance.AddBonusMana(1);
+                NetworkEventManager.RaiseEventAddBonusMana(1);
+
+                ManaManager.Instance.RestoreAllMana();
+                ManaManager.Instance.UpdateManaUI();
+            };
+            Effect effect = new Effect(f, 1, PlayerManager.Instance.GetCurrentPlayer().SideId, Effect.EffectTypes.Parallel, 0);
+            AddEffect(effect);
+        }
+
+        public void Decrease2MaxMana_Effect()
+        {
+            Action d = delegate ()
+            {
+                ManaManager.Instance.IncreaseMaxMana(2);
+                NetworkEventManager.RaiseEventIncreaseMaxMana(2);
+
+                ManaManager.Instance.RestoreAllMana();
+                ManaManager.Instance.UpdateManaUI();
+            };
+            Effect effect = new Effect(delegate () { }, 3, PlayerManager.Instance.GetCurrentPlayer().SideId, Effect.EffectTypes.Parallel, 0, d);
+            AddEffect(effect);
+        }
+        public void Increase2MaxMana_Effect()
+        {
+            Action d = delegate ()
+            {
+                ManaManager.Instance.IncreaseMaxMana(-2);
+                NetworkEventManager.RaiseEventIncreaseMaxMana(-2);
+
+                ManaManager.Instance.RestoreAllMana();
+                ManaManager.Instance.UpdateManaUI();
+            };
+            Effect effect = new Effect(delegate () { }, 3, PlayerManager.Instance.GetCurrentPlayer().SideId, Effect.EffectTypes.Parallel, 0, d);
+            AddEffect(effect);
+        }
+
+        public void Random2Mana_Effect()
+        {
+            Action f = delegate ()
+            {
+                int randValue = UnityEngine.Random.Range(0, 2) == 0 ? -2 : 2;
+                ManaManager.Instance.AddBonusMana(randValue);
+                NetworkEventManager.RaiseEventAddBonusMana(randValue);
+
+                ManaManager.Instance.RestoreAllMana();
+                ManaManager.Instance.UpdateManaUI();
+            };
+            Effect effect = new Effect(f, 1, PlayerManager.Instance.GetCurrentPlayer().SideId, Effect.EffectTypes.Parallel, 0);
+            AddEffect(effect);
+        }
+
+        public void DecreaseIncrease2Mana_Effect()
+        {
+            Action f = delegate ()
+            {
+                ManaManager.Instance.AddBonusMana(-2);
+                NetworkEventManager.RaiseEventAddBonusMana(-2);
+
+                ManaManager.Instance.RestoreAllMana();
+                ManaManager.Instance.UpdateManaUI();
+            };
+            Action d = delegate ()
+            {
+
+
+                ManaManager.Instance.AddBonusMana(4);
+                NetworkEventManager.RaiseEventAddBonusMana(4);
+
+                ManaManager.Instance.RestoreAllMana();
+                ManaManager.Instance.UpdateManaUI();
+            };
+
+
+            Effect effect = new Effect(f, 2, PlayerManager.Instance.GetCurrentPlayer().SideId, Effect.EffectTypes.Parallel, 0, d);
+            AddEffect(effect);
+        }
+
+        public void FreezeCell_Effect(Vector2Int id)
+        {
+            Cell cell = Field.Instance.CellList[id.x][id.y];
+            Action f = delegate ()
+            {
+                //FreezeCellDisableEffect(posCard.Id, sprite);
+            };
+            Action d = delegate ()
+            {
+                Field.Instance.ResetSubStateWithPlaceFigure(cell.Id, Vector2Int.one, (CellFigure)PlayerManager.Instance.GetCurrentPlayer().SideId);
+            };
+            f.Invoke();
+            Effect effect = new Effect(f, 2, PlayerManager.Instance.GetCurrentPlayer().SideId, Effect.EffectTypes.Parallel, 2, d, Cell.AnimationTime, Cell.AnimationTime * 2);
+            AddEffect(effect);
         }
     }
  
