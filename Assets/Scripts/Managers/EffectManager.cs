@@ -13,11 +13,19 @@ namespace Managers
 
         private List<Effect> _effectList = new List<Effect>();
 
-        private List<Action> actions = new List<Action>();
+        private List<Action> _serializedActions = new List<Action>();
 
         private void Awake()
         {
-            actions.Add(ClearEffect);
+            _serializedActions.Add(AddBonusMana_Effect);
+            _serializedActions.Add(AddFigure_Effect);
+            _serializedActions.Add(Decrease2MaxMana_Effect);
+            _serializedActions.Add(DecreaseIncrease2Mana_Effect);
+            //actions.Add(FreezeCell_Effect);
+            _serializedActions.Add(Increase2MaxMana_Effect);
+            _serializedActions.Add(Random2Mana_Effect);
+            _serializedActions.Add(Freeze3Cell_Effected);
+            
         }
 
         public List<Effect> EffectList
@@ -29,11 +37,31 @@ namespace Managers
         public void AddEffect(Effect effect)
         {
             _effectList.Add(effect);
+        }  
+        
+        public void AddEffect(int effect)
+        {
+            _serializedActions[effect].Invoke();
         }
 
         public void ClearEffect()
         {
             _effectList.Clear();
+        }
+
+        public void ClearEffect(int id)
+        {
+            _effectList.RemoveAt(id);
+        }
+
+        public void UpdateEffectState(int id, int value)
+        {
+            _effectList[id].EffectTurnCount = value;
+        }
+
+        public int GetIdSerializibleAction(Action action)
+        {
+            return _serializedActions.IndexOf(action);
         }
 
         /// <summary>
@@ -88,7 +116,19 @@ namespace Managers
 
                 }
             }
-            _effectList.RemoveAll(x => x.EffectTurnCount == 0);
+            int i = 0;
+            while (i < _effectList.Count)
+            {
+                if (_effectList[i].EffectTurnCount == 0)
+                {
+                    _effectList.RemoveAt(i);
+                    NetworkEventManager.RaiseEventClearEffect(i);
+                }
+                else
+                {
+                    i+=1;
+                }
+            }
             yield return new WaitForSeconds(maxTime);
             FinishLineManager.Instance.MasterChecker(PlayerManager.Instance.GetCurrentPlayer().SideId);
             NetworkEventManager.RaiseEventMasterChecker();
@@ -105,6 +145,7 @@ namespace Managers
         {
 
             effect.EffectTurnCount -= 1;
+            NetworkEventManager.RaiseEventUpdateEffect(_effectList.IndexOf(effect), effect.EffectTurnCount);
             Debug.Log("Effect turn delete");
 
 
@@ -123,7 +164,6 @@ namespace Managers
                 if (position == new Vector2Int(-1, -1)) return;
 
                 Field.Instance.PlaceInCell(position);
-                NetworkEventManager.RaiseEventPlaceInCell(position);
 
             };
             Effect effect = new Effect(f, 3, PlayerManager.Instance.GetCurrentPlayer().SideId, Effect.EffectTypes.Consistently, 1);
@@ -217,15 +257,32 @@ namespace Managers
             Cell cell = Field.Instance.CellList[id.x][id.y];
             Action f = delegate ()
             {
-                //FreezeCellDisableEffect(posCard.Id, sprite);
             };
             Action d = delegate ()
             {
-                Field.Instance.ResetSubStateWithPlaceFigure(cell.Id, Vector2Int.one, (CellFigure)PlayerManager.Instance.GetCurrentPlayer().SideId);
+                Field.Instance.ResetSubStateWithPlaceFigure(cell.Id);
             };
             f.Invoke();
             Effect effect = new Effect(f, 2, PlayerManager.Instance.GetCurrentPlayer().SideId, Effect.EffectTypes.Parallel, 2, d, Cell.AnimationTime, Cell.AnimationTime * 2);
             AddEffect(effect);
+        }
+
+        public void Freeze3Cell_Effected()
+        {
+            Action f = delegate ()
+            {
+                Vector2Int position = AIManager.Instance.GenerateRandomPosition(Field.Instance.FieldSize);
+                if (position == new Vector2Int(-1, -1)) return;
+
+                Field.Instance.FreezeCell(position);
+
+                FreezeCell_Effect(position);
+                NetworkEventManager.RaiseEventAddFreezeEffect(position);
+                /**/
+            };
+
+            Effect effect = new Effect(f, 3, PlayerManager.Instance.GetCurrentPlayer().SideId, Effect.EffectTypes.Parallel, 3, null, Cell.AnimationTime);
+            EffectManager.Instance.AddEffect(effect);
         }
     }
  

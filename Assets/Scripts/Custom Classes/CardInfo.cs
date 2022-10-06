@@ -74,7 +74,6 @@ public class CardInfo : ScriptableObject
             {
                 Vector2Int position = new Vector2Int(x, y);
                 Field.Instance.PlaceInCell(position);
-                NetworkEventManager.RaiseEventPlaceInCell(position);
             }
         }
         NetworkEventManager.RaiseEventMasterChecker();
@@ -93,7 +92,6 @@ public class CardInfo : ScriptableObject
                 Vector2Int position = new Vector2Int(x, y);
 
                 Field.Instance.PlaceInCell(position);
-                NetworkEventManager.RaiseEventPlaceInCell(position);
 
                 FinishLineManager.Instance.MasterChecker(PlayerManager.Instance.GetCurrentPlayer().SideId);
                 NetworkEventManager.RaiseEventMasterChecker();
@@ -108,7 +106,6 @@ public class CardInfo : ScriptableObject
             Vector2Int position = AIManager.Instance.GenerateRandomPosition(Field.Instance.FieldSize);
             if (position == new Vector2Int(-1, -1)) continue;
             Field.Instance.PlaceInCell(position);
-            NetworkEventManager.RaiseEventPlaceInCell(position);
 
             FinishLineManager.Instance.MasterChecker(PlayerManager.Instance.GetCurrentPlayer().SideId);
             NetworkEventManager.RaiseEventMasterChecker();
@@ -118,7 +115,7 @@ public class CardInfo : ScriptableObject
     public void AddFigure_Effected()
     {
         EffectManager.Instance.AddFigure_Effect();
-/**/
+        NetworkEventManager.RaiseEventAddEffect(EffectManager.Instance.AddFigure_Effect);
     }  
     
     #region Mana
@@ -126,8 +123,7 @@ public class CardInfo : ScriptableObject
     public void AddBonusMana_Effected()
     {
         EffectManager.Instance.AddBonusMana_Effect();
-
-      /**/
+        NetworkEventManager.RaiseEventAddEffect(EffectManager.Instance.AddBonusMana_Effect);
     }
 
     public void Decrease2MaxMana()
@@ -135,8 +131,9 @@ public class CardInfo : ScriptableObject
         ManaManager.Instance.IncreaseMaxMana(-2);
         NetworkEventManager.RaiseEventIncreaseMaxMana(-2);
         ManaManager.Instance.UpdateManaUI();
-        EffectManager.Instance.Decrease2MaxMana_Effect();   
-/**/
+
+        EffectManager.Instance.Decrease2MaxMana_Effect();
+        NetworkEventManager.RaiseEventAddEffect(EffectManager.Instance.Decrease2MaxMana_Effect);
     }
 
     public void Increase2MaxMana()
@@ -146,20 +143,20 @@ public class CardInfo : ScriptableObject
 
         ManaManager.Instance.UpdateManaUI();
         EffectManager.Instance.Increase2MaxMana_Effect();
-/**/
+        NetworkEventManager.RaiseEventAddEffect(EffectManager.Instance.Increase2MaxMana_Effect);
 
     }
 
     public void Random2Mana()
     {
         EffectManager.Instance.Random2Mana_Effect();
-        /**/
+        NetworkEventManager.RaiseEventAddEffect(EffectManager.Instance.Random2Mana_Effect);
     }
 
     public void DecreaseIncrease2Mana()
     {
         EffectManager.Instance.DecreaseIncrease2Mana_Effect();
-/**/
+        NetworkEventManager.RaiseEventAddEffect(EffectManager.Instance.DecreaseIncrease2Mana_Effect);
     }
 
     #endregion
@@ -169,8 +166,13 @@ public class CardInfo : ScriptableObject
     public void FreezeCell()
     {
         Field.Instance.FreezeCell(Card.ChosedCell);
+
+
         EffectManager.Instance.FreezeCell_Effect(Card.ChosedCell);
-       /* NetworkEventManager.RaiseEventSetSubState(Card.ChosedCell, CardId);*/
+        NetworkEventManager.RaiseEventAddFreezeEffect(Card.ChosedCell);
+
+
+
         FinishLineManager.Instance.MasterChecker(PlayerManager.Instance.GetCurrentPlayer().SideId);
     }
 
@@ -186,8 +188,9 @@ public class CardInfo : ScriptableObject
             while (_posList.IndexOf(Field.Instance.CellList[result.x][result.y]) != -1) result = AIManager.Instance.GenerateRandomPosition(Field.Instance.FieldSize);
 
             Field.Instance.FreezeCell(result);
-            EffectManager.Instance.FreezeCell_Effect(result); 
-           /* NetworkEventManager.RaiseEventSetSubState(result, CardId);*/
+
+            EffectManager.Instance.FreezeCell_Effect(result);
+            NetworkEventManager.RaiseEventAddFreezeEffect(result);
             _posList.Add(Field.Instance.CellList[result.x][result.y]);
 
         }
@@ -198,19 +201,9 @@ public class CardInfo : ScriptableObject
 
     public void Freeze3Cell_Effected()
     {
-        Sprite sprite = (PlayerManager.Instance.GetCurrentPlayer().SideId == 1) ? CardHighlightP1 : CardHighlightP2;
-        Action f = delegate ()
-        {
-            Vector2Int position = AIManager.Instance.GenerateRandomPosition(Field.Instance.FieldSize);
-            if (position == new Vector2Int(-1, -1)) return;
 
-            Field.Instance.FreezeCell(position);
-            EffectManager.Instance.FreezeCell_Effect(Card.ChosedCell);
-            /*NetworkEventManager.RaiseEventSetSubState(position, CardId);*/
-        };
-
-        Effect effect = new Effect(f, 3, PlayerManager.Instance.GetCurrentPlayer().SideId, Effect.EffectTypes.Parallel, 3, null, Cell.AnimationTime);
-        EffectManager.Instance.AddEffect(effect);
+        EffectManager.Instance.Freeze3Cell_Effected();
+        NetworkEventManager.RaiseEventAddEffect(EffectManager.Instance.Freeze3Cell_Effected);
     }
 
     public void FreezeFigure()
@@ -224,17 +217,19 @@ public class CardInfo : ScriptableObject
             AllCells.Remove(AllCells[randValue]);
         }
 
-        Sprite sprite = (PlayerManager.Instance.GetCurrentPlayer().SideId == 1) ? CardHighlightP1 : CardHighlightP2;
         for (int i = 0; i < resultCells.Count; i++)
         {
             Field.Instance.FreezeCell(resultCells[i].Id);
+
+
             EffectManager.Instance.FreezeCell_Effect(resultCells[i].Id);
-            NetworkEventManager.RaiseEventSetSubState(resultCells[i].Id, CardId);
+            NetworkEventManager.RaiseEventAddFreezeEffect(resultCells[i].Id);
+            /**/
         }
 
     }
 
-    public void BreakIce()
+    public void BreakFreeze()
     {
         List<Effect> effects = EffectManager.Instance.EffectList.FindAll(x => x.EffectPriority == 2);
         List<Effect> resultEffects = new List<Effect>();
@@ -248,11 +243,40 @@ public class CardInfo : ScriptableObject
         for (int i = 0; i < resultEffects.Count; i++)
         {
             resultEffects[i].OnEffectDisable.Invoke();
+            int effectIndex = EffectManager.Instance.EffectList.IndexOf(resultEffects[i]);
+
             EffectManager.Instance.EffectList.Remove(resultEffects[i]);
+            NetworkEventManager.RaiseEventClearEffect(effectIndex);
+
         }
         CoroutineManager.Instance.AddAwaitTime(resultEffects[0].EffectTimeDisable);
+        NetworkEventManager.RaiseEventAwaitTime(resultEffects[0].EffectTimeDisable);
         FinishLineManager.Instance.MasterChecker(PlayerManager.Instance.GetCurrentPlayer().SideId);
+        NetworkEventManager.RaiseEventMasterChecker();
 
+    }
+
+    public void PlaceAroundFreeze()
+    {
+        List<Cell> _allFreeze = new List<Cell>();
+        for (int i = 0; i < Field.Instance.CellList.Count; i++) _allFreeze.AddRange(Field.Instance.CellList[i].FindAll(x => x.SubState == CellSubState.freeze));
+
+        for (int i=0; i<_allFreeze.Count;i++)
+        {
+            List<Cell> NeighCell = Field.Instance.GetAllEmptyNeighbours(_allFreeze[i]);
+            Debug.Log($"{_allFreeze[i].Id} : {NeighCell.Count}");
+            if (NeighCell.Count > 0)
+            {
+                int randValue = Random.Range(0, NeighCell.Count);
+                Field.Instance.FreezeCell(NeighCell[randValue].Id);
+
+                EffectManager.Instance.FreezeCell_Effect(NeighCell[randValue].Id);
+                NetworkEventManager.RaiseEventAddFreezeEffect(NeighCell[randValue].Id);
+            }
+        }
+
+        FinishLineManager.Instance.MasterChecker(PlayerManager.Instance.GetCurrentPlayer().SideId);
+        NetworkEventManager.RaiseEventMasterChecker();
     }
 
     public void FreezeAllMana()
@@ -266,13 +290,17 @@ public class CardInfo : ScriptableObject
                 Vector2Int result = AIManager.Instance.GenerateRandomPosition(Field.Instance.FieldSize);
                 if (result == new Vector2Int(-1, -1)) break;
                 Field.Instance.FreezeCell(result);
+
                 EffectManager.Instance.FreezeCell_Effect(result);
+                NetworkEventManager.RaiseEventAddFreezeEffect(result);
+/**/
             }
 
         }
         ManaManager.Instance.UpdateManaUI();
         CoroutineManager.Instance.AddAwaitTime(Cell.AnimationTime);        
         FinishLineManager.Instance.MasterChecker(PlayerManager.Instance.GetCurrentPlayer().SideId);
+        NetworkEventManager.RaiseEventMasterChecker();
 
     }
 

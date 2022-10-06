@@ -10,15 +10,15 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 280c217edb247014c88a71e11514f438, type: 3}
-  m_Name: DestroyIce
+  m_Name: DestroyFreeze
   m_EditorClassIdentifier: 
-  CardId: 0
+  CardId: 15
   CardImageP1: {fileID: 21300000, guid: b3287a97f31c94644b34e5d5a1f2c0ed, type: 3}
   CardImageP2: {fileID: 21300000, guid: b3287a97f31c94644b34e5d5a1f2c0ed, type: 3}
   CardHighlightP1: {fileID: 0}
   CardHighlightP2: {fileID: 0}
   CardHighlightColor: {r: 0, g: 0, b: 0, a: 0}
-  CardName: Destroy Ice
+  CardName: Destroy Freeze
   CardDescription: "\u0423\u043D\u0438\u0447\u0442\u043E\u0436\u0430\u0435\u0442
     \u0434\u043E 6 \u043B\u044C\u0434\u0430 \u0438 \u0441\u0442\u0430\u0432\u0438\u0442
     \u0441\u0442\u043E\u043B\u044C\u043A\u043E \u0444\u0438\u0433\u0443\u043A \u0441\u043A\u043E\u043B\u044C\u043A\u043E
@@ -37,7 +37,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 11400000}
         m_TargetAssemblyTypeName: CardInfo, Assembly-CSharp
-        m_MethodName: BreakIce
+        m_MethodName: BreakFreeze
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}

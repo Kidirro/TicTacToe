@@ -522,7 +522,7 @@ namespace Managers
         public List<Cell> GetAllCellWithFigure(CellFigure figure)
         {
             List<Cell> result = new List<Cell>();
-            for (int i =0; i < CellList.Count; i++)
+            for (int i = 0; i < CellList.Count; i++)
             {
                 result.AddRange(CellList[i].FindAll(x => x.Figure == figure));
             }
@@ -533,6 +533,27 @@ namespace Managers
         {
 
             return h >= (_startPositionY + _remainY);
+        }
+
+        public List<Cell> GetAllEmptyNeighbours(Cell cell)
+        {
+            List<Cell> cells = new List<Cell>();
+            Vector2Int startPos = cell.Id;
+            Cell checkedPos;
+
+            checkedPos = IsOnField(startPos,Vector2Int.down);
+            if (checkedPos!=null && IsCellEnableToPlace(checkedPos.Id)) cells.Add(CellList[checkedPos.Id.x][checkedPos.Id.y]);
+            
+            checkedPos = IsOnField(startPos,Vector2Int.up);
+            if (checkedPos!=null && IsCellEnableToPlace(checkedPos.Id)) cells.Add(CellList[checkedPos.Id.x][checkedPos.Id.y]);
+            
+            checkedPos = IsOnField(startPos,Vector2Int.right);
+            if (checkedPos!=null && IsCellEnableToPlace(checkedPos.Id)) cells.Add(CellList[checkedPos.Id.x][checkedPos.Id.y]);
+            
+            checkedPos = IsOnField(startPos,Vector2Int.left);
+            if (checkedPos!=null && IsCellEnableToPlace(checkedPos.Id)) cells.Add(CellList[checkedPos.Id.x][checkedPos.Id.y]);
+
+            return cells;
         }
 
         /// <summary>
@@ -598,8 +619,6 @@ namespace Managers
             }
         }
 
-
-
         public bool IsZoneEmpty(Vector2Int Position, Vector2Int AreaSize)
         {
             Vector4 CurrentArea = AreaManager.GetArea(Position, AreaSize);
@@ -659,9 +678,15 @@ namespace Managers
         public Cell GetNextCell(Vector2Int currentId, Vector2Int step)
         {
             Vector2Int nextId = currentId + step;
-            if (nextId.x < 0 || nextId.y < 0 || nextId.x >= Field.Instance.FieldSize.x || nextId.y >= Field.Instance.FieldSize.y) return null;
+            if (IsOnField(currentId,step)==null) return null;
             if (Field.Instance.CellList[nextId.x][nextId.y].Figure == CellFigure.none) return null;
+            return Field.Instance.CellList[nextId.x][nextId.y];
+        }
 
+        public Cell IsOnField(Vector2Int currentId, Vector2Int step)
+        {
+            Vector2Int nextId = currentId + step;
+            if (nextId.x < 0 || nextId.y < 0 || nextId.x >= Field.Instance.FieldSize.x || nextId.y >= Field.Instance.FieldSize.y) return null;
             return Field.Instance.CellList[nextId.x][nextId.y];
         }
 
@@ -700,23 +725,16 @@ namespace Managers
             return false;
         }
 
-        public void PlaceInCell(Vector2Int id)
+        public void PlaceInCell(Vector2Int id, bool isNeedEvent = true)
         {
             if (IsCellEnableToPlace(id))
             {
                 CellList[id.x][id.y].SetFigure(PlayerManager.Instance.GetCurrentPlayer().SideId);
+                if (isNeedEvent) NetworkEventManager.RaiseEventPlaceInCell(id);
             }
         }
 
-        public void PlaceInCell(Cell cell)
-        {
-            if (IsCellEnableToPlace(cell.Id))
-            {
-                CellList[cell.Id.x][cell.Id.y].SetFigure(PlayerManager.Instance.GetCurrentPlayer().SideId);
-            }
-        }
-
-        public void FreezeCell(Vector2Int id, Sprite sprite)
+        public void FreezeCell(Vector2Int id, Sprite sprite, bool isNeedEvent = true)
         {
             if (CellList[id.x][id.y].Figure == CellFigure.none)
             {
@@ -734,9 +752,11 @@ namespace Managers
                                              Color.black,
                                              CellSubState.freeze);
             }
+
+            if (isNeedEvent) NetworkEventManager.RaiseEventFreezeCell(id);
         }
-        
-        public void FreezeCell(Vector2Int id)
+
+        public void FreezeCell(Vector2Int id, bool isNeedEvent = true)
         {
             if (CellList[id.x][id.y].Figure == CellFigure.none)
             {
@@ -754,18 +774,14 @@ namespace Managers
                                              Color.black,
                                              CellSubState.freeze);
             }
+
+            if (isNeedEvent) NetworkEventManager.RaiseEventFreezeCell(id);
         }
 
-        public void ResetSubStateWithPlaceFigure(Vector2Int Position, Vector2Int AreaSize, CellFigure figure)
+        public void ResetSubStateWithPlaceFigure(Vector2Int Position, bool isNeedEvent = true)
         {
-            Vector4 CurrentArea = AreaManager.GetArea(Position, AreaSize);
-            for (int x = (int)CurrentArea.x; x <= CurrentArea.z; x++)
-            {
-                for (int y = (int)CurrentArea.y; y <= CurrentArea.w; y++)
-                {
-                    CellList[x][y].ResetSubStateWithPlace((CellFigure)PlayerManager.Instance.GetCurrentPlayer().SideId);
-                }
-            }
+            CellList[Position.x][Position.y].ResetSubStateWithPlace((CellFigure)PlayerManager.Instance.GetCurrentPlayer().SideId);
+            if (isNeedEvent) NetworkEventManager.RaiseEventUnFreezeCell(Position);
         }
 
         public void ResetFigureWithPlaceSubState(Vector2Int Position, Vector2Int AreaSize, Sprite sprite, Color color, CellSubState cellSubState)
@@ -775,7 +791,7 @@ namespace Managers
             {
                 for (int y = (int)CurrentArea.y; y <= CurrentArea.w; y++)
                 {
-                    CellList[x][y].ResetFigureWithPlaceState(sprite,color,cellSubState);
+                    CellList[x][y].ResetFigureWithPlaceState(sprite, color, cellSubState);
                 }
             }
         }

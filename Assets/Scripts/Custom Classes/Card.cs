@@ -231,7 +231,6 @@ public class Card : MonoBehaviour
     public void SetSideCard(int side)
     {
         _cardImage.sprite = (side == 1) ? Info.CardImageP1 : Info.CardImageP2;
-        Debug.Log("Current side:" + side);
     }
 
 

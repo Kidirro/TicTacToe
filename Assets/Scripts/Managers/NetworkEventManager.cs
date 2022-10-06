@@ -3,6 +3,7 @@ using UnityEngine;
 using Photon.Pun;
 using Photon.Realtime;
 using Managers;
+using System;
 
 public class NetworkEventManager : Singleton<NetworkEventManager>, IOnEventCallback
 {
@@ -47,6 +48,15 @@ public class NetworkEventManager : Singleton<NetworkEventManager>, IOnEventCallb
         RaiseEventOptions RO = new RaiseEventOptions { Receivers = ReceiverGroup.Others };
         SendOptions SO = new SendOptions { Reliability = true };
         PhotonNetwork.RaiseEvent(11, null, RO, SO);
+    }
+
+    public static void RaiseEventAwaitTime(float time)
+    {
+        if (!GameplayManager.IsOnline) return;
+
+        RaiseEventOptions RO = new RaiseEventOptions { Receivers = ReceiverGroup.Others };
+        SendOptions SO = new SendOptions { Reliability = true };
+        PhotonNetwork.RaiseEvent(12, time, RO, SO);
     }
 
     #endregion
@@ -118,50 +128,72 @@ public class NetworkEventManager : Singleton<NetworkEventManager>, IOnEventCallb
 
     #region Freeze_event
 
-    public static void RaiseEventSetSubState(Vector2Int id, CardInfo card)
+    public static void RaiseEventFreezeCell(Vector2Int id)
     {
         if (!GameplayManager.IsOnline) return;
-
-        Vector3Int data = new Vector3Int(id.x, id.y, card.CardId);
 
         RaiseEventOptions RO = new RaiseEventOptions { Receivers = ReceiverGroup.Others };
         SendOptions SO = new SendOptions { Reliability = true };
-        PhotonNetwork.RaiseEvent(50, data, RO, SO);
-    }
-    
-    public static void RaiseEventSetSubState(Vector2Int id, int card)
-    {
-        if (!GameplayManager.IsOnline) return;
-
-        Vector3Int data = new Vector3Int(id.x, id.y, card);
-
-        RaiseEventOptions RO = new RaiseEventOptions { Receivers = ReceiverGroup.Others };
-        SendOptions SO = new SendOptions { Reliability = true };
-        PhotonNetwork.RaiseEvent(50, data, RO, SO);
+        PhotonNetwork.RaiseEvent(50, id, RO, SO);
     }
 
-    public static void RaiseEventResetSubState(Vector2Int id)
+    public static void RaiseEventUnFreezeCell(Vector2Int id)
     {
         if (!GameplayManager.IsOnline) return;
-
 
         RaiseEventOptions RO = new RaiseEventOptions { Receivers = ReceiverGroup.Others };
         SendOptions SO = new SendOptions { Reliability = true };
         PhotonNetwork.RaiseEvent(51, id, RO, SO);
-    }    
-    
-   /* public static void RaiseEventFreezeCell(EffectTest id)
-    {
-        if (!GameplayManager.IsOnline) return;
-
-        Debug.Log($"effect send! {id.EffectType} : {id.EffectTurnCount}");
-        RaiseEventOptions RO = new RaiseEventOptions { Receivers = ReceiverGroup.Others };
-        SendOptions SO = new SendOptions { Reliability = true };
-        PhotonNetwork.RaiseEvent(52, id, RO, SO);
     }
-*/
+
     #endregion
 
+    #region Effect_event
+
+    public static void RaiseEventAddEffect(Action action)
+    {
+        if (!GameplayManager.IsOnline) return;
+        if (EffectManager.Instance.GetIdSerializibleAction(action) == -1) return;
+        Debug.Log($"Send effect! {EffectManager.Instance.GetIdSerializibleAction(action)}");
+        RaiseEventOptions RO = new RaiseEventOptions { Receivers = ReceiverGroup.Others };
+        SendOptions SO = new SendOptions { Reliability = true };
+        PhotonNetwork.RaiseEvent(60, EffectManager.Instance.GetIdSerializibleAction(action), RO, SO);
+    }
+
+    public static void RaiseEventAddEffect(int action)
+    {
+        if (!GameplayManager.IsOnline) return;
+        RaiseEventOptions RO = new RaiseEventOptions { Receivers = ReceiverGroup.Others };
+        SendOptions SO = new SendOptions { Reliability = true };
+        PhotonNetwork.RaiseEvent(60, action, RO, SO);
+    }
+
+    public static void RaiseEventClearEffect(int action)
+    {
+        if (!GameplayManager.IsOnline) return;
+        RaiseEventOptions RO = new RaiseEventOptions { Receivers = ReceiverGroup.Others };
+        SendOptions SO = new SendOptions { Reliability = true };
+        PhotonNetwork.RaiseEvent(61, action, RO, SO);
+    }
+
+    public static void RaiseEventUpdateEffect(int action, int value)
+    {
+        if (!GameplayManager.IsOnline) return;
+        Vector2Int data = new Vector2Int(action, value);
+        RaiseEventOptions RO = new RaiseEventOptions { Receivers = ReceiverGroup.Others };
+        SendOptions SO = new SendOptions { Reliability = true };
+        PhotonNetwork.RaiseEvent(62, data, RO, SO);
+    }
+
+    public static void RaiseEventAddFreezeEffect(Vector2Int position)
+    {
+        if (!GameplayManager.IsOnline) return;
+        RaiseEventOptions RO = new RaiseEventOptions { Receivers = ReceiverGroup.Others };
+        SendOptions SO = new SendOptions { Reliability = true };
+        PhotonNetwork.RaiseEvent(63, position, RO, SO);
+    }
+
+    #endregion
 
     /*   public static void RaiseEventCellState(Vector2Int id)
        {
@@ -190,6 +222,10 @@ public class NetworkEventManager : Singleton<NetworkEventManager>, IOnEventCallb
             case 11:
                 GameplayManager.Instance.SetGamePlayStateQueue(GameplayManager.GameplayState.NewTurn);
                 break;
+            case 12:
+                float data_12 = (float)photonEvent.CustomData;
+                CoroutineManager.Instance.AddAwaitTime(data_12);
+                break;
             case 20:
                 Vector2Int data_20 = (Vector2Int)photonEvent.CustomData;
                 ManaManager.Instance.IncreaseMana(data_20.x, data_20.y == 1);
@@ -216,25 +252,31 @@ public class NetworkEventManager : Singleton<NetworkEventManager>, IOnEventCallb
                 break;
             case 40:
                 Vector2Int data_40 = (Vector2Int)photonEvent.CustomData;
-                Field.Instance.PlaceInCell(data_40);
+                Field.Instance.PlaceInCell(data_40, false);
                 break;
             case 50:
-                Vector3Int data_50 = (Vector3Int)photonEvent.CustomData;
-                Vector2Int position = new Vector2Int(data_50.x, data_50.y);
-                CardInfo card = CollectionManager.GetCardFromId(data_50.z);
-               /* Field.Instance.FreezeCellDisableEffect(
-                               position,
-                               PlayerManager.Instance.GetCurrentPlayer().SideId == 1 ? card.CardHighlightP1 : card.CardHighlightP2);*/
+                Vector2Int data_50 = (Vector2Int)photonEvent.CustomData;
+                Field.Instance.FreezeCell(data_50, false);
                 break;
             case 51:
                 Vector2Int data_51 = (Vector2Int)photonEvent.CustomData;
-                Field.Instance.ResetSubStateZone(data_51, Vector2Int.one);
+                Field.Instance.ResetSubStateWithPlaceFigure(data_51, false);
                 break;
-            case 52:
-          /*      EffectTest data_52 = (EffectTest)photonEvent.CustomData;
-
-                Debug.Log($"{data_52.EffectType} : {data_52.EffectTurnCount}");*/
-
+            case 60:
+                int data_60 = (int)photonEvent.CustomData;
+                EffectManager.Instance.AddEffect(data_60);
+                break;
+            case 61:
+                int data_61 = (int)photonEvent.CustomData;
+                EffectManager.Instance.ClearEffect(data_61);
+                break;
+            case 62:
+                Vector2Int data_62 = (Vector2Int)photonEvent.CustomData;
+                EffectManager.Instance.UpdateEffectState(data_62.x, data_62.y);
+                break;
+            case 63:
+                Vector2Int data_63 = (Vector2Int)photonEvent.CustomData;
+                EffectManager.Instance.FreezeCell_Effect(data_63);
                 break;
         }
 
@@ -247,6 +289,7 @@ public class NetworkEventManager : Singleton<NetworkEventManager>, IOnEventCallb
 1* - ивенты со стейт машиной
 10 - глобальная проверка    
 11 - новый ход
+12 - ожидание времени в очереди
 
 2* - ивенты с маной
 20 - изменение текущей маны
@@ -263,4 +306,11 @@ public class NetworkEventManager : Singleton<NetworkEventManager>, IOnEventCallb
 5* - ивенты с заморозкой
 50 - заморозка клетки
 51 - разморозка клетки
+
+6* - ивенты с эффектами
+60 - добавить сериализуемый эффект 
+61 - удалить эффект
+62 - обновить количество ходов эффекта
+63 - добавить эффект заморозки
+64 - активировать OnDisableEffect
  */
