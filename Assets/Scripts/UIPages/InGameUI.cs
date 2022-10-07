@@ -73,7 +73,7 @@ public class InGameUI : Singleton<InGameUI>
 
     public void ReturnHome()
     {
-        if (GameplayManager.TypeGame == GameplayManager.GameType.MultiplayerHuman) RoomManager.LeaveRoom();
+        if (GameplayManager.IsOnline) RoomManager.LeaveRoom();
         GameSceneManager.Instance.SetGameScene(GameSceneManager.GameScene.MainMenu);
     }
 
@@ -101,6 +101,7 @@ public class InGameUI : Singleton<InGameUI>
 
     public void RestartGame()
     {
+        if (GameplayManager.IsOnline) return;
         StateGameOverPanel(false);
         GameplayManager.Instance.SetGamePlayStateQueue(GameplayManager.GameplayState.RestartGame);
     }

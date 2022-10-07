@@ -31,6 +31,11 @@ namespace Managers
         {
             _currentScoreList.Add(player, 0);
         }
+ 
+        public void RemovePlayer (int player)
+        {
+            _currentScoreList.Remove(player);
+        }
 
         public void ResetAllScore()
         {

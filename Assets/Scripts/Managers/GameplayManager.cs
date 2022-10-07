@@ -9,6 +9,11 @@ namespace Managers
     {
         private static GameplayState _gameplayState = GameplayState.NewGame;
 
+        public static GameplayState CurrentGameplayState
+        {
+            get => _gameplayState;
+        }
+
         public static GameType TypeGame = 0;
 
         private bool _isNewStateInQueue = false;
@@ -137,9 +142,10 @@ namespace Managers
 
                     break;
                 case GameplayState.GameOver:
+                    if (IsOnline) RoomManager.LeaveRoom();
                     int valueMoney = 0;
-                    if (GameplayManager.TypeGame == GameType.SingleAI && ScoreManager.Instance.GetWinner() != -1 && PlayerManager.Instance.Players[ScoreManager.Instance.GetWinner() - 1].EntityType == PlayerType.Human) valueMoney = CoinManager.CoinPerWin;
-                    else if (GameplayManager.TypeGame == GameType.SingleAI && ScoreManager.Instance.GetWinner() == -1) valueMoney = CoinManager.CoinPerWin / 2;
+                    if (GameplayManager.TypeGame != GameType.SingleHuman && ScoreManager.Instance.GetWinner() != -1 && PlayerManager.Instance.Players[ScoreManager.Instance.GetWinner() - 1].EntityType == PlayerType.Human) valueMoney = CoinManager.CoinPerWin;
+                    else if (GameplayManager.TypeGame != GameType.SingleHuman && ScoreManager.Instance.GetWinner() == -1) valueMoney = CoinManager.CoinPerWin / 2;
 
                     CoinManager.AllCoins += valueMoney;
                     InGameUI.Instance.StateGameOverPanel(true, valueMoney);

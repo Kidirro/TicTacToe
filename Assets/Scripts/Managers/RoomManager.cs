@@ -23,6 +23,9 @@ public class RoomManager : MonoBehaviourPunCallbacks
     public override void OnPlayerLeftRoom(Player otherPlayer)
     {
         base.OnPlayerLeftRoom(otherPlayer);
+        if (GameplayManager.CurrentGameplayState == GameplayManager.GameplayState.GameOver) return;
+        ScoreManager.Instance.RemovePlayer(otherPlayer.ActorNumber);
+        GameplayManager.Instance.SetGameplayState(GameplayManager.GameplayState.GameOver);
         Debug.Log("Player Leave:" +otherPlayer.ActorNumber);
     }
 
