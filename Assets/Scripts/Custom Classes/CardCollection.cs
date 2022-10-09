@@ -36,6 +36,9 @@ public class CardCollection : MonoBehaviour
     [Header("Objects"), SerializeField]
     private GameObject _cardObj;
 
+    [SerializeField]
+    private CanvasGroup _canvasGroup;
+
     /// <summary>
     /// Обьект карты (закрытое состояние)
     /// </summary>
@@ -76,6 +79,11 @@ public class CardCollection : MonoBehaviour
         }
     }
 
+    public void SetDeckState(bool state)
+    {
+        _canvasGroup.alpha = (state) ? 1 : 0.2f;
+    }
+
     public void RewerseState()
     {
             PlayerPrefs.SetInt("IsCard" + Info.name + "Unlocked", IsUnlock?0:1);
@@ -86,5 +94,11 @@ public class CardCollection : MonoBehaviour
     {
         PlayerPrefs.SetInt("IsCard" + Info.name + "Unlocked", 1);
         UpdateUI();
+    }   
+    
+    public void PickCard()
+    {
+        Managers.CollectionManager.PickCard(Info);
+        SetDeckState(Managers.CollectionManager.IsOnRedactedDeck(Info));
     }
 }
