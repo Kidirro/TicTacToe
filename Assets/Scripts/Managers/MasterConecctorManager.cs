@@ -27,7 +27,7 @@ namespace Managers {
             Debug.Log("Start search!");
         }
 
-        public static void StopSearh()
+        public static void StopSearñh()
         {
             PhotonNetwork.LeaveRoom();
         }
