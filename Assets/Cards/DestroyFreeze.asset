@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: DestroyFreeze
   m_EditorClassIdentifier: 
   CardId: 15
-  CardImageP1: {fileID: 21300000, guid: b3287a97f31c94644b34e5d5a1f2c0ed, type: 3}
-  CardImageP2: {fileID: 21300000, guid: b3287a97f31c94644b34e5d5a1f2c0ed, type: 3}
+  CardImageP1: {fileID: 21300000, guid: 696a6d66d9c71c1488c46284ed74fdcb, type: 3}
+  CardImageP2: {fileID: 21300000, guid: 696a6d66d9c71c1488c46284ed74fdcb, type: 3}
   CardHighlightP1: {fileID: 0}
   CardHighlightP2: {fileID: 0}
   CardHighlightColor: {r: 0, g: 0, b: 0, a: 0}

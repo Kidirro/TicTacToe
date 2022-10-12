@@ -12,9 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 280c217edb247014c88a71e11514f438, type: 3}
   m_Name: DecreaseIncrease2Mana
   m_EditorClassIdentifier: 
-  CardId: 0
-  CardImageP1: {fileID: 21300000, guid: e28be8de2979357428103e54d71e18d1, type: 3}
-  CardImageP2: {fileID: 21300000, guid: e28be8de2979357428103e54d71e18d1, type: 3}
+  CardId: 3
+  CardImageP1: {fileID: 21300000, guid: 0e787908646595f4fb7f92cd091a2050, type: 3}
+  CardImageP2: {fileID: 21300000, guid: 0e787908646595f4fb7f92cd091a2050, type: 3}
   CardHighlightP1: {fileID: 0}
   CardHighlightP2: {fileID: 0}
   CardHighlightColor: {r: 0, g: 0, b: 0, a: 0}
