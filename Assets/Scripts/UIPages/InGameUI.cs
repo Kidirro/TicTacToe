@@ -121,9 +121,5 @@ public class InGameUI : Singleton<InGameUI>
         }
     }
     
-    public void SetTimeText(float time)
-    {
-        _timerPanelText.text = time.ToString();    
-    }
 
 }

@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace Managers
 {
@@ -8,31 +9,53 @@ namespace Managers
     public class HistoryManager : Singleton<HistoryManager>
     {
 
-        [SerializeField]
-        private GameObject _historyUnitPrefab;
+        [Header("Prefabs"), SerializeField]
+        private GameObject _historySegmentPrefabP1;
 
         [SerializeField]
-        private Transform _historyContetParent;
+        private GameObject _historySegmentPrefabP2;
+        
+        
+        [SerializeField]
+        private GameObject _historyCardPrefab;
 
-        private List<GameObject> _historyUnitObjectsList = new List<GameObject>();
+        [Space, SerializeField]
+        private RectTransform _historyContentParent;
+
+        private List<GameObject> _historySegmentObjectsList = new List<GameObject>();
+
         private List<HistoryUnit> _historyUnitInfoList = new List<HistoryUnit>();
+
+        private bool isNewTurn = true;
 
         public void AddHistoryNewTurn(PlayerInfo player)
         {
-            GameObject historyUnit = Instantiate(_historyUnitPrefab, _historyContetParent);
-            _historyUnitObjectsList.Add(historyUnit);
             _historyUnitInfoList.Add(new HistoryUnit { HistoryType = HistoryUnit.HistoryUnitTypes.NewTurn, HistoryPlayer = player });
+            isNewTurn = true;
         }
 
         public void AddHistoryCard(PlayerInfo player, CardInfo card)
         {
-            GameObject historyUnit = Instantiate(_historyUnitPrefab, _historyContetParent);
-            _historyUnitObjectsList.Add(historyUnit);
-            _historyUnitInfoList.Add(new HistoryUnit { HistoryType = HistoryUnit.HistoryUnitTypes.Card, HistoryPlayer = player, HistoryCard = card });
+            if (isNewTurn)
+            {
+                _historySegmentObjectsList.Add(Instantiate((player.SideId == 1) ? _historySegmentPrefabP1 : _historySegmentPrefabP2, _historyContentParent));                
+                _historySegmentObjectsList[_historySegmentObjectsList.Count-1].transform.SetSiblingIndex(0);
+                if (_historySegmentObjectsList.Count == 7)
+                {
+                    Destroy(_historySegmentObjectsList[0].gameObject);
+                    _historySegmentObjectsList.RemoveAt(0);
+                }
+                isNewTurn = false;
+            }
+
+            GameObject historyUnit = Instantiate(_historyCardPrefab, _historySegmentObjectsList[_historySegmentObjectsList.Count-1].transform);
+            historyUnit.transform.GetChild(0).GetComponent<Image>().sprite = (player.SideId == 1) ? card.CardImageP1 : card.CardImageP2;
+            historyUnit.transform.SetSiblingIndex(0);
+            StartCoroutine(IChangePosition());
         }
 
         private void Update()
-        {
+        {            
             if (Input.GetKeyDown(KeyCode.I))
             {
                 for (int i = 0; i < _historyUnitInfoList.Count; i++)
@@ -47,11 +70,17 @@ namespace Managers
         public void RestartGame()
         {
             _historyUnitInfoList = new List<HistoryUnit>();
-            for (int i=0; i< _historyUnitObjectsList.Count; i++)
+            for (int i=0; i< _historySegmentObjectsList.Count; i++)
             {
-                Destroy(_historyUnitObjectsList[i]);
+                Destroy(_historySegmentObjectsList[i]);
             }
-            _historyUnitObjectsList = new List<GameObject>();
+            _historySegmentObjectsList = new List<GameObject>();
+        }
+
+        IEnumerator IChangePosition()
+        {
+            yield return null;
+            _historyContentParent.anchoredPosition = new Vector2(_historyContentParent.rect.width / 2, _historyContentParent.anchoredPosition.y);
         }
 
         public class HistoryUnit

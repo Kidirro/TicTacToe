@@ -52,7 +52,6 @@ namespace Managers
             while (_timeLeft > 0)
             {
                 yield return null;
-                InGameUI.Instance.SetTimeText(_timeLeft);
                 _timeLeft -= Time.deltaTime;
             }
             /*GameplayManager.Instance.SetGameplayState(GameplayState.NewTurn);*/
