@@ -10,7 +10,7 @@ namespace Managers
 
         public static int CoinPerWin = 20;
 
-        public static int CoinPerUnlock = 150;
+        public static int CoinPerUnlock = 50;
 
         public static int AllCoins
         {

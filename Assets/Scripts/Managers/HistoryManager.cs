@@ -51,6 +51,7 @@ namespace Managers
             GameObject historyUnit = Instantiate(_historyCardPrefab, _historySegmentObjectsList[_historySegmentObjectsList.Count-1].transform);
             historyUnit.transform.GetChild(0).GetComponent<Image>().sprite = (player.SideId == 1) ? card.CardImageP1 : card.CardImageP2;
             historyUnit.transform.SetSiblingIndex(0);
+            Debug.Log("TryStartCoroutine");
             StartCoroutine(IChangePosition());
         }
 
@@ -79,8 +80,11 @@ namespace Managers
 
         IEnumerator IChangePosition()
         {
-            yield return null;
+
+            float startWidth = _historyContentParent.rect.width;
+            while(startWidth == _historyContentParent.rect.width)            yield return null;
             _historyContentParent.anchoredPosition = new Vector2(_historyContentParent.rect.width / 2, _historyContentParent.anchoredPosition.y);
+            Debug.Log("end thread");
         }
 
         public class HistoryUnit

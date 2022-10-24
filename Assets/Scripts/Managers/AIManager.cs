@@ -8,6 +8,8 @@ namespace Managers
     {
         public BotGameType BotAggression;
 
+        public CardInfo BotCardDefault;
+
         public Vector2Int GenerateNewTurn(int SideId)
         {
             if (ScoreManager.Instance.GetScore(PlayerManager.Instance.GetCurrentPlayer().SideId) > ScoreManager.Instance.GetScore(PlayerManager.Instance.GetNextPlayer().SideId))

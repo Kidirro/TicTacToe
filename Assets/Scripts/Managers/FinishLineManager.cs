@@ -192,7 +192,7 @@ namespace Managers
                 Field.Instance.DrawFinishLine(line, i);
                 _lineForClearing.Remove(line);
             }
-            yield return new WaitForSeconds(FinishLine.AnimationTime);
+            yield return new WaitForSeconds(FinishLine.AnimationTime*2);
 
         }
     }

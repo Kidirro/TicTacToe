@@ -2726,6 +2726,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   BotAggression: 0
+  BotCardDefault: {fileID: 11400000, guid: bf2f2ec6defab5541bef361fc04f40c1, type: 2}
 --- !u!1 &744024354
 GameObject:
   m_ObjectHideFlags: 0
@@ -2757,7 +2758,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _isNeedGizmos: 1
   _transformParent: {fileID: 1890832272}
-  _buttonBorder: 125
+  _buttonBorder: 35
   _widthBorder: 250
   _widthCard: 100
   _deckPosition: 800

@@ -48,16 +48,18 @@ namespace Managers
             if (_cardDeck.Count == 0) CreateDeckList();
 
 
-            _currentDeck = new BoolArray(_cardListStat.Count);
+            _currentDeck = new BoolArray();
             if (PlayerPrefs.HasKey("CurrentDeck"))
             {
                 LoadCurrentDeck();
+                CheckCurrentDeck();
+                SaveCurrentDeck();
             }
             else
             {
                 for (int i = 0; i < _cardCollections.Count; i++)
                 {
-                    _currentDeck.Array[i] = _cardCollections[i].IsUnlock;
+                    _currentDeck.Array.Add(_cardCollections[i].IsUnlock);
                 }
                 SaveCurrentDeck();
 
@@ -169,6 +171,14 @@ namespace Managers
             PlayerPrefs.SetString("CurrentDeck", JsonUtility.ToJson(_currentDeck));
         }
 
+        private void CheckCurrentDeck()
+        {
+            for(int i =0; i < _cardCollections.Count; i++)
+            {
+                if (i >= _currentDeck.Array.Count) _currentDeck.Array.Add(_cardCollections[i].IsUnlock);
+                else _currentDeck.Array[i] = _cardCollections[i].IsUnlock && _currentDeck.Array[i];
+            }
+        }
 
         public void TrySaveDeck()
         {
@@ -196,11 +206,11 @@ namespace Managers
         [Serializable]
         public class BoolArray
         {
-            public bool[] Array;
+            public List<bool> Array;
 
-            public BoolArray(int len)
+            public BoolArray()
             {
-                Array = new bool[len];
+                Array = new List<bool>();
             }
         }
     }

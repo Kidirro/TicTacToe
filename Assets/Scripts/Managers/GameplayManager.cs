@@ -131,6 +131,7 @@ namespace Managers
                         Debug.LogFormat("Current tactic : {0}", AIManager.Instance.BotAggression);
 
                         FinishLineManager.Instance.MasterChecker(PlayerManager.Instance.GetCurrentPlayer().SideId);
+                        HistoryManager.Instance.AddHistoryCard(PlayerManager.Instance.GetCurrentPlayer(), AIManager.Instance.BotCardDefault);
 
                         SetGamePlayStateQueue(GameplayState.NewTurn);
                         //SetGameplayState(GameplayState.NewTurn);
