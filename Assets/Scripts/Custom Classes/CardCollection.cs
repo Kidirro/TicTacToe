@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using UnityEngine.EventSystems;
 
 
 public class CardCollection : MonoBehaviour
 {
-
     /// <summary>
     /// Открыта ли карта по умолчанию
     /// </summary>
@@ -71,10 +71,14 @@ public class CardCollection : MonoBehaviour
         {            
             _manapoints.text = (Info.CardManacost + Info.CardBonusManacost).ToString();
             _cardImage.sprite = Info.CardImageP1;
-            _cardDescription.text = Info.CardDescription;
+
+            string desc = "";
+            desc= I2.Loc.LocalizationManager.TryGetTranslation(Info.CardDescription, out desc) ? I2.Loc.LocalizationManager.GetTranslation(Info.CardDescription) : Info.CardDescription;
+            _cardDescription.text = desc;
+
             for (int i = 0; i < _bonusImageList.Count; i++)
             {
-                _bonusImageList[i].SetActive(i + 1 == (int)Info.CardBonus);
+                _bonusImageList[i].SetActive(i== (int)Info.CardBonus);
             }
         }
     }
@@ -82,12 +86,6 @@ public class CardCollection : MonoBehaviour
     public void SetDeckState(bool state)
     {
         _canvasGroup.alpha = (state) ? 1 : 0.2f;
-    }
-
-    public void RewerseState()
-    {
-            PlayerPrefs.SetInt("IsCard" + Info.name + "Unlocked", IsUnlock?0:1);
-        UpdateUI();
     }
 
     public void UnlockCard()
@@ -101,4 +99,15 @@ public class CardCollection : MonoBehaviour
         Managers.CollectionManager.PickCard(Info);
         SetDeckState(Managers.CollectionManager.IsOnRedactedDeck(Info));
     }
+
+    public void OnPointerDown()
+    {
+        Managers.CollectionManager.Instance.StartTap(this);
+    }
+
+    public void OnPointerUp() 
+    {
+        Managers.CollectionManager.Instance.EndTap(this);
+    }
+
 }

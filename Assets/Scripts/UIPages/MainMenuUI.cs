@@ -16,9 +16,6 @@ public class MainMenuUI : Singleton<MainMenuUI>
     [Header("Pages"), SerializeField]
     private GameObject _mainMenu;
 
-    [SerializeField]
-    private GameObject _preSettings;
-
     [Header("Buttons"), SerializeField]
     private Button _multiplayerButton;
 
@@ -55,7 +52,7 @@ public class MainMenuUI : Singleton<MainMenuUI>
         GameplayManager.TypeGame = GameplayManager.GameType.SingleHuman;
         GameSceneManager.Instance.SetGameScene(GameSceneManager.GameScene.Game);
     }
-    
+
     public void OnMultiplierOButtonStart()
     {
         GameplayManager.TypeGame = GameplayManager.GameType.MultiplayerHuman;
@@ -69,7 +66,7 @@ public class MainMenuUI : Singleton<MainMenuUI>
 
     public void ChangeGrowFieldState()
     {
-//        Field._isFieldGrow_Dew = !Field._isFieldGrow_Dew;
+        //        Field._isFieldGrow_Dew = !Field._isFieldGrow_Dew;
         //Field._cyclePerGrow = _growTurnDEV;
     }
 
@@ -82,7 +79,7 @@ public class MainMenuUI : Singleton<MainMenuUI>
 
     public void SetMana(string value)
     {
-     //   ManaManager.Manapool = int.Parse(value);
+        //   ManaManager.Manapool = int.Parse(value);
     }
 
     public void ChangeMultiplayerButtonState(bool state)
@@ -120,26 +117,18 @@ public class MainMenuUI : Singleton<MainMenuUI>
     {
         CoinManager.CoinPerWin = int.Parse(text);
     }
-    
+
     public void DEV_SetCoinPerCard(string text)
     {
         CoinManager.CoinPerUnlock = int.Parse(text);
     }
-       public void DEV_PointsPerWin(string text)
+    public void DEV_PointsPerWin(string text)
     {
         ScoreManager._scoreForWin = int.Parse(text);
-    }
-    
-    public void ShowPreSettingMenu(bool state)
-    {
-        _mainMenu.SetActive(!state);
-        _preSettings.SetActive(state);
     }
 
     public void PlayButtonClick()
     {
-        Debug.Log(_showPre);
-        if (_showPre) ShowPreSettingMenu(true);
-        else OnAIButtonStart();
+        OnAIButtonStart();
     }
 }

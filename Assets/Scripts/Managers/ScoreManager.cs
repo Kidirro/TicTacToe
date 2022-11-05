@@ -62,6 +62,7 @@ namespace Managers
             int maxKey = -1;
             foreach (int res in _currentScoreList.Keys)
             {
+                Debug.Log($"res: {res}. score: {_currentScoreList[res]}");
                 if (_currentScoreList[res] > maxScore)
                 {
                     maxScore = _currentScoreList[res];
@@ -73,6 +74,11 @@ namespace Managers
                 }
             }
             return maxKey;
+        }
+
+        private void Update()
+        {
+            if (Input.GetKey(KeyCode.W)) Debug.Log(GetWinner());
         }
     }
 }

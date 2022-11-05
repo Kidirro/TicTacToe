@@ -217,7 +217,7 @@ public class NetworkEventManager : Singleton<NetworkEventManager>, IOnEventCallb
         switch (photonEvent.Code)
         {
             case 10:
-                FinishLineManager.Instance.MasterChecker(PlayerManager.Instance.GetCurrentPlayer().SideId);
+                FinishLineManager.Instance.MasterChecker(PlayerManager.Instance.GetCurrentPlayer().SideId,isNeedEvent:false);
                 break;
             case 11:
                 GameplayManager.Instance.SetGamePlayStateQueue(GameplayManager.GameplayState.NewTurn);

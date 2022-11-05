@@ -65,5 +65,10 @@ namespace Managers
             if (_nextPlayer == _players.Count) _nextPlayer = 0;
             return _players[_nextPlayer];
         }
+
+        public void ResetCurrentPlayer()
+        {
+            _currentPlayer = 0;
+        }
     }
 }

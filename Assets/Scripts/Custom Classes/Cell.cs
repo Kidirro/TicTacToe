@@ -8,14 +8,14 @@ using Managers;
 
 public class Cell : MonoBehaviour
 {
-    const float _scaleSpeed = 4;
-    const float _positionSpeed = 4;
-    const float _figureSpeed = 4;
+    const float _scaleCountFrame = 25;
+    const float _positionCountFrame = 25;
+    const float _figureCountFrame = 25;
 
     public static float AnimationTime
     {
 
-        get => 100 / Mathf.Max(_scaleSpeed, _positionSpeed, _figureSpeed) * Time.deltaTime;
+        get => Mathf.Max(_scaleCountFrame, _positionCountFrame, _figureCountFrame);
     }
 
 
@@ -75,7 +75,9 @@ public class Cell : MonoBehaviour
 
     public void SetFigure(int s, bool isNeedPlace = true, bool isQueue = true)
     {
-        _figure = (CellFigure)s;
+        if (!isNeedPlace)
+            _figure = (CellFigure)s;
+
         switch ((CellFigure)s)
         {
             case CellFigure.none:
@@ -227,14 +229,14 @@ public class Cell : MonoBehaviour
     {
         _isSizeCoroutineWork = true;
         float prevS = _cellSize;
-        float step = (_cellSize - _transformRect.sizeDelta.x) / 100f * _scaleSpeed;
+        float step = (_cellSize - _transformRect.sizeDelta.x) /_scaleCountFrame;
         int i = 0;
-        while (i <= 100 / _scaleSpeed)
+        while (i < _scaleCountFrame)
         {
             if (prevS != _cellSize)
             {
                 prevS = _cellSize;
-                step = (_cellSize - _transformRect.sizeDelta.x) / 100f * _scaleSpeed;
+                step = (_cellSize - _transformRect.sizeDelta.x) / _scaleCountFrame;
                 i = 0;
             }
             _transformRect.sizeDelta += new Vector2(step, step);
@@ -252,16 +254,16 @@ public class Cell : MonoBehaviour
         Vector2 prevPos = _position;
 
         Vector2 currentPosition = _transformRect.localPosition;
-        Vector2 step = (prevPos - currentPosition) / 100f * _positionSpeed;
+        Vector2 step = (prevPos - currentPosition) / _positionCountFrame;
         int i = 0;
-        while (i <= 100 / _positionSpeed)
+        while (i < _positionCountFrame)
         {
             currentPosition = _transformRect.localPosition;
             if (prevPos != _position)
             {
                 prevPos = _position;
 
-                step = (prevPos - currentPosition) / 100f * _positionSpeed;
+                step = (prevPos - currentPosition) / _positionCountFrame;
                 i = 0;
             }
 
@@ -276,7 +278,6 @@ public class Cell : MonoBehaviour
 
     private IEnumerator IFigureFillProcess(CellFigure s, bool reverse)
     {
-        Debug.Log("Place Begn!");
         if (!reverse)
         {
             _image.sprite = ThemeManager.Instance.GetSprite(s);
@@ -284,9 +285,9 @@ public class Cell : MonoBehaviour
         }
         _isFigureCoroutineWork = true;
         _image.fillAmount = (reverse) ? 1 : 0;
-        float step = (1) / 100f * _figureSpeed;
+        float step = 1 / _figureCountFrame;
         int i = 0;
-        while (i <= 100 / _figureSpeed)
+        while (i <_figureCountFrame)
         {
             _image.fillAmount += (reverse) ? -step : step;
             i++;
@@ -295,7 +296,7 @@ public class Cell : MonoBehaviour
         _image.fillAmount = (reverse) ? 0 : 1;
         if (reverse) _image.sprite = ThemeManager.Instance.GetSprite(s);
         _isFigureCoroutineWork = false;
-        //_figure = (CellFigure)s;
+        _figure = s;
 
     }
 
@@ -310,9 +311,9 @@ public class Cell : MonoBehaviour
 
         _isFigureCoroutineWork = true;
         _subImage.fillAmount = (reverse) ? 1 : 0;
-        float step = (1) / 100f * _figureSpeed;
+        float step = 1 / _figureCountFrame;
         int i = 0;
-        while (i <= 100 / _figureSpeed)
+        while (i < _figureCountFrame)
         {
             _subImage.fillAmount += (reverse) ? -step : step;
             i++;

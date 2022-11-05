@@ -21,16 +21,17 @@ public class CardTips : MonoBehaviour
     private float _awaitTime;
 
     private bool _isPositionCoroutineWork = false;
-    private float _positionSpeed = 4;
+    private float _positionCountFrame = 25;
     private Vector2 _tipPosition;
 
     private bool _isAlphaCoroutineWork = false;
-    private float _alphaSpeed = 4;
+    private float _alphaCountFrame = 25;
     private float _tipAlpha;
 
     public void ShowTip(string textTip, bool instantly = true)
     {
         if (!this.gameObject.activeSelf) this.gameObject.SetActive(true);
+
         _tipsText.text = textTip;
         _tipPosition = new Vector2(0, ScreenManager.Instance.GetHeight(_tipsPos.y));
         _tipAlpha = 1;
@@ -79,21 +80,19 @@ public class CardTips : MonoBehaviour
 
         _isPositionCoroutineWork = true;
 
-        float countStep = 100f / _positionSpeed;
-
         Vector2 prevPos = _tipPosition;
 
         Vector2 currentPosition = _tipRect.localPosition;
-        Vector2 step = (prevPos - currentPosition) / countStep;
+        Vector2 step = (prevPos - currentPosition) / _positionCountFrame;
         int i = 0;
-        while (i <= countStep)
+        while (i <_positionCountFrame)
         {
             currentPosition = _tipRect.localPosition;
             if (prevPos != _tipPosition)
             {
                 prevPos = _tipPosition;
 
-                step = (prevPos - currentPosition) / countStep;
+                step = (prevPos - currentPosition) / _positionCountFrame;
                 i = 0;
             }
 
@@ -110,21 +109,20 @@ public class CardTips : MonoBehaviour
         yield return new WaitForSecondsRealtime(aTime);
 
         _isPositionCoroutineWork = true;
-        float countStep = 100f / _positionSpeed;
         float prevAlpha = _tipAlpha;
         float currentAlpha = _tipCanvas.alpha;
 
-        float step = (prevAlpha - currentAlpha) / countStep;
+        float step = (prevAlpha - currentAlpha) / _alphaCountFrame;
 
         int i = 0;
-        while (i <= countStep)
+        while (i <= _alphaCountFrame)
         {
             currentAlpha = _tipCanvas.alpha;
             if (prevAlpha != _tipAlpha)
             {
                 prevAlpha = _tipAlpha;
 
-                step = (prevAlpha - currentAlpha) / countStep;
+                step = (prevAlpha - currentAlpha) / _alphaCountFrame;
                 i = 0;
             }
 

@@ -75,7 +75,6 @@ namespace Managers
                             ScoreManager.Instance.AddPlayer(1);
                             PlayerManager.Instance.AddPlayer(PlayerType.Human);
                             ScoreManager.Instance.AddPlayer(2);
-                            Debug.Log("Current RoomController.Instance.GetCurrentPlayerSide()" + RoomManager.GetCurrentPlayerSide());
                             SlotManager.Instance.NewTurn(PlayerManager.Instance.Players[RoomManager.GetCurrentPlayerSide() - 1]);
                             break;
                     }
@@ -114,14 +113,16 @@ namespace Managers
                     }
 
 
-                    if (!IsOnline || PlayerManager.Instance.GetCurrentPlayer().SideId == Photon.Pun.PhotonNetwork.LocalPlayer.ActorNumber) { SlotManager.Instance.NewTurn(PlayerManager.Instance.GetCurrentPlayer());
+                    if (!IsOnline || PlayerManager.Instance.GetCurrentPlayer().SideId == Photon.Pun.PhotonNetwork.LocalPlayer.ActorNumber)
+                    {
+                        SlotManager.Instance.NewTurn(PlayerManager.Instance.GetCurrentPlayer());
                         CoroutineManager.Instance.AddCoroutine(EffectManager.Instance.UpdateEffectTurn());
                     }
                     TurnTimerManager.Instance.StartNewTurnTimer(PlayerManager.Instance.GetCurrentPlayer().EntityType, !IsOnline || PlayerManager.Instance.GetCurrentPlayer().SideId == Photon.Pun.PhotonNetwork.LocalPlayer.ActorNumber);
-  
+
                     ManaManager.Instance.RestoreAllMana();
-                    ManaManager.Instance.UpdateManaUI(); 
-                    
+                    ManaManager.Instance.UpdateManaUI();
+
                     InGameUI.Instance.NewTurn();
 
                     if (PlayerManager.Instance.GetCurrentPlayer().EntityType.Equals(PlayerType.AI))
@@ -143,16 +144,19 @@ namespace Managers
 
                     break;
                 case GameplayState.GameOver:
-                    if (IsOnline) RoomManager.LeaveRoom();
+                    if (IsOnline) RoomManager.LeaveRoom(false);
                     int valueMoney = 0;
                     if (GameplayManager.TypeGame != GameType.SingleHuman && ScoreManager.Instance.GetWinner() != -1 && PlayerManager.Instance.Players[ScoreManager.Instance.GetWinner() - 1].EntityType == PlayerType.Human) valueMoney = CoinManager.CoinPerWin;
                     else if (GameplayManager.TypeGame != GameType.SingleHuman && ScoreManager.Instance.GetWinner() == -1) valueMoney = CoinManager.CoinPerWin / 2;
 
+                    Debug.Log($"Winner {ScoreManager.Instance.GetWinner()}.");
                     CoinManager.AllCoins += valueMoney;
                     InGameUI.Instance.StateGameOverPanel(true, valueMoney);
                     break;
                 case GameplayState.RestartGame:
-
+                    PlayerManager.Instance.ResetCurrentPlayer();
+                    Field.Instance.Initialization();
+                    CoroutineManager.Instance.ClearQueue();
                     HistoryManager.Instance.RestartGame();
                     EffectManager.Instance.ClearEffect();
                     for (int i = 0; i < PlayerManager.Instance.Players.Count; i++)
@@ -165,19 +169,18 @@ namespace Managers
                     }
                     SlotManager.Instance.NewTurn(PlayerManager.Instance.GetCurrentPlayer());
                     ScoreManager.Instance.ResetAllScore();
-                    Field.Instance.Initialization();
                     SlotManager.Instance.UpdateCardPosition(false);
 
-
-                    TurnTimerManager.Instance.StartNewTurnTimer(PlayerManager.Instance.GetCurrentPlayer().EntityType);
-
+                    ManaManager.Instance.SetBonusMana(0);
                     ManaManager.Instance.ResetMana();
+
+                    TurnTimerManager.Instance.StartNewTurnTimer(PlayerManager.Instance.GetCurrentPlayer().EntityType, !IsOnline || PlayerManager.Instance.GetCurrentPlayer().SideId == Photon.Pun.PhotonNetwork.LocalPlayer.ActorNumber);
+
                     ManaManager.Instance.RestoreAllMana();
                     ManaManager.Instance.UpdateManaUI();
-                    InGameUI.Instance.UpdateScore();
+
+                    InGameUI.Instance.NewTurn();
                     break;
-
-
             }
         }
 

@@ -51,4 +51,16 @@ public class MenuAction
         ManaManager.Instance.UpdateManaUI();
     }
 
+    [MenuItem("Language/English")]
+    static void English()
+    {
+
+        I2.Loc.LocalizationManager.CurrentLanguage = "English";
+    }
+    [MenuItem("Language/Russian")]
+    static void Russian()
+    {
+
+        I2.Loc.LocalizationManager.CurrentLanguage = "Russian";
+    }
 }

@@ -4,8 +4,8 @@ using UnityEngine;
 
 public class Line : MonoBehaviour
 {
-    const float _widthSpeed = 4;
-    const float _positionSpeed = 4;
+    const float _widthCountFrame = 25;
+    const float _positionCountFrame = 25;
 
     public LineRenderer LineRend
     {
@@ -126,14 +126,14 @@ public class Line : MonoBehaviour
     {
         _isWidthCoroutineWork = true;
         float prevW = _width;
-        float step = (_width - _line.endWidth)/100f * _widthSpeed;
+        float step = (_width - _line.endWidth)/_widthCountFrame;
         int i = 0;
-        while (i<=100/ _widthSpeed)
+        while (i< _widthCountFrame)
         {
             if (prevW != _width)
             {
                 prevW = _width;
-                step = (_width - _line.endWidth) / 100f * _widthSpeed;
+                step = (_width - _line.endWidth) / _widthCountFrame;
                 i = 0;
             }
             _line.endWidth = _line.endWidth + step;
@@ -155,23 +155,23 @@ public class Line : MonoBehaviour
 
         Vector2 currentStartPoint = _line.GetPosition(0);
         Vector2 currentEndPoint = _line.GetPosition(1);
-        Vector2 stepStart = (_startPoint - currentStartPoint) / 100f* _positionSpeed;
-        Vector2 stepEnd = (_endPoint - currentEndPoint) / 100f* _positionSpeed;
+        Vector2 stepStart = (_startPoint - currentStartPoint) / _positionCountFrame;
+        Vector2 stepEnd = (_endPoint - currentEndPoint) / _positionCountFrame;
         int i = 0;
-        while (i <= 100/ _positionSpeed)
+        while (i < _positionCountFrame)
         {
             currentStartPoint = _line.GetPosition(0);
             currentEndPoint = _line.GetPosition(1);
             if (prevStartPos != _startPoint)
             {
                 prevStartPos = _startPoint;
-                stepStart = (_startPoint - currentStartPoint) / 100f* _positionSpeed;
+                stepStart = (_startPoint - currentStartPoint) / _positionCountFrame;
                 i = 0;
             } 
             if (prevEndPos != _endPoint)
             {
                 prevEndPos = _endPoint;
-                stepEnd = (_endPoint - currentEndPoint) / 100f * _positionSpeed;
+                stepEnd = (_endPoint - currentEndPoint) / _positionCountFrame;
                 i = 0;
             }
             _line.SetPosition(0, currentStartPoint + stepStart);

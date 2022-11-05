@@ -2,12 +2,32 @@ using System.Collections;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 using TMPro;
 
 namespace Managers
 {
-    public class CollectionManager : MonoBehaviour
+    public class CollectionManager : Singleton<CollectionManager>
     {
+        [Header("Card view"), SerializeField]
+        private CanvasGroup _viewCardCanvas;
+
+        [SerializeField]
+        private TextMeshProUGUI _viewManapoints;
+
+        [SerializeField]
+        private TextMeshProUGUI _viewCardDescription;
+
+        [SerializeField]
+        private Image _viewCardImage;
+
+        [SerializeField]
+        private List<GameObject> _viewBonusImageList = new List<GameObject>();
+
+        private DateTime _startTimeTap = DateTime.MinValue;
+        private const float TIME_TAP_VIEW = 0.5f;
+        private const float ALPHA_PER_STEP = 0.05f;
+
         [Header("Cards"), SerializeField]
         private List<CardInfo> _cardsList = new List<CardInfo>();
 
@@ -36,9 +56,11 @@ namespace Managers
         [SerializeField]
         private TextMeshProUGUI _moneyValue;
 
+        private bool _isEdit = false;
 
         private void Start()
         {
+            _viewCardCanvas.gameObject.SetActive(false);
             _cardListStat = new List<CardInfo>(_cardsList);
             for (int i = 0; i < _cardListStat.Count; i++)
             {
@@ -173,7 +195,7 @@ namespace Managers
 
         private void CheckCurrentDeck()
         {
-            for(int i =0; i < _cardCollections.Count; i++)
+            for (int i = 0; i < _cardCollections.Count; i++)
             {
                 if (i >= _currentDeck.Array.Count) _currentDeck.Array.Add(_cardCollections[i].IsUnlock);
                 else _currentDeck.Array[i] = _cardCollections[i].IsUnlock && _currentDeck.Array[i];
@@ -193,6 +215,7 @@ namespace Managers
             }
             if (flag)
             {
+                _isEdit = false;
                 _currentDeck = _redactedDeck;
                 SaveCurrentDeck();
                 CreateCardPull();
@@ -201,6 +224,71 @@ namespace Managers
             {
                 throw new Exception("No one card in deck!");
             }
+        }
+
+        public void StartTap(CardCollection cardCollection)
+        {
+            _startTimeTap = DateTime.Now;
+            UpdateCardViewImage(cardCollection.Info);
+            StartCoroutine(IStartTap());
+        }
+
+        public void EndTap(CardCollection cardCollection)
+        {
+            StopAllCoroutines();
+            if ((DateTime.Now - _startTimeTap).TotalSeconds > TIME_TAP_VIEW)
+            {
+                StartCoroutine(IEndTap());
+            }
+            else
+            {               
+                if (_isEdit) cardCollection.PickCard();
+            }
+        }
+
+        public void UpdateCardViewImage(CardInfo info)
+        {
+            string desc = "";
+            desc = I2.Loc.LocalizationManager.TryGetTranslation(info.CardDescription, out desc) ? I2.Loc.LocalizationManager.GetTranslation(info.CardDescription) : info.CardDescription;
+            _viewCardDescription.text = desc;
+            _viewCardImage.sprite = info.CardImageP1;
+            _viewManapoints.text = info.CardManacost.ToString();
+            for (int i = 0; i < _viewBonusImageList.Count; i++)
+            {
+                _viewBonusImageList[i].SetActive(i == (int)info.CardBonus);
+                Debug.Log($"i={i}: {info.CardBonus}/{(int)info.CardBonus} ");
+            }
+        }
+
+        public void StartEditPull()
+        {
+            _isEdit = true;
+        }
+
+        private IEnumerator IStartTap()
+        {
+            Debug.Log("StartCoroutine");
+            yield return new WaitForSeconds(TIME_TAP_VIEW);
+            _viewCardCanvas.gameObject.SetActive(true);
+            _viewCardCanvas.alpha = 0;
+            while (_viewCardCanvas.alpha < 1)
+            {
+                _viewCardCanvas.alpha += ALPHA_PER_STEP;
+                yield return null;
+            }
+
+        }
+
+        private IEnumerator IEndTap()
+        {
+            while (_viewCardCanvas.alpha > 0)
+            {
+                _viewCardCanvas.alpha -= ALPHA_PER_STEP;
+                yield return null;
+            }
+            _viewCardCanvas.alpha = 0;
+            _viewCardCanvas.gameObject.SetActive(false);
+
         }
 
         [Serializable]

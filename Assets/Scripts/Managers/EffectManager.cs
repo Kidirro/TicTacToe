@@ -104,7 +104,6 @@ namespace Managers
                     if (effect.EffectType == Effect.EffectTypes.Parallel)
                     {
                         maxTime = Mathf.Max(maxTime, effect.EffectTimeAction, (effect.EffectTurnCount == 0) ? effect.EffectTimeDisable : 0);
-                        Debug.Log(maxTime);
                     }
                     else
                     {
@@ -129,14 +128,13 @@ namespace Managers
                     i+=1;
                 }
             }
-            yield return new WaitForSeconds(maxTime);
+            yield return StartCoroutine(CoroutineManager.Instance.IAwaitProcess(maxTime));
             FinishLineManager.Instance.MasterChecker(PlayerManager.Instance.GetCurrentPlayer().SideId);
-            NetworkEventManager.RaiseEventMasterChecker();
         }
 
         private IEnumerator IEffectAwaitAsync(List<Effect> effects, float startAwait = 0)
         {
-            yield return new WaitForSeconds(startAwait);
+            yield return StartCoroutine(CoroutineManager.Instance.IAwaitProcess(startAwait));
             while (!CoroutineManager.IsQueueEmpty) yield return null;
             CoroutineManager.Instance.AddCoroutine(UpdateEffectTurn(effects));
         }

@@ -19,13 +19,10 @@ MonoBehaviour:
   CardHighlightP2: {fileID: 0}
   CardHighlightColor: {r: 1, g: 1, b: 1, a: 1}
   CardName: Place Figure Random
-  CardDescription: "\u0421\u043B\u0435\u0434\u0443\u044E\u0449\u0438\u0435 3 \u0445\u043E\u0434\u0430
-    \u0432 \u043D\u0430\u0447\u0430\u043B\u0435 \u0445\u043E\u0434\u0430 \u0441\u0442\u0430\u0432\u0438\u0442
-    \u043E\u0434\u043D\u0443 \u0444\u0438\u0433\u0443\u0440\u0443 \u0432 \u0441\u043B\u0443\u0447\u0430\u043D\u043E\u043C
-    \u043C\u0435\u0441\u0442\u0435"
-  IsDefaultUnlock: 0
+  CardDescription: Card/PlaceFigureRandom
+  IsDefaultUnlock: 1
   CardType: 0
-  CardBonus: 1
+  CardBonus: -1
   CardAreaSize: {x: 0, y: 0}
   CardCount: 1
   IsNeedShowTip: 0

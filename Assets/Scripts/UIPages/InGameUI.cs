@@ -73,7 +73,7 @@ public class InGameUI : Singleton<InGameUI>
 
     public void ReturnHome()
     {
-        if (GameplayManager.IsOnline) RoomManager.LeaveRoom();
+        if (GameplayManager.IsOnline) RoomManager.LeaveRoom(true);
         GameSceneManager.Instance.SetGameScene(GameSceneManager.GameScene.MainMenu);
     }
 

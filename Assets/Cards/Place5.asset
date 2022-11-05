@@ -19,12 +19,10 @@ MonoBehaviour:
   CardHighlightP2: {fileID: 0}
   CardHighlightColor: {r: 0, g: 0, b: 0, a: 0}
   CardName: Place 5
-  CardDescription: "\u0421\u0442\u0430\u0432\u0438\u0442 5 \u0444\u0438\u0433\u0443\u0440
-    \u0432 \u0441\u043B\u0447\u0430\u0439\u043D\u043E\u043C \u043C\u0435\u0441\u0442\u0435 
-    \u043D\u0430 \u043F\u043E\u043B\u0435"
-  IsDefaultUnlock: 0
+  CardDescription: Card/Place5
+  IsDefaultUnlock: 1
   CardType: 0
-  CardBonus: 1
+  CardBonus: 0
   CardAreaSize: {x: 0, y: 0}
   CardCount: 1
   IsNeedShowTip: 0

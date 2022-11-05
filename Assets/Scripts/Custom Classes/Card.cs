@@ -22,18 +22,18 @@ public class Card : MonoBehaviour
     /// <summary>
     /// Скорость поворота
     /// </summary>
-    const float _rotationSpeed = 8;
+    const float _rotationCountFrame = 12;
 
     /// <summary>
     /// Скорость поворота
     /// </summary>
-    const float _scaleSpeed = 8;
+    const float _scaleCountFrame = 12;
 
 
     /// <summary>
     /// Скорость перемещения
     /// </summary>
-    const float _positionSpeed = 8;
+    const float _positionCountFrame = 12;
 
 
     /// <summary>
@@ -96,12 +96,6 @@ public class Card : MonoBehaviour
     /// </summary>
     [SerializeField]
     private float _magnitudeCard;
-
-    /// <summary>
-    /// Начальная позиция магнитуды
-    /// </summary>
-    private Vector2 _magnitudePosition = Vector2.zero;
-
 
     /// <summary>
     /// Актуальная позиция карты
@@ -221,10 +215,14 @@ public class Card : MonoBehaviour
     {
         _manapoints.text = (Info.CardManacost + Info.CardBonusManacost).ToString();
         SetSideCard(1);
-        _cardDescription.text = Info.CardDescription;
+
+        string desc = "";
+        desc = I2.Loc.LocalizationManager.TryGetTranslation(Info.CardDescription, out desc) ? I2.Loc.LocalizationManager.GetTranslation(Info.CardDescription) : Info.CardDescription;
+        _cardDescription.text = desc;
+
         for (int i = 0; i < _bonusImageList.Count; i++)
         {
-            _bonusImageList[i].SetActive(i + 1 == (int)Info.CardBonus);
+            _bonusImageList[i].SetActive(i== (int)Info.CardBonus);
         }
     }
 
@@ -248,9 +246,15 @@ public class Card : MonoBehaviour
         _isSlotReInit = false;
         stopWatch.Reset();
         stopWatch.Start();
-        if (Info.IsNeedShowTip) _cardTip.ShowTip(Info.TipText, false);
+        if (Info.IsNeedShowTip)
+        {
+            string textTip = Info.TipText;
+            textTip = I2.Loc.LocalizationManager.TryGetTranslation(Info.TipText, out textTip) ? I2.Loc.LocalizationManager.GetTranslation(Info.TipText) : Info.TipText;
+            Debug.Log(textTip);
+
+            _cardTip.ShowTip(textTip, false);
+        }
         if (SlotManager.Instance.IsCurrentPlayerOnSlot) SlotManager.Instance.ShowRechanger();
-        _magnitudePosition = positionVect;
     }
 
     /// <summary>
@@ -286,7 +290,15 @@ public class Card : MonoBehaviour
         }
         else
         {
-            if (Info.IsNeedShowTip) _cardTip.ShowTip(Info.TipText);
+            if (Info.IsNeedShowTip)
+            {
+
+                string textTip = Info.TipText;
+                textTip = I2.Loc.LocalizationManager.TryGetTranslation(Info.TipText, out textTip) ? I2.Loc.LocalizationManager.GetTranslation(Info.TipText) : Info.TipText;
+
+
+                _cardTip.ShowTip(textTip);
+            }
         }
 
         _cardObj.SetActive(!Field.Instance.IsInFieldHeight(vectorFigure.y));
@@ -456,15 +468,14 @@ public class Card : MonoBehaviour
     {
         _isSizeCoroutineWork = true;
         float prevS = _cardSize;
-        float countStep = 100f / _scaleSpeed;
-        float step = (_cardSize - transform.localScale.x) / countStep;
+        float step = (_cardSize - transform.localScale.x) / _scaleCountFrame;
         int i = 0;
-        while (i <= countStep)
+        while (i <_scaleCountFrame)
         {
             if (prevS != _cardSize)
             {
                 prevS = _cardSize;
-                step = (_cardSize - transform.localScale.x) / countStep;
+                step = (_cardSize - transform.localScale.x) / _scaleCountFrame;
                 i = 0;
             }
             transform.localScale = transform.localScale + new Vector3(step, step);
@@ -479,21 +490,19 @@ public class Card : MonoBehaviour
     {
         _isPositionCoroutineWork = true;
 
-        float countStep = 100f / _positionSpeed;
-
         Vector2 prevPos = _cardPosition;
 
         Vector2 currentPosition = _transformRect.localPosition;
-        Vector2 step = (prevPos - currentPosition) / countStep;
+        Vector2 step = (prevPos - currentPosition) / _positionCountFrame;
         int i = 0;
-        while (i <= countStep)
+        while (i < _positionCountFrame)
         {
             currentPosition = _transformRect.localPosition;
             if (prevPos != _cardPosition)
             {
                 prevPos = _cardPosition;
 
-                step = (prevPos - currentPosition) / countStep;
+                step = (prevPos - currentPosition) / _positionCountFrame;
                 i = 0;
             }
 
@@ -510,14 +519,11 @@ public class Card : MonoBehaviour
     {
         _isRotationCoroutineWork = true;
 
-
-        float countStep = 100f / _rotationSpeed;
-
         Quaternion prevRot = Quaternion.Euler(0, 0, _cardRotation);
 
         Quaternion currentRotation = _transformRect.localRotation;
         int i = 0;
-        while (i <= countStep)
+        while (i <_rotationCountFrame)
         {
             if (prevRot != Quaternion.Euler(0, 0, _cardRotation))
             {
@@ -526,7 +532,7 @@ public class Card : MonoBehaviour
                 i = 0;
             }
 
-            _transformRect.localRotation = Quaternion.Lerp(currentRotation, prevRot, (float)i / countStep);
+            _transformRect.localRotation = Quaternion.Lerp(currentRotation, prevRot, (float)i / _rotationCountFrame);
             i++;
             yield return null;
         }

@@ -147,7 +147,7 @@ namespace Managers
                 }
             }
             NewCellSize(_fieldSize, false);
-            yield return new WaitForSeconds(Cell.AnimationTime);
+            yield return StartCoroutine(CoroutineManager.Instance.IAwaitProcess(Cell.AnimationTime));
         }
 
         public IEnumerator AddLineRight()
@@ -186,7 +186,7 @@ namespace Managers
                 }
             }
             NewCellSize(_fieldSize, false);
-            yield return new WaitForSeconds(Cell.AnimationTime);
+            yield return StartCoroutine(CoroutineManager.Instance.IAwaitProcess(Cell.AnimationTime));
 
         }
 
@@ -225,7 +225,7 @@ namespace Managers
                 }
             }
             NewCellSize(_fieldSize, false);
-            yield return new WaitForSeconds(Cell.AnimationTime);
+            yield return StartCoroutine(CoroutineManager.Instance.IAwaitProcess(Cell.AnimationTime));
         }
 
         public IEnumerator AddLineDown()
@@ -263,7 +263,7 @@ namespace Managers
                 }
             }
             NewCellSize(_fieldSize, false);
-            yield return new WaitForSeconds(Cell.AnimationTime);
+            yield return StartCoroutine(CoroutineManager.Instance.IAwaitProcess(Cell.AnimationTime));
         }
 
         private float GetCellSize(int x_size = 3, int y_size = 3)
@@ -541,17 +541,17 @@ namespace Managers
             Vector2Int startPos = cell.Id;
             Cell checkedPos;
 
-            checkedPos = IsOnField(startPos,Vector2Int.down);
-            if (checkedPos!=null && IsCellEnableToPlace(checkedPos.Id)) cells.Add(CellList[checkedPos.Id.x][checkedPos.Id.y]);
-            
-            checkedPos = IsOnField(startPos,Vector2Int.up);
-            if (checkedPos!=null && IsCellEnableToPlace(checkedPos.Id)) cells.Add(CellList[checkedPos.Id.x][checkedPos.Id.y]);
-            
-            checkedPos = IsOnField(startPos,Vector2Int.right);
-            if (checkedPos!=null && IsCellEnableToPlace(checkedPos.Id)) cells.Add(CellList[checkedPos.Id.x][checkedPos.Id.y]);
-            
-            checkedPos = IsOnField(startPos,Vector2Int.left);
-            if (checkedPos!=null && IsCellEnableToPlace(checkedPos.Id)) cells.Add(CellList[checkedPos.Id.x][checkedPos.Id.y]);
+            checkedPos = IsOnField(startPos, Vector2Int.down);
+            if (checkedPos != null && IsCellEnableToPlace(checkedPos.Id)) cells.Add(CellList[checkedPos.Id.x][checkedPos.Id.y]);
+
+            checkedPos = IsOnField(startPos, Vector2Int.up);
+            if (checkedPos != null && IsCellEnableToPlace(checkedPos.Id)) cells.Add(CellList[checkedPos.Id.x][checkedPos.Id.y]);
+
+            checkedPos = IsOnField(startPos, Vector2Int.right);
+            if (checkedPos != null && IsCellEnableToPlace(checkedPos.Id)) cells.Add(CellList[checkedPos.Id.x][checkedPos.Id.y]);
+
+            checkedPos = IsOnField(startPos, Vector2Int.left);
+            if (checkedPos != null && IsCellEnableToPlace(checkedPos.Id)) cells.Add(CellList[checkedPos.Id.x][checkedPos.Id.y]);
 
             return cells;
         }
@@ -678,7 +678,7 @@ namespace Managers
         public Cell GetNextCell(Vector2Int currentId, Vector2Int step)
         {
             Vector2Int nextId = currentId + step;
-            if (IsOnField(currentId,step)==null) return null;
+            if (IsOnField(currentId, step) == null) return null;
             if (Field.Instance.CellList[nextId.x][nextId.y].Figure == CellFigure.none) return null;
             return Field.Instance.CellList[nextId.x][nextId.y];
         }
@@ -697,20 +697,20 @@ namespace Managers
 
         public IEnumerator GrowField()
         {
-            if (_isFieldGrow_Dew)
+            _currenCycle += 1;
+            if (_currenCycle == _cyclePerGrow)
             {
-                _currenCycle += 1;
-                if (_currenCycle == _cyclePerGrow)
-                {
 
-                    if (_fieldSize.y < _growSizeMax.y)
-                    {
-                        StartCoroutine(AddLineDown());
-                        yield return StartCoroutine(AddLineRight());
-                    }
-                    _currenCycle = 0;
+                if (_fieldSize.y < _growSizeMax.y)
+                {
+                    Debug.Log($"Grow_Started {Cell.AnimationTime}");
+                    StartCoroutine(AddLineDown());
+                    yield return StartCoroutine(AddLineRight());
+                    Debug.Log($"Grow_Ended {Cell.AnimationTime}");
                 }
+                _currenCycle = 0;
             }
+
         }
 
         public bool IsExistEmptyCell()
@@ -725,13 +725,20 @@ namespace Managers
             return false;
         }
 
-        public void PlaceInCell(Vector2Int id, bool isNeedEvent = true)
+        public void PlaceInCell(Vector2Int id, bool isNeedEvent = true, bool isQueue = true)
         {
             if (IsCellEnableToPlace(id))
             {
-                CellList[id.x][id.y].SetFigure(PlayerManager.Instance.GetCurrentPlayer().SideId);
+                CellList[id.x][id.y].SetFigure(PlayerManager.Instance.GetCurrentPlayer().SideId, isQueue: isQueue);
                 if (isNeedEvent) NetworkEventManager.RaiseEventPlaceInCell(id);
             }
+        }
+
+        public void PlaceInRandomCell(bool isNeedQueue = true)
+        {
+            if (isNeedQueue) CoroutineManager.Instance.AddCoroutine(IPlaceInRandomCell());
+            else StartCoroutine(IPlaceInRandomCell());
+
         }
 
         public void FreezeCell(Vector2Int id, Sprite sprite, bool isNeedEvent = true)
@@ -796,8 +803,21 @@ namespace Managers
             }
         }
 
+        IEnumerator IPlaceInRandomCell()
+        {
 
+            Vector2Int id = AIManager.Instance.GenerateRandomPosition(FieldSize);
+            Debug.Log(id);
+            if (id != new Vector2Int(-1, -1))
+            {
+                PlaceInCell(id, isQueue: false);
+                yield return StartCoroutine(CoroutineManager.Instance.IAwaitProcess(Cell.AnimationTime));
+            }
+            else
+            {
+                yield return null;
+            }
+
+        }
     }
-
-
 }

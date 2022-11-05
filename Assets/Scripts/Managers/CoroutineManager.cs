@@ -44,9 +44,14 @@ namespace Managers
             AddCoroutine(IAwaitProcess(time));
         }
 
-        private IEnumerator IAwaitProcess(float time)
+        public IEnumerator IAwaitProcess(float time)
         {
-            yield return new WaitForSeconds(time);
+            for (int i =0; i<time; i++)           yield return null;
+        }
+        
+        public void ClearQueue()
+        {
+            _coroutineQueue.Clear();
         }
     }
 }

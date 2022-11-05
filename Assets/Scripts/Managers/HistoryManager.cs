@@ -26,17 +26,17 @@ namespace Managers
 
         private List<HistoryUnit> _historyUnitInfoList = new List<HistoryUnit>();
 
-        private bool isNewTurn = true;
+        private bool _isNewTurn = true;
 
         public void AddHistoryNewTurn(PlayerInfo player)
         {
             _historyUnitInfoList.Add(new HistoryUnit { HistoryType = HistoryUnit.HistoryUnitTypes.NewTurn, HistoryPlayer = player });
-            isNewTurn = true;
+            _isNewTurn = true;
         }
 
         public void AddHistoryCard(PlayerInfo player, CardInfo card)
         {
-            if (isNewTurn)
+            if (_isNewTurn)
             {
                 _historySegmentObjectsList.Add(Instantiate((player.SideId == 1) ? _historySegmentPrefabP1 : _historySegmentPrefabP2, _historyContentParent));                
                 _historySegmentObjectsList[_historySegmentObjectsList.Count-1].transform.SetSiblingIndex(0);
@@ -45,7 +45,7 @@ namespace Managers
                     Destroy(_historySegmentObjectsList[0].gameObject);
                     _historySegmentObjectsList.RemoveAt(0);
                 }
-                isNewTurn = false;
+                _isNewTurn = false;
             }
 
             GameObject historyUnit = Instantiate(_historyCardPrefab, _historySegmentObjectsList[_historySegmentObjectsList.Count-1].transform);
@@ -76,6 +76,7 @@ namespace Managers
                 Destroy(_historySegmentObjectsList[i]);
             }
             _historySegmentObjectsList = new List<GameObject>();
+            _isNewTurn = true;
         }
 
         IEnumerator IChangePosition()

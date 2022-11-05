@@ -5,12 +5,12 @@ using Managers;
 
 public class FinishLine : Line
 {
-    private static float _finishLineSpeed = 4f;
+    private static float _finishCountFrame = 25;
 
     public static float AnimationTime
     {
 
-        get => 100 / Mathf.Max(_finishLineSpeed) * Time.deltaTime;
+        get => _finishCountFrame*2;
     }
 
 
@@ -24,10 +24,10 @@ public class FinishLine : Line
         //SetWidthScreenCord(Field.Instance.CellList[0][0].CellSize * Field.Instance.LineWidthPercent);
         SetPositions(Field.Instance.CellList[id1.x][id1.y].Position, Field.Instance.CellList[id2.x][id2.y].Position);
         float j = 0;
-        while (j < 100f / _finishLineSpeed)
+        while (j < _finishCountFrame)
         {
             j++;
-            SetAlphaFinishLine(j / (100f / _finishLineSpeed));
+            SetAlphaFinishLine(j / _finishCountFrame);
             yield return null;
         }
 
@@ -41,7 +41,7 @@ public class FinishLine : Line
         while (j > 0)
         {
             j--;
-            SetAlphaFinishLine(j / (100f / _finishLineSpeed));
+            SetAlphaFinishLine(j / _finishCountFrame);
             yield return null;
         }
         Field.Instance.AddToFinishLineList(this);

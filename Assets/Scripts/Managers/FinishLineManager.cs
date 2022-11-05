@@ -18,22 +18,21 @@ namespace Managers
 
         private List<List<Vector2Int>> _lineForClearing = new List<List<Vector2Int>>();
 
-        public void MasterChecker(int figure)
+        public void MasterChecker(int figure, bool isInQueue = true, bool isNeedEvent = true)
         {
-            MasterChecker((CellFigure)figure);
+            if (isInQueue) CoroutineManager.Instance.AddCoroutine(MasterChecker((CellFigure)figure, isNeedEvent));
+            else StartCoroutine(MasterChecker((CellFigure)figure, isNeedEvent));
         }
 
-        public void MasterChecker(CellFigure figure)
+        public IEnumerator MasterChecker(CellFigure figure, bool isNeedEvent)
         {
-            Debug.Log("Begin Check!");
-
+            if (isNeedEvent) NetworkEventManager.RaiseEventMasterChecker();
             List<Vector2Int> verticalList = new List<Vector2Int>();
             List<Vector2Int> horizontalList = new List<Vector2Int>();
             List<Vector2Int> diagonalRightList = new List<Vector2Int>();
             List<Vector2Int> diagonalLeftList = new List<Vector2Int>();
 
             List<List<Vector2Int>> linesFind = new List<List<Vector2Int>>();
-
 
             for (int x = 0; x < Field.Instance.FieldSize.x; x++)
             {
@@ -153,13 +152,12 @@ namespace Managers
 
             }
 
-
-            if (linesRes.Count > 0) CoroutineManager.Instance.AddCoroutine(IDrawFinishLine(linesRes));
+            if (linesRes.Count > 0) yield return StartCoroutine(IDrawFinishLine(linesRes));
             else
             {
                 if (!Field.Instance.IsExistEmptyCell()) GameplayManager.Instance.SetGamePlayStateQueue(GameplayManager.GameplayState.GameOver);
             }
-            Debug.Log("End Check!");
+            yield return null;
         }
 
         private Vector2Int GetNextCellId(Vector2Int currentId, Vector2Int step)
@@ -192,7 +190,7 @@ namespace Managers
                 Field.Instance.DrawFinishLine(line, i);
                 _lineForClearing.Remove(line);
             }
-            yield return new WaitForSeconds(FinishLine.AnimationTime*2);
+            yield return StartCoroutine(CoroutineManager.Instance.IAwaitProcess(FinishLine.AnimationTime));
 
         }
     }

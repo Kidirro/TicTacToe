@@ -76,9 +76,7 @@ public class CardInfo : ScriptableObject
                 Field.Instance.PlaceInCell(position);
             }
         }
-        NetworkEventManager.RaiseEventMasterChecker();
         FinishLineManager.Instance.MasterChecker(PlayerManager.Instance.GetCurrentPlayer().SideId);
-
         SlotManager.Instance.AddCard(PlayerManager.Instance.GetCurrentPlayer());
     }
 
@@ -94,7 +92,6 @@ public class CardInfo : ScriptableObject
                 Field.Instance.PlaceInCell(position);
 
                 FinishLineManager.Instance.MasterChecker(PlayerManager.Instance.GetCurrentPlayer().SideId);
-                NetworkEventManager.RaiseEventMasterChecker();
             }
         }
     }
@@ -103,12 +100,8 @@ public class CardInfo : ScriptableObject
     {
         for (int i = 0; i < 5; i++)
         {
-            Vector2Int position = AIManager.Instance.GenerateRandomPosition(Field.Instance.FieldSize);
-            if (position == new Vector2Int(-1, -1)) continue;
-            Field.Instance.PlaceInCell(position);
-
+            Field.Instance.PlaceInRandomCell();
             FinishLineManager.Instance.MasterChecker(PlayerManager.Instance.GetCurrentPlayer().SideId);
-            NetworkEventManager.RaiseEventMasterChecker();
         }
     }
 
@@ -116,8 +109,8 @@ public class CardInfo : ScriptableObject
     {
         EffectManager.Instance.AddFigure_Effect();
         NetworkEventManager.RaiseEventAddEffect(EffectManager.Instance.AddFigure_Effect);
-    }  
-    
+    }
+
     #region Mana
 
     public void AddBonusMana_Effected()
@@ -195,7 +188,6 @@ public class CardInfo : ScriptableObject
 
         }
         FinishLineManager.Instance.MasterChecker(PlayerManager.Instance.GetCurrentPlayer().SideId);
-        NetworkEventManager.RaiseEventMasterChecker();
     }
 
 
@@ -252,8 +244,6 @@ public class CardInfo : ScriptableObject
         CoroutineManager.Instance.AddAwaitTime(resultEffects[0].EffectTimeDisable);
         NetworkEventManager.RaiseEventAwaitTime(resultEffects[0].EffectTimeDisable);
         FinishLineManager.Instance.MasterChecker(PlayerManager.Instance.GetCurrentPlayer().SideId);
-        NetworkEventManager.RaiseEventMasterChecker();
-
     }
 
     public void PlaceAroundFreeze()
@@ -261,7 +251,7 @@ public class CardInfo : ScriptableObject
         List<Cell> _allFreeze = new List<Cell>();
         for (int i = 0; i < Field.Instance.CellList.Count; i++) _allFreeze.AddRange(Field.Instance.CellList[i].FindAll(x => x.SubState == CellSubState.freeze));
 
-        for (int i=0; i<_allFreeze.Count;i++)
+        for (int i = 0; i < _allFreeze.Count; i++)
         {
             List<Cell> NeighCell = Field.Instance.GetAllEmptyNeighbours(_allFreeze[i]);
             Debug.Log($"{_allFreeze[i].Id} : {NeighCell.Count}");
@@ -274,9 +264,7 @@ public class CardInfo : ScriptableObject
                 NetworkEventManager.RaiseEventAddFreezeEffect(NeighCell[randValue].Id);
             }
         }
-
         FinishLineManager.Instance.MasterChecker(PlayerManager.Instance.GetCurrentPlayer().SideId);
-        NetworkEventManager.RaiseEventMasterChecker();
     }
 
     public void FreezeAllMana()
@@ -285,7 +273,7 @@ public class CardInfo : ScriptableObject
         {
             ManaManager.Instance.IncreaseMana(-1);
             NetworkEventManager.RaiseEventIncreaseMana(-1);
-            for (int i =0; i<2; i++)
+            for (int i = 0; i < 2; i++)
             {
                 Vector2Int result = AIManager.Instance.GenerateRandomPosition(Field.Instance.FieldSize);
                 if (result == new Vector2Int(-1, -1)) break;
@@ -293,14 +281,13 @@ public class CardInfo : ScriptableObject
 
                 EffectManager.Instance.FreezeCell_Effect(result);
                 NetworkEventManager.RaiseEventAddFreezeEffect(result);
-/**/
+                /**/
             }
 
         }
         ManaManager.Instance.UpdateManaUI();
-        CoroutineManager.Instance.AddAwaitTime(Cell.AnimationTime);        
+        CoroutineManager.Instance.AddAwaitTime(Cell.AnimationTime);
         FinishLineManager.Instance.MasterChecker(PlayerManager.Instance.GetCurrentPlayer().SideId);
-        NetworkEventManager.RaiseEventMasterChecker();
 
     }
 
@@ -309,7 +296,7 @@ public class CardInfo : ScriptableObject
         List<Effect> effects = EffectManager.Instance.EffectList.FindAll(x => x.EffectPriority == 2);
         int resultMana = effects.Count / 3;
         ManaManager.Instance.IncreaseMana(resultMana, true);
-        NetworkEventManager.RaiseEventIncreaseMana(resultMana,true);
+        NetworkEventManager.RaiseEventIncreaseMana(resultMana, true);
         ManaManager.Instance.UpdateManaUI();
     }
 
@@ -339,7 +326,7 @@ public enum CardTypeImpact
 
 public enum CardBonusType
 {
-    None,
+    None=-1,
     Random,
     AddCard
 }
