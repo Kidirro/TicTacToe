@@ -7,6 +7,11 @@ using Managers;
 
 public class InGameUI : Singleton<InGameUI>
 {
+    public bool IsGameOverShowed
+    {
+        get => _gameOverPanel.gameObject.activeSelf;
+    }
+
 
     [SerializeField]
     private TextMeshProUGUI _playerOneScoreText;
@@ -25,6 +30,9 @@ public class InGameUI : Singleton<InGameUI>
     private Image _gameOverLogo;
 
     [SerializeField]
+    private GameObject _gameOverReplyBTN;
+
+    [SerializeField]
     private TextMeshProUGUI _moneyValue;
 
     [SerializeField]
@@ -41,9 +49,6 @@ public class InGameUI : Singleton<InGameUI>
     private GameObject _timerPanel;
 
     [SerializeField]
-    private TextMeshProUGUI _timerPanelText;
-
-    [SerializeField]
     private Image _timerFilledImg;
 
     [SerializeField]
@@ -51,6 +56,19 @@ public class InGameUI : Singleton<InGameUI>
 
     [SerializeField]
     private float _timerStartAnimationTime;
+
+    [Header("New turn banner properties"), SerializeField]
+    private Animator _animatorNewTurn;
+
+
+    [Header ("Pause menu Properties"),SerializeField]
+    private GameObject _pauseMenuReplyBTN;
+
+     public void UpdateRerplyState()
+    {
+        _pauseMenuReplyBTN.SetActive(!GameplayManager.IsOnline);
+        _gameOverReplyBTN.SetActive(!GameplayManager.IsOnline);
+    }
 
     public void Initialization()
     {
@@ -61,6 +79,7 @@ public class InGameUI : Singleton<InGameUI>
     public void NewTurn()
     {
         StopTimer();
+        _animatorNewTurn.SetTrigger("NewTurn");
         StartCoroutine(ITimerProcess());
         _newTurnBTN.SetActive(SlotManager.Instance.IsCurrentPlayerOnSlot);
     }
@@ -86,9 +105,9 @@ public class InGameUI : Singleton<InGameUI>
 
     public void StateGameOverPanel(bool state, int value = 0)
     {
-        if (state) _gameOverPanel.FadeIn();
+        UpdateRerplyState();
+        if (state) _gameOverPanel.FadeIn();        
         else _gameOverPanel.FadeOut();
-
         if (state)
         {
             _winnerText.text = (ScoreManager.Instance.GetWinner() != -1) ? "Winner!" : "Draw!";
@@ -104,7 +123,7 @@ public class InGameUI : Singleton<InGameUI>
     public void RestartGame()
     {
         if (GameplayManager.IsOnline) return;
-        StateGameOverPanel(false);
+        if (_gameOverPanel.gameObject.activeSelf) StateGameOverPanel(false);
         GameplayManager.Instance.SetGamePlayStateQueue(GameplayManager.GameplayState.RestartGame);
     }
 
@@ -126,6 +145,6 @@ public class InGameUI : Singleton<InGameUI>
     public void StopTimer()
     {
         StopAllCoroutines();
-    }  
+    }
 
 }

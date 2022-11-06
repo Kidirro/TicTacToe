@@ -129,6 +129,30 @@ namespace Managers
             return resultValue;
         }
 
+        public void StartBotTurn(int countFigure)
+        {
+            StartCoroutine(IBotTurnProcess(countFigure));
+        }
+
+        private IEnumerator IBotTurnProcess(int countFigure)
+        {
+            for (int i = 0; i < countFigure; i++)
+            {
+                Vector2Int position = GenerateNewTurn(PlayerManager.Instance.GetCurrentPlayer().SideId);
+                if (position != new Vector2Int(-1, -1))
+                {
+                    Field.Instance.PlaceInCell(position);
+
+                    FinishLineManager.Instance.MasterChecker(PlayerManager.Instance.GetCurrentPlayer().SideId);
+                    HistoryManager.Instance.AddHistoryCard(PlayerManager.Instance.GetCurrentPlayer(), AIManager.Instance.BotCardDefault);
+                    Debug.LogFormat("Current tactic : {0}. Is Empty: {1}", AIManager.Instance.BotAggression, CoroutineManager.IsQueueEmpty);
+                    while (!CoroutineManager.IsQueueEmpty) yield return null;
+                }
+
+            }
+            GameplayManager.Instance.SetGamePlayStateQueue(GameplayManager.GameplayState.NewTurn);
+
+        }
 
         public enum BotGameType
         {

@@ -16,9 +16,13 @@ namespace Managers
 
         public static GameType TypeGame = 0;
 
-        private bool _isNewStateInQueue = false;
+        private static bool _isNewStateInQueue = false;
 
         public static bool IsOnline;
+
+        private int _figureCount = 0;
+
+        public int _maxFigureCount = 3;
 
         private void Start()
         {
@@ -35,7 +39,7 @@ namespace Managers
         public void AddScore(int value, int sideId)
         {
             ScoreManager.Instance.AddScore(sideId, value);
-            if (ScoreManager.Instance.IsExistWinner())
+            if (ScoreManager.Instance.IsExistWinner() && GameplayManager.CurrentGameplayState != GameplayState.GameOver)
             {
                 SetGameplayState(GameplayState.GameOver);
             }
@@ -128,13 +132,8 @@ namespace Managers
                     if (PlayerManager.Instance.GetCurrentPlayer().EntityType.Equals(PlayerType.AI))
                     {
                         Debug.Log("AI TURN START");
-                        Field.Instance.PlaceInCell(AIManager.Instance.GenerateNewTurn(PlayerManager.Instance.GetCurrentPlayer().SideId));
-                        Debug.LogFormat("Current tactic : {0}", AIManager.Instance.BotAggression);
-
-                        FinishLineManager.Instance.MasterChecker(PlayerManager.Instance.GetCurrentPlayer().SideId);
-                        HistoryManager.Instance.AddHistoryCard(PlayerManager.Instance.GetCurrentPlayer(), AIManager.Instance.BotCardDefault);
-
-                        SetGamePlayStateQueue(GameplayState.NewTurn);
+                        _figureCount = Mathf.Min(_figureCount + 1, _maxFigureCount);
+                        AIManager.Instance.StartBotTurn(_figureCount);
                         //SetGameplayState(GameplayState.NewTurn);
                     }
                     else
@@ -144,6 +143,7 @@ namespace Managers
 
                     break;
                 case GameplayState.GameOver:
+                    if (InGameUI.Instance.IsGameOverShowed) return;
                     TurnTimerManager.Instance.StopTimer();
                     InGameUI.Instance.StopTimer();
                     if (IsOnline) RoomManager.LeaveRoom(false);
@@ -156,6 +156,7 @@ namespace Managers
                     InGameUI.Instance.StateGameOverPanel(true, valueMoney);
                     break;
                 case GameplayState.RestartGame:
+                    _figureCount = 0;
                     PlayerManager.Instance.ResetCurrentPlayer();
                     Field.Instance.Initialization();
                     CoroutineManager.Instance.ClearQueue();
@@ -182,6 +183,7 @@ namespace Managers
                     ManaManager.Instance.UpdateManaUI();
 
                     InGameUI.Instance.NewTurn();
+                    InGameUI.Instance.UpdateScore();
                     break;
             }
         }

@@ -131,4 +131,9 @@ public class MainMenuUI : Singleton<MainMenuUI>
     {
         OnAIButtonStart();
     }
+
+    public void OnDiscordClick()
+    {
+        Application.OpenURL("https://discord.gg/DK7M2QYZ");
+    }
 }

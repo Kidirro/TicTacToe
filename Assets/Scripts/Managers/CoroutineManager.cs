@@ -35,7 +35,7 @@ namespace Managers
 
         public void AddCoroutine(IEnumerator coroutine)
         {
-            Debug.Log("Add coroutine");
+            IsQueueEmpty = false;
             _coroutineQueue.Enqueue(coroutine);
         }
 

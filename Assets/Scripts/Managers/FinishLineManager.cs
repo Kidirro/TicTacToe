@@ -22,6 +22,8 @@ namespace Managers
         {
             if (isInQueue) CoroutineManager.Instance.AddCoroutine(MasterChecker((CellFigure)figure, isNeedEvent));
             else StartCoroutine(MasterChecker((CellFigure)figure, isNeedEvent));
+
+            Debug.Log("AddMasterChecker");
         }
 
         public IEnumerator MasterChecker(CellFigure figure, bool isNeedEvent)
@@ -155,7 +157,10 @@ namespace Managers
             if (linesRes.Count > 0) yield return StartCoroutine(IDrawFinishLine(linesRes));
             else
             {
-                if (!Field.Instance.IsExistEmptyCell()) GameplayManager.Instance.SetGamePlayStateQueue(GameplayManager.GameplayState.GameOver);
+                if (!Field.Instance.IsExistEmptyCell() && _lineForClearing.Count == 0 && GameplayManager.CurrentGameplayState != GameplayManager.GameplayState.GameOver)
+                {
+                    GameplayManager.Instance.SetGamePlayStateQueue(GameplayManager.GameplayState.GameOver);
+                }
             }
             yield return null;
         }

@@ -56,6 +56,8 @@ namespace Managers
         [SerializeField]
         private TextMeshProUGUI _moneyValue;
 
+        private IEnumerator _fadeInCoroutine;
+
         private bool _isEdit = false;
 
         private void Start()
@@ -229,19 +231,19 @@ namespace Managers
         public void StartTap(CardCollection cardCollection)
         {
             _startTimeTap = DateTime.Now;
-            UpdateCardViewImage(cardCollection.Info);
-            StartCoroutine(IStartTap());
+            _fadeInCoroutine = IStartTap(cardCollection);
+            StartCoroutine(_fadeInCoroutine);
         }
 
         public void EndTap(CardCollection cardCollection)
         {
-            StopAllCoroutines();
+            StopCoroutine(_fadeInCoroutine);
             if ((DateTime.Now - _startTimeTap).TotalSeconds > TIME_TAP_VIEW)
             {
                 StartCoroutine(IEndTap());
             }
             else
-            {               
+            {
                 if (_isEdit) cardCollection.PickCard();
             }
         }
@@ -256,7 +258,6 @@ namespace Managers
             for (int i = 0; i < _viewBonusImageList.Count; i++)
             {
                 _viewBonusImageList[i].SetActive(i == (int)info.CardBonus);
-                Debug.Log($"i={i}: {info.CardBonus}/{(int)info.CardBonus} ");
             }
         }
 
@@ -265,10 +266,11 @@ namespace Managers
             _isEdit = true;
         }
 
-        private IEnumerator IStartTap()
+        private IEnumerator IStartTap(CardCollection cardCollection)
         {
-            Debug.Log("StartCoroutine");
             yield return new WaitForSeconds(TIME_TAP_VIEW);
+
+            UpdateCardViewImage(cardCollection.Info);
             _viewCardCanvas.gameObject.SetActive(true);
             _viewCardCanvas.alpha = 0;
             while (_viewCardCanvas.alpha < 1)
