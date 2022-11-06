@@ -19,7 +19,7 @@ public class InGameUI : Singleton<InGameUI>
 
 
     [Space, Header("GameOver Properties"), SerializeField]
-    private GameObject _gameOverPanel;
+    private AnimationFading _gameOverPanel;
 
     [SerializeField]
     private Image _gameOverLogo;
@@ -60,7 +60,7 @@ public class InGameUI : Singleton<InGameUI>
 
     public void NewTurn()
     {
-        StopAllCoroutines();
+        StopTimer();
         StartCoroutine(ITimerProcess());
         _newTurnBTN.SetActive(SlotManager.Instance.IsCurrentPlayerOnSlot);
     }
@@ -86,7 +86,9 @@ public class InGameUI : Singleton<InGameUI>
 
     public void StateGameOverPanel(bool state, int value = 0)
     {
-        _gameOverPanel.SetActive(state);
+        if (state) _gameOverPanel.FadeIn();
+        else _gameOverPanel.FadeOut();
+
         if (state)
         {
             _winnerText.text = (ScoreManager.Instance.GetWinner() != -1) ? "Winner!" : "Draw!";
@@ -120,6 +122,10 @@ public class InGameUI : Singleton<InGameUI>
             yield return new WaitForSecondsRealtime(0.1f);
         }
     }
-    
+
+    public void StopTimer()
+    {
+        StopAllCoroutines();
+    }  
 
 }

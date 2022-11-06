@@ -144,6 +144,8 @@ namespace Managers
 
                     break;
                 case GameplayState.GameOver:
+                    TurnTimerManager.Instance.StopTimer();
+                    InGameUI.Instance.StopTimer();
                     if (IsOnline) RoomManager.LeaveRoom(false);
                     int valueMoney = 0;
                     if (GameplayManager.TypeGame != GameType.SingleHuman && ScoreManager.Instance.GetWinner() != -1 && PlayerManager.Instance.Players[ScoreManager.Instance.GetWinner() - 1].EntityType == PlayerType.Human) valueMoney = CoinManager.CoinPerWin;

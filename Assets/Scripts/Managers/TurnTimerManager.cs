@@ -1,5 +1,4 @@
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 namespace Managers
@@ -32,7 +31,7 @@ namespace Managers
         {
 
             Debug.Log("Started timer");
-            if (_timerCoroutine!=null)StopCoroutine(_timerCoroutine);
+            if (_timerCoroutine != null) StopCoroutine(_timerCoroutine);
             switch (player)
             {
                 case PlayerType.AI:
@@ -55,10 +54,18 @@ namespace Managers
                 _timeLeft -= Time.deltaTime;
             }
             /*GameplayManager.Instance.SetGameplayState(GameplayState.NewTurn);*/
-            if (isNeedAddtoQueue) { GameplayManager.Instance.SetGamePlayStateQueue(GameplayManager.GameplayState.NewTurn);
+            if (isNeedAddtoQueue)
+            {
+                GameplayManager.Instance.SetGamePlayStateQueue(GameplayManager.GameplayState.NewTurn);
                 NetworkEventManager.RaiseEventEndTurn();
-            
+
             }
+        }
+
+        public void StopTimer()
+        {
+            if (_timerCoroutine != null) StopCoroutine(_timerCoroutine);
+            _timerCoroutine = null;
         }
     }
 }
