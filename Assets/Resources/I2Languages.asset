@@ -329,6 +329,51 @@ MonoBehaviour:
       - Continue
       Flags: 0000
       Languages_Touch: []
+    - Term: Buy new card (
+      TermType: 0
+      Description: 
+      Languages:
+      - "\u041A\u0443\u043F\u0438\u0442\u044C \u043D\u043E\u0432\u0443\u044E \u043A\u0430\u0440\u0442\u0443
+        ("
+      - Buy new card (
+      Flags: 0000
+      Languages_Touch: []
+    - Term: Not Available
+      TermType: 0
+      Description: 
+      Languages:
+      - "\u041D\u0435\u0434\u043E\u0441\u0442\u0443\u043F\u0435\u043D"
+      - Not Available
+      Flags: 0000
+      Languages_Touch: []
+    - Term: YouWin
+      TermType: 0
+      Description: 
+      Languages:
+      - "\u0412\u042B\n\u041F\u041E\u0411\u0415\u0414\u0418\u041B\u0418!"
+      - 'YOU
+
+        WIN!'
+      Flags: 0000
+      Languages_Touch: []
+    - Term: YouLose
+      TermType: 0
+      Description: 
+      Languages:
+      - "\u0412\u042B\n\u041F\u0420\u041E\u0418\u0413\u0420\u0410\u041B\u0418!"
+      - 'YOU
+
+        LOSE!'
+      Flags: 0000
+      Languages_Touch: []
+    - Term: Draw
+      TermType: 0
+      Description: 
+      Languages:
+      - "\u041D\u0438\u0447\u044C\u044F!"
+      - Draw!
+      Flags: 0000
+      Languages_Touch: []
     CaseInsensitiveTerms: 0
     OnMissingTranslation: 1
     mTerm_AppName: 

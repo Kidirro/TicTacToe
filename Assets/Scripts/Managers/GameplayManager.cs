@@ -150,10 +150,10 @@ namespace Managers
                     int valueMoney = 0;
                     if (GameplayManager.TypeGame != GameType.SingleHuman && ScoreManager.Instance.GetWinner() != -1 && PlayerManager.Instance.Players[ScoreManager.Instance.GetWinner() - 1].EntityType == PlayerType.Human) valueMoney = CoinManager.CoinPerWin;
                     else if (GameplayManager.TypeGame != GameType.SingleHuman && ScoreManager.Instance.GetWinner() == -1) valueMoney = CoinManager.CoinPerWin / 2;
-
-                    Debug.Log($"Winner {ScoreManager.Instance.GetWinner()}.");
+                    CoinManager.AllCoins += valueMoney;
                     CoinManager.AllCoins += valueMoney;
                     InGameUI.Instance.StateGameOverPanel(true, valueMoney);
+                    CoroutineManager.Instance.ClearQueue();
                     break;
                 case GameplayState.RestartGame:
                     _figureCount = 0;

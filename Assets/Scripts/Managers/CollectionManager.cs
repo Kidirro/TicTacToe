@@ -39,6 +39,9 @@ namespace Managers
         [Header("Deck properties"), SerializeField]
         private Transform _deckParent;
 
+        [SerializeField]
+        private int _minDeckPool;
+
         private List<CardCollection> _cardDeck = new List<CardCollection>();
 
         private static BoolArray _currentDeck;
@@ -206,26 +209,29 @@ namespace Managers
 
         public void TrySaveDeck()
         {
-            bool flag = false;
+            bool flagEmpty = false;
+            int countDeck = 0;
             foreach (bool i in _redactedDeck.Array)
             {
                 if (i)
                 {
-                    flag = true;
-                    break;
+                    flagEmpty = true;
+                    countDeck = +1;
                 }
             }
-            if (flag)
+            if (flagEmpty)
             {
-                _isEdit = false;
-                _currentDeck = _redactedDeck;
-                SaveCurrentDeck();
-                CreateCardPull();
+                if (countDeck >= _minDeckPool)
+                {
+                    _isEdit = false;
+                    _currentDeck = _redactedDeck;
+                    SaveCurrentDeck();
+                    CreateCardPull();
+                }
+                else throw new Exception("Card count less minimum");
             }
-            else
-            {
-                throw new Exception("No one card in deck!");
-            }
+            else throw new Exception("No one card in deck!");
+
         }
 
         public void StartTap(CardCollection cardCollection)

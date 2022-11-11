@@ -30,6 +30,15 @@ public class InGameUI : Singleton<InGameUI>
     private Image _gameOverLogo;
 
     [SerializeField]
+    private GameObject _windrawBG;
+
+    [SerializeField]
+    private GameObject _loseBG;
+
+    [SerializeField]
+    private List<GameObject> _bgList;
+
+    [SerializeField]
     private GameObject _gameOverReplyBTN;
 
     [SerializeField]
@@ -110,14 +119,38 @@ public class InGameUI : Singleton<InGameUI>
         else _gameOverPanel.FadeOut();
         if (state)
         {
-            _winnerText.text = (ScoreManager.Instance.GetWinner() != -1) ? "Winner!" : "Draw!";
+            int currentWinner = ScoreManager.Instance.GetWinner();
+            bool isWin = false;
+            if (currentWinner != -1)
+            {
+                switch (GameplayManager.TypeGame)
+                {
+                    case GameplayManager.GameType.MultiplayerHuman:
+                        isWin = currentWinner == RoomManager.GetCurrentPlayerSide();
+                        break;
+                    case GameplayManager.GameType.SingleAI:
+                        isWin = PlayerManager.Instance.Players[currentWinner - 1].EntityType == PlayerType.Human;
+                        break;
+                    case GameplayManager.GameType.SingleHuman:
+                        isWin = true;
+                        break;
+                }
+            }
+            _windrawBG.SetActive(isWin || currentWinner ==-1);
+            _loseBG.SetActive(!(isWin||currentWinner==-1));
             _moneyValue.text = "+" + value.ToString();
+
+                _winnerText.text = (currentWinner==-1)? I2.Loc.LocalizationManager.GetTranslation("Draw"):
+                (isWin) ? I2.Loc.LocalizationManager.GetTranslation("YouWin") : I2.Loc.LocalizationManager.GetTranslation("YouLose");
+            
             _drawArea.SetActive(ScoreManager.Instance.GetWinner() == -1);
             _winnerArea.SetActive(ScoreManager.Instance.GetWinner() != -1);
+            for (int i = 0; i < _bgList.Count; i++)
+            {
+                _bgList[i].SetActive(i == Mathf.Max(0, currentWinner));
+            }
             if (ScoreManager.Instance.GetWinner() != -1) _gameOverLogo.sprite = ThemeManager.Instance.GetSprite((CellFigure)ScoreManager.Instance.GetWinner());
-
         }
-        //      Debug.Log(ThemeManager.Instance.GetSprite((CellFigure)PlayerManager.Instance.GetCurrentPlayer().SideId));
     }
 
     public void RestartGame()
@@ -130,11 +163,14 @@ public class InGameUI : Singleton<InGameUI>
     private IEnumerator ITimerProcess()
     {
         _timerPanel.SetActive(false);
-        yield return new WaitForSecondsRealtime(TurnTimerManager.Instance.TimeLeft - _timerEnableTime);
+
+        while (_timerEnableTime < TurnTimerManager.Instance.TimeLeft) yield return null;
+
         _timerFilledImg.fillAmount = 1;
         _timerPanel.SetActive(true);
-        Debug.Log($"TimeLeft{TurnTimerManager.Instance.TimeLeft}");
-        yield return new WaitForSecondsRealtime(TurnTimerManager.Instance.TimeLeft - _timerStartAnimationTime);
+
+        while (_timerStartAnimationTime < TurnTimerManager.Instance.TimeLeft) yield return null;
+
         while (TurnTimerManager.Instance.TimeLeft >= 0)
         {
             _timerFilledImg.fillAmount = TurnTimerManager.Instance.TimeLeft / _timerStartAnimationTime;

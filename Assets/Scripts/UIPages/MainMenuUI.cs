@@ -16,16 +16,21 @@ public class MainMenuUI : Singleton<MainMenuUI>
     [Header("Pages"), SerializeField]
     private GameObject _mainMenu;
 
-    [Header("Buttons"), SerializeField]
+    [Header("Multiplayer button properties"), SerializeField]
     private Button _multiplayerButton;
+
+    [SerializeField]
+    private GameObject _multiplayerNotAvaibleObject;
 
     private bool _showPre = false;
 
+
+
     private void Awake()
     {
-        _multiplayerButton.interactable = MasterConecctorManager.IsConnected;
         QualitySettings.vSyncCount = 0;
         Application.targetFrameRate = 60;
+        UpdateNetworkUI(MasterConecctorManager.IsConnected);
     }
 
     private void OnEnable()
@@ -64,27 +69,10 @@ public class MainMenuUI : Singleton<MainMenuUI>
         Field.SetStartSize(new Vector2Int(i, i));
     }
 
-    public void ChangeGrowFieldState()
-    {
-        //        Field._isFieldGrow_Dew = !Field._isFieldGrow_Dew;
-        //Field._cyclePerGrow = _growTurnDEV;
-    }
-
-    public void ChangeGrowManaState()
-    {
-        //ManaManager._isManaGrow = !ManaManager._isManaGrow;
-        //ManaManager.Manapool = 1;
-        //ManaManager._maxManaGrow = _growManaDEV;
-    }
-
-    public void SetMana(string value)
-    {
-        //   ManaManager.Manapool = int.Parse(value);
-    }
-
     public void ChangeMultiplayerButtonState(bool state)
     {
         _multiplayerButton.interactable = state;
+        _multiplayerNotAvaibleObject.SetActive(!state);
     }
 
     public void UpdateNetworkUI(bool isConnected)
@@ -100,12 +88,6 @@ public class MainMenuUI : Singleton<MainMenuUI>
     public void SetMaxManaGrow(string value)
     {
         _growManaDEV = int.Parse(value);
-    }
-
-    public void DEV_clearAllPrefs()
-    {
-        PlayerPrefs.DeleteAll();
-        Application.Quit();
     }
 
     public void DEV_ChangePreShow()

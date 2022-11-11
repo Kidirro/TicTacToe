@@ -20,7 +20,7 @@ MonoBehaviour:
   CardHighlightColor: {r: 0, g: 0, b: 0, a: 0.14901961}
   CardName: Restore 1 Mana
   CardDescription: Card/Restore1Mana
-  IsDefaultUnlock: 0
+  IsDefaultUnlock: 1
   CardType: 0
   CardBonus: -1
   CardAreaSize: {x: 1, y: 1}
