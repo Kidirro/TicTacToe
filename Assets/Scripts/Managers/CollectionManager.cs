@@ -99,6 +99,19 @@ namespace Managers
             UpdateTexts();
         }
 
+        public int CountCardInDeck()
+        {
+            int countDeck = 0;
+            foreach (bool i in _redactedDeck.Array)
+            {
+                if (i)
+                {                
+                    countDeck +=1;
+                }
+            }
+            return countDeck;
+        }
+
         public void UpdateCollectionCardState()
         {
             foreach (CardCollection card in _cardCollections)
@@ -210,18 +223,16 @@ namespace Managers
         public void TrySaveDeck()
         {
             bool flagEmpty = false;
-            int countDeck = 0;
             foreach (bool i in _redactedDeck.Array)
             {
                 if (i)
                 {
                     flagEmpty = true;
-                    countDeck = +1;
                 }
             }
             if (flagEmpty)
             {
-                if (countDeck >= _minDeckPool)
+                if (CountCardInDeck() >= _minDeckPool)
                 {
                     _isEdit = false;
                     _currentDeck = _redactedDeck;
@@ -250,7 +261,8 @@ namespace Managers
             }
             else
             {
-                if (_isEdit) cardCollection.PickCard();
+                int value = (_redactedDeck.Array[_cardListStat.IndexOf(cardCollection.Info)])? 1:-1;
+                if (_isEdit && CountCardInDeck() - value>=_minDeckPool) cardCollection.PickCard();
             }
         }
 

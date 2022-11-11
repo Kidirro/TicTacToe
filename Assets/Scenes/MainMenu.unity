@@ -5096,7 +5096,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 07ea10e2f6a7e414688088b2830fa49d, type: 2}
   _cardPrefab: {fileID: 523472384096669092, guid: 7e415cb8c62703d4ca9414938bc77725, type: 3}
   _deckParent: {fileID: 1435437146}
-  _minDeckPool: 4
+  _minDeckPool: 5
   _collectionParent: {fileID: 903892679}
   _cardUnlockValue: {fileID: 1966209402}
   _moneyValue: {fileID: 2021504864}
@@ -10963,7 +10963,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &1903989738
 RectTransform:
   m_ObjectHideFlags: 0
