@@ -104,10 +104,10 @@ public class MainMenuUI : Singleton<MainMenuUI>
     {
         CoinManager.CoinPerUnlock = int.Parse(text);
     }
-    public void DEV_PointsPerWin(string text)
+/*    public void DEV_PointsPerWin(string text)
     {
         ScoreManager._scoreForWin = int.Parse(text);
-    }
+    }*/
 
     public void PlayButtonClick()
     {

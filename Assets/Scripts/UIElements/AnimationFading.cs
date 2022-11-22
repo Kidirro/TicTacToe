@@ -10,6 +10,11 @@ public class AnimationFading : MonoBehaviour
     [SerializeField]
     private float _fadeOutTimeAwait = 1;
 
+    public float FadeOutTimeAwait
+    {
+        get => _fadeOutTimeAwait;
+    }
+
     private void Awake()
     {
         _animator = GetComponent<Animator>();

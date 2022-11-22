@@ -17,7 +17,13 @@ public class InGameUI : Singleton<InGameUI>
     private TextMeshProUGUI _playerOneScoreText;
 
     [SerializeField]
+    private List<GameObject> _playerOneRPList;
+
+    [SerializeField]
     private TextMeshProUGUI _playerTwoScorText;
+
+    [SerializeField]
+    private List<GameObject> _playerTwoRPList;
 
     [SerializeField]
     private GameObject _newTurnBTN;
@@ -53,6 +59,36 @@ public class InGameUI : Singleton<InGameUI>
     [SerializeField]
     private GameObject _drawArea;
 
+    [Space, Header("RoundOver Properties"), SerializeField]
+    private AnimationFading _roundOverPanel;
+
+    [SerializeField]
+    private Image _roundOverLogo;
+
+    [SerializeField]
+    private GameObject _windrawRoundOverBG;
+
+    [SerializeField]
+    private GameObject _loseRoundOverBG;
+
+    [SerializeField]
+    private List<GameObject> _bgListRoundOver;
+
+    [SerializeField]
+    private TextMeshProUGUI _winnerRoundOverText;
+
+    [SerializeField]
+    private GameObject _winnerRoundOverArea;
+
+    [SerializeField]
+    private GameObject _drawRoundOverArea;
+
+    [SerializeField]
+    private List<GameObject> _p1RoundOverPoints;
+
+    [SerializeField]
+    private List<GameObject> _p2RoundOverPoints;
+
 
     [Space, Header("Timer Properties"), SerializeField]
     private GameObject _timerPanel;
@@ -66,14 +102,15 @@ public class InGameUI : Singleton<InGameUI>
     [SerializeField]
     private float _timerStartAnimationTime;
 
+    private Coroutine _timerCoroutine;
+
     [Header("New turn banner properties"), SerializeField]
     private Animator _animatorNewTurn;
 
-
-    [Header ("Pause menu Properties"),SerializeField]
+    [Header("Pause menu Properties"), SerializeField]
     private GameObject _pauseMenuReplyBTN;
 
-     public void UpdateRerplyState()
+    public void UpdateReplyState()
     {
         _pauseMenuReplyBTN.SetActive(!GameplayManager.IsOnline);
         _gameOverReplyBTN.SetActive(!GameplayManager.IsOnline);
@@ -83,20 +120,52 @@ public class InGameUI : Singleton<InGameUI>
     {
         _playerOneScoreText.text = "0";
         _playerTwoScorText.text = "0";
+
+        UpdatePlayerRP();
     }
 
     public void NewTurn()
     {
         StopTimer();
+        ClearTriggers();
         _animatorNewTurn.SetTrigger("NewTurn");
-        StartCoroutine(ITimerProcess());
+        _timerCoroutine = StartCoroutine(ITimerProcess());
         _newTurnBTN.SetActive(SlotManager.Instance.IsCurrentPlayerOnSlot);
+    }
+
+    public void SetSideBannerTurn(int side)
+    {
+        ClearTriggers();
+        _animatorNewTurn.SetTrigger((side == 1) ? "XTurn" : "OTurn");
+    }
+
+    public void ClearTriggers()
+    {
+            _animatorNewTurn.ResetTrigger("NewTurn");
+            _animatorNewTurn.ResetTrigger("XTurn");
+            _animatorNewTurn.ResetTrigger("OTurn");
     }
 
     public void UpdateScore()
     {
         _playerOneScoreText.text = ScoreManager.Instance.GetScore(1).ToString();
         _playerTwoScorText.text = ScoreManager.Instance.GetScore(2).ToString();
+
+        UpdatePlayerRP();
+    }
+
+    private void UpdatePlayerRP()
+    {
+
+        for (int i = 0; i < _playerOneRPList.Count; i++)
+        {
+            _playerOneRPList[i].SetActive(i < ScoreManager.Instance.GetCountRoundWin(1));
+        }
+
+        for (int i = 0; i < _playerTwoRPList.Count; i++)
+        {
+            _playerTwoRPList[i].SetActive(i < ScoreManager.Instance.GetCountRoundWin(2));
+        }
     }
 
     public void ReturnHome()
@@ -114,12 +183,12 @@ public class InGameUI : Singleton<InGameUI>
 
     public void StateGameOverPanel(bool state, int value = 0)
     {
-        UpdateRerplyState();
-        if (state) _gameOverPanel.FadeIn();        
+        UpdateReplyState();
+        if (state) _gameOverPanel.FadeIn();
         else _gameOverPanel.FadeOut();
         if (state)
         {
-            int currentWinner = ScoreManager.Instance.GetWinner();
+            int currentWinner = ScoreManager.Instance.GetGameWinner();
             bool isWin = false;
             if (currentWinner != -1)
             {
@@ -136,28 +205,36 @@ public class InGameUI : Singleton<InGameUI>
                         break;
                 }
             }
-            _windrawBG.SetActive(isWin || currentWinner ==-1);
-            _loseBG.SetActive(!(isWin||currentWinner==-1));
+            _windrawBG.SetActive(isWin || currentWinner == -1);
+            _loseBG.SetActive(!(isWin || currentWinner == -1));
             _moneyValue.text = "+" + value.ToString();
 
-                _winnerText.text = (currentWinner==-1)? I2.Loc.LocalizationManager.GetTranslation("Draw"):
-                (isWin) ? I2.Loc.LocalizationManager.GetTranslation("YouWin") : I2.Loc.LocalizationManager.GetTranslation("YouLose");
-            
-            _drawArea.SetActive(ScoreManager.Instance.GetWinner() == -1);
-            _winnerArea.SetActive(ScoreManager.Instance.GetWinner() != -1);
+            _winnerText.text = (currentWinner == -1) ? "Draw" :
+            (isWin) ? "You\nwin" : "You\nlose";
+
+            _drawArea.SetActive(ScoreManager.Instance.GetGameWinner() == -1);
+            _winnerArea.SetActive(ScoreManager.Instance.GetGameWinner() != -1);
             for (int i = 0; i < _bgList.Count; i++)
             {
                 _bgList[i].SetActive(i == Mathf.Max(0, currentWinner));
             }
-            if (ScoreManager.Instance.GetWinner() != -1) _gameOverLogo.sprite = ThemeManager.Instance.GetSprite((CellFigure)ScoreManager.Instance.GetWinner());
+            if (ScoreManager.Instance.GetGameWinner() != -1) _gameOverLogo.sprite = ThemeManager.Instance.GetSprite((CellFigure)ScoreManager.Instance.GetGameWinner());
         }
     }
+
 
     public void RestartGame()
     {
         if (GameplayManager.IsOnline) return;
         if (_gameOverPanel.gameObject.activeSelf) StateGameOverPanel(false);
         GameplayManager.Instance.SetGamePlayStateQueue(GameplayManager.GameplayState.RestartGame);
+    }
+
+
+    public void StopTimer()
+    {
+        if (_timerCoroutine != null) StopCoroutine(_timerCoroutine);
+        _timerCoroutine = null;
     }
 
     private IEnumerator ITimerProcess()
@@ -178,9 +255,66 @@ public class InGameUI : Singleton<InGameUI>
         }
     }
 
-    public void StopTimer()
+    public IEnumerator ShowRoundOverAnimation()
     {
-        StopAllCoroutines();
+        _roundOverPanel.FadeIn();
+        int currentWinner = ScoreManager.Instance.GetRoundWinner();
+        bool isWin = false;
+        if (currentWinner != -1)
+        {
+            switch (GameplayManager.TypeGame)
+            {
+                case GameplayManager.GameType.MultiplayerHuman:
+                    isWin = currentWinner == RoomManager.GetCurrentPlayerSide();
+                    break;
+                case GameplayManager.GameType.SingleAI:
+                    isWin = PlayerManager.Instance.Players[currentWinner - 1].EntityType == PlayerType.Human;
+                    break;
+                case GameplayManager.GameType.SingleHuman:
+                    isWin = true;
+                    break;
+            }
+        }
+        _windrawRoundOverBG.SetActive(isWin || currentWinner == -1);
+        _loseRoundOverBG.SetActive(!(isWin || currentWinner == -1));
+
+        _winnerRoundOverText.text = (currentWinner == -1) ? "Draw" :
+        (isWin) ? "You\nwin" : "You\nlose";
+
+        _drawRoundOverArea.SetActive(ScoreManager.Instance.GetRoundWinner() == -1);
+        _winnerRoundOverArea.SetActive(ScoreManager.Instance.GetRoundWinner() != -1);
+        for (int i = 0; i < _bgList.Count; i++)
+        {
+            _bgList[i].SetActive(i == Mathf.Max(0, currentWinner));
+        }
+
+        if (ScoreManager.Instance.GetRoundWinner() != -1) _roundOverLogo.sprite = ThemeManager.Instance.GetSprite((CellFigure)ScoreManager.Instance.GetRoundWinner());
+
+        int p1Count = ScoreManager.Instance.GetCountRoundWin(1);
+        int p2Count = ScoreManager.Instance.GetCountRoundWin(2);
+
+        for (int i = 0; i < _p1RoundOverPoints.Count; i++)
+        {
+            _p1RoundOverPoints[i].SetActive(i < p1Count);
+        }
+        for (int i = 0; i < _p2RoundOverPoints.Count; i++)
+        {
+            _p2RoundOverPoints[i].SetActive(i < p2Count);
+        }
+
+        Transform currentPoint = null;
+
+        currentPoint = (ScoreManager.Instance.GetRoundWinner() == 1) ? _p1RoundOverPoints[p1Count - 1].transform : _p2RoundOverPoints[p2Count - 1].transform;
+        currentPoint.localScale = Vector2.zero;
+
+
+        yield return new WaitForSecondsRealtime(_roundOverPanel.FadeOutTimeAwait);
+        yield return new WaitForSeconds(0.5f);
+        yield return StartCoroutine(currentPoint.ScaleWithLerp(Vector2.zero, Vector2.one, 20));
+        yield return new WaitForSeconds(1f);
+        _roundOverPanel.FadeOut();
+        yield return new WaitForSecondsRealtime(_roundOverPanel.FadeOutTimeAwait);
     }
+
 
 }

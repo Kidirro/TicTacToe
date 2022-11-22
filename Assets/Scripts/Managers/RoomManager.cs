@@ -31,8 +31,7 @@ public class RoomManager : MonoBehaviourPunCallbacks
         base.OnPlayerLeftRoom(otherPlayer);
         if (GameplayManager.CurrentGameplayState == GameplayManager.GameplayState.GameOver) return;
         if (otherPlayer.CustomProperties["isPreExit"] == null || (bool)otherPlayer.CustomProperties["isPreExit"]) ScoreManager.Instance.RemovePlayer(otherPlayer.ActorNumber);
-        Debug.Log($"Player Leave:  {otherPlayer.ActorNumber}. Custom properties: {otherPlayer.CustomProperties["isPreExit"]}");
-        GameplayManager.Instance.SetGameplayState(GameplayManager.GameplayState.GameOver);
+        GameplayManager.Instance.SetGamePlayStateQueue(GameplayManager.GameplayState.GameOver);
     }
 
     public static void LeaveRoom(bool isPreExit)

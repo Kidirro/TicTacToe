@@ -30,18 +30,12 @@ namespace Managers
             GameSceneManager.Instance.SetGameScene(GameSceneManager.GameScene.Game);
         }
 
-        public void SetGameplayState(GameplayState state)
-        {
-            _gameplayState = state;
-            CheckGameplayState();
-        }
-
         public void AddScore(int value, int sideId)
         {
             ScoreManager.Instance.AddScore(sideId, value);
-            if (ScoreManager.Instance.IsExistWinner() && GameplayManager.CurrentGameplayState != GameplayState.GameOver)
+            if (ScoreManager.Instance.IsExistRoundWinner() && GameplayManager.CurrentGameplayState != GameplayState.GameOver)
             {
-                SetGameplayState(GameplayState.GameOver);
+                SetGamePlayStateQueue(GameplayState.RoundOver);
             }
             InGameUI.Instance.UpdateScore();
         }
@@ -134,7 +128,6 @@ namespace Managers
                         Debug.Log("AI TURN START");
                         _figureCount = Mathf.Min(_figureCount + 1, _maxFigureCount);
                         AIManager.Instance.StartBotTurn(_figureCount);
-                        //SetGameplayState(GameplayState.NewTurn);
                     }
                     else
                     {
@@ -144,19 +137,38 @@ namespace Managers
                     break;
                 case GameplayState.GameOver:
                     if (InGameUI.Instance.IsGameOverShowed) return;
-                    TurnTimerManager.Instance.StopTimer();
-                    InGameUI.Instance.StopTimer();
                     if (IsOnline) RoomManager.LeaveRoom(false);
                     int valueMoney = 0;
-                    if (GameplayManager.TypeGame != GameType.SingleHuman && ScoreManager.Instance.GetWinner() != -1 && PlayerManager.Instance.Players[ScoreManager.Instance.GetWinner() - 1].EntityType == PlayerType.Human) valueMoney = CoinManager.CoinPerWin;
-                    else if (GameplayManager.TypeGame != GameType.SingleHuman && ScoreManager.Instance.GetWinner() == -1) valueMoney = CoinManager.CoinPerWin / 2;
+                    if (GameplayManager.TypeGame != GameType.SingleHuman && ScoreManager.Instance.GetRoundWinner() != -1 && PlayerManager.Instance.Players[ScoreManager.Instance.GetRoundWinner() - 1].EntityType == PlayerType.Human) valueMoney = CoinManager.CoinPerWin;
+                    else if (GameplayManager.TypeGame != GameType.SingleHuman && ScoreManager.Instance.GetRoundWinner() == -1) valueMoney = CoinManager.CoinPerWin / 2;
                     CoinManager.AllCoins += valueMoney;
                     CoinManager.AllCoins += valueMoney;
                     InGameUI.Instance.StateGameOverPanel(true, valueMoney);
                     CoroutineManager.Instance.ClearQueue();
                     break;
                 case GameplayState.RestartGame:
+                    ScoreManager.Instance.ClearRoundWinners();
+                    SetGameplayState(GameplayState.NewRound);
+
+                    break;
+                case GameplayState.RoundOver:
+                    TurnTimerManager.Instance.StopTimer();
+                    InGameUI.Instance.StopTimer();
+                    CoroutineManager.Instance.ClearQueue();
+                    ScoreManager.Instance.AddRoundWinner(ScoreManager.Instance.GetRoundWinner());
+                    if (ScoreManager.Instance.IsExistGameWinner())
+                    {
+                        SetGameplayState(GameplayState.GameOver);
+                    }
+                    else
+                    {
+                        CoroutineManager.Instance.AddCoroutine(InGameUI.Instance.ShowRoundOverAnimation());
+                        CoroutineManager.Instance.AddCoroutine(ISetStateQueueProcess(GameplayState.NewRound));
+                    }
+                    break;
+                case GameplayState.NewRound:
                     _figureCount = 0;
+                    AIManager.Instance.StopBotTurnForce();
                     PlayerManager.Instance.ResetCurrentPlayer();
                     Field.Instance.Initialization();
                     CoroutineManager.Instance.ClearQueue();
@@ -171,7 +183,7 @@ namespace Managers
                         }
                     }
                     SlotManager.Instance.NewTurn(PlayerManager.Instance.GetCurrentPlayer());
-                    ScoreManager.Instance.ResetAllScore();
+                    ScoreManager.Instance.ClearAllScore();
                     SlotManager.Instance.UpdateCardPosition(false);
 
                     ManaManager.Instance.SetBonusMana(0);
@@ -183,6 +195,7 @@ namespace Managers
                     ManaManager.Instance.UpdateManaUI();
 
                     InGameUI.Instance.NewTurn();
+                    InGameUI.Instance.SetSideBannerTurn(1);
                     InGameUI.Instance.UpdateScore();
                     break;
             }
@@ -191,10 +204,15 @@ namespace Managers
         private void Update()
         {
 
-            if (Input.GetKeyDown(KeyCode.I))
-                Debug.Log(RoomManager.GetPlayerInfo());
-            //if (Input.GetKeyDown(KeyCode.S)) NetworkEventManager.RaiseEventCardInvoke(PlayerManager.Instance.GetCurrentPlayer().HandPool[0].Info);
+            if (Input.GetKeyDown(KeyCode.I)) Debug.Log(RoomManager.GetPlayerInfo());
             if (Input.GetKeyDown(KeyCode.K)) NetworkEventManager.RaiseEventEndTurn();
+        }
+
+        public void SetGameplayState(GameplayState state)
+        {
+            _gameplayState = state;
+            CheckGameplayState();
+            Debug.Log($"Current state :{state}");
         }
 
         public void SetGamePlayStateQueue(GameplayState state)
@@ -227,7 +245,11 @@ namespace Managers
 
             GameOver,
 
-            RestartGame
+            RestartGame,
+
+            RoundOver,
+
+            NewRound
         }
 
         public enum GameType

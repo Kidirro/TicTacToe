@@ -148,10 +148,19 @@ namespace Managers
                     Debug.LogFormat("Current tactic : {0}. Is Empty: {1}", AIManager.Instance.BotAggression, CoroutineManager.IsQueueEmpty);
                     while (!CoroutineManager.IsQueueEmpty) yield return null;
                 }
+                else
+                {
+                    yield break;
+                }
 
             }
             GameplayManager.Instance.SetGamePlayStateQueue(GameplayManager.GameplayState.NewTurn);
 
+        }
+
+        public void StopBotTurnForce()
+        {
+            StopAllCoroutines();
         }
 
         public enum BotGameType

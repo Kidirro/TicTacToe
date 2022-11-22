@@ -25,7 +25,7 @@ namespace Managers
                 {
                     IsQueueEmpty = false;
                     Debug.Log(_coroutineQueue);
-                    yield return  StartCoroutine(_coroutineQueue.Dequeue());
+                    yield return StartCoroutine(_coroutineQueue.Dequeue());
 
                 }
                 yield return new WaitForEndOfFrame();
@@ -36,7 +36,7 @@ namespace Managers
         public void AddCoroutine(IEnumerator coroutine)
         {
             IsQueueEmpty = false;
-            _coroutineQueue.Enqueue(coroutine);
+            _coroutineQueue.Enqueue(coroutine);            
         }
 
         public void AddAwaitTime(float time)
@@ -46,9 +46,9 @@ namespace Managers
 
         public IEnumerator IAwaitProcess(float time)
         {
-            for (int i =0; i<time; i++)           yield return null;
+            for (int i = 0; i < time; i++) yield return null;
         }
-        
+
         public void ClearQueue()
         {
             _coroutineQueue.Clear();

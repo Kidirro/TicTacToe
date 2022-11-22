@@ -159,7 +159,7 @@ namespace Managers
             {
                 if (!Field.Instance.IsExistEmptyCell() && _lineForClearing.Count == 0 && GameplayManager.CurrentGameplayState != GameplayManager.GameplayState.GameOver)
                 {
-                    GameplayManager.Instance.SetGamePlayStateQueue(GameplayManager.GameplayState.GameOver);
+                    GameplayManager.Instance.SetGamePlayStateQueue(GameplayManager.GameplayState.RoundOver);
                 }
             }
             yield return null;
