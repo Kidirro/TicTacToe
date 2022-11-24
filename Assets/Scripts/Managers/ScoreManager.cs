@@ -12,9 +12,9 @@ namespace Managers
 
         private List<int> _roundWinner = new List<int>();
 
-        private const int _scoreForWin = 20;
-        private const int _roundForWin = 2;
-        private const int _maxRounds = 3;
+        private const int SCORE_FOR_WIN = 20;
+        private const int ROUND_FOR_WIN = 2;
+        private const int MAX_ROUNDS = 3;
 
         public int GetScore(int player)
         {
@@ -55,7 +55,7 @@ namespace Managers
         {
             foreach (int res in _currentScoreList.Keys)
             {
-                if (_currentScoreList[res] >= _scoreForWin) return true;
+                if (_currentScoreList[res] >= SCORE_FOR_WIN) return true;
             }
             return false;
         }
@@ -84,15 +84,15 @@ namespace Managers
         {
             int p1Count = GetCountRoundWin(1);
             int p2Count = GetCountRoundWin(2);
-            return (p1Count == _roundForWin || p2Count == _roundForWin || _roundWinner.Count == _maxRounds);
+            return (p1Count == ROUND_FOR_WIN || p2Count == ROUND_FOR_WIN || _roundWinner.Count == MAX_ROUNDS);
         }   
         
         public int GetGameWinner()
         {
             int p1Count = _roundWinner.FindAll(x => x == 1).Count;
             int p2Count = _roundWinner.FindAll(x => x == 2).Count;
-            if (p1Count == _roundForWin) return 1;
-            else if (p2Count == _roundForWin) return 2;
+            if (p1Count == ROUND_FOR_WIN || (_roundWinner.Count == MAX_ROUNDS && p1Count>p2Count)) return 1;
+            else if (p2Count == ROUND_FOR_WIN || (_roundWinner.Count == MAX_ROUNDS && p2Count > p1Count)) return 2;
             else return -1;
         }
 
@@ -111,10 +111,11 @@ namespace Managers
             return _roundWinner.FindAll(x => x == side).Count;
         }
 
-        private void Update()
+        public int GetRoundCount()
         {
-            if (Input.GetKey(KeyCode.W)) Debug.Log(GetRoundWinner());
+            return _roundWinner.Count;
         }
 
+        
     }
 }

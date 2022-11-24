@@ -254,7 +254,7 @@ public class Card : MonoBehaviour
 
             _cardTip.ShowTip(textTip, false);
         }
-        if (SlotManager.Instance.IsCurrentPlayerOnSlot) SlotManager.Instance.ShowRechanger();
+        //if (SlotManager.Instance.IsCurrentPlayerOnSlot) SlotManager.Instance.ShowRechanger();
     }
 
     /// <summary>
@@ -334,15 +334,15 @@ public class Card : MonoBehaviour
         {
             Field.Instance.UnhighlightZone(ChosedCell, Info.CardAreaSize);
         }
-        SlotManager.Instance.HideRechanger();
+        //SlotManager.Instance.HideRechanger();
         stopWatch.Stop();
         _canvas.overrideSorting = false;
 
-        if (SlotManager.Instance.IsOnRechanger(_cardPosition.y - ScreenManager.Instance.GetHeight(_fingerDistance.y)))
+    /*    if (SlotManager.Instance.IsOnRechanger(_cardPosition.y - ScreenManager.Instance.GetHeight(_fingerDistance.y)))
         {
             SlotManager.Instance.UseRechanger(this);
             return;
-        }
+        }*/
 
         bool TimeFlag = stopWatch.ElapsedMilliseconds > 80;
         bool TypeFlag = false;

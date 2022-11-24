@@ -17,7 +17,7 @@ namespace Managers
         [Space]
         [Space]
 
-        [SerializeField]
+        [Header("Parent properties"), SerializeField]
         private GameObject _lineParent;
 
         [SerializeField]
@@ -26,18 +26,16 @@ namespace Managers
         [Space]
 
         //In screen cord
-        [SerializeField]
+        [Header("Screen properties"), SerializeField]
         private Vector2 _screenBorderX;
 
         [SerializeField]
         private Vector2 _screenBorderY;
 
         [SerializeField]
-        private static Vector2Int _startFieldSize = new Vector2Int(3, 3);
+        private int _startFieldSize = 3;
 
-        [SerializeField]
-        private Vector2Int _growSizeMax = new Vector2Int(6, 6);
-
+        private const int GROW_PER_ROUND = 1;
 
         private Vector2Int _fieldSize;
 
@@ -58,7 +56,7 @@ namespace Managers
             get { return _cellList; }
         }
 
-        [SerializeField] private GameObject _cellPrefab;
+        [Header("Prefabs properties"),SerializeField] private GameObject _cellPrefab;
         [SerializeField] private GameObject _linePrefab;
         [SerializeField] private GameObject _finishLinePrefab;
 
@@ -84,19 +82,13 @@ namespace Managers
         private float _remainX;
         private float _remainY;
 
-
-        private bool _isFieldGrow_Dew = true;
-
-        private int _cyclePerGrow = 2;
-        private int _currenCycle = 0;
-
-
-        public void Initialization()
+        public void Initialization(int round=0)
         {
             StopAllCoroutines();
-            InitializeField();
+            int size = _startFieldSize + round*GROW_PER_ROUND;
 
-            _fieldSize = _startFieldSize;
+            _fieldSize = new Vector2Int(size, size);
+            InitializeField();
             InitializeLine();
             NewCellSize(_fieldSize, false);
         }
@@ -276,13 +268,12 @@ namespace Managers
 
         private void InitializeField()
         {
-            _currenCycle = 0;
             GetStartPosition();
             if (_cellList.Count != 0)
             {
-                for (int i = 0; i < _fieldSize.x; i++)
+                for (int i = 0; i < _cellList.Count; i++)
                 {
-                    for (int j = 0; j < _fieldSize.y; j++)
+                    for (int j = 0; j < _cellList[i].Count; j++)
                     {
                         Destroy(_cellList[i][j].gameObject);
 
@@ -290,10 +281,10 @@ namespace Managers
                 }
             }
             _cellList = new List<List<Cell>>();
-            for (int i = 0; i < _startFieldSize.x; i++)
+            for (int i = 0; i < _fieldSize.x; i++)
             {
                 _cellList.Add(new List<Cell>());
-                for (int j = 0; j < _startFieldSize.y; j++)
+                for (int j = 0; j < _fieldSize.y; j++)
                 {
                     GameObject newCellObject = Instantiate(_cellPrefab);
                     Cell cell = newCellObject.GetComponent<Cell>();
@@ -692,14 +683,11 @@ namespace Managers
 
         public static void SetStartSize(Vector2Int newSize)
         {
-            _startFieldSize = newSize;
+            //_startFieldSize = newSize;
         }
 
-        public IEnumerator GrowField()
+      /*  public IEnumerator GrowField()
         {
-            _currenCycle += 1;
-            if (_currenCycle == _cyclePerGrow)
-            {
 
                 if (_fieldSize.y < _growSizeMax.y)
                 {
@@ -708,10 +696,9 @@ namespace Managers
                     yield return StartCoroutine(AddLineRight());
                     Debug.Log($"Grow_Ended {Cell.AnimationTime}");
                 }
-                _currenCycle = 0;
-            }
+            
 
-        }
+        }*/
 
         public bool IsExistEmptyCell()
         {

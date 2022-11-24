@@ -141,9 +141,9 @@ public class InGameUI : Singleton<InGameUI>
 
     public void ClearTriggers()
     {
-            _animatorNewTurn.ResetTrigger("NewTurn");
-            _animatorNewTurn.ResetTrigger("XTurn");
-            _animatorNewTurn.ResetTrigger("OTurn");
+        _animatorNewTurn.ResetTrigger("NewTurn");
+        _animatorNewTurn.ResetTrigger("XTurn");
+        _animatorNewTurn.ResetTrigger("OTurn");
     }
 
     public void UpdateScore()
@@ -304,13 +304,20 @@ public class InGameUI : Singleton<InGameUI>
 
         Transform currentPoint = null;
 
-        currentPoint = (ScoreManager.Instance.GetRoundWinner() == 1) ? _p1RoundOverPoints[p1Count - 1].transform : _p2RoundOverPoints[p2Count - 1].transform;
-        currentPoint.localScale = Vector2.zero;
+        if (ScoreManager.Instance.GetRoundWinner() == 1)
+        {
+            currentPoint = _p1RoundOverPoints[p1Count - 1].transform;
+            currentPoint.localScale = Vector2.zero;
+        }
+        else if (ScoreManager.Instance.GetRoundWinner() == 2) {
+            currentPoint =_p2RoundOverPoints[p2Count - 1].transform;
+            currentPoint.localScale = Vector2.zero; 
+        }
 
 
         yield return new WaitForSecondsRealtime(_roundOverPanel.FadeOutTimeAwait);
         yield return new WaitForSeconds(0.5f);
-        yield return StartCoroutine(currentPoint.ScaleWithLerp(Vector2.zero, Vector2.one, 20));
+        if (currentPoint!=null) yield return StartCoroutine(currentPoint.ScaleWithLerp(Vector2.zero, Vector2.one, 20));
         yield return new WaitForSeconds(1f);
         _roundOverPanel.FadeOut();
         yield return new WaitForSecondsRealtime(_roundOverPanel.FadeOutTimeAwait);

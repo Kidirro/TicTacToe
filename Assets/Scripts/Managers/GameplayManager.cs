@@ -77,18 +77,7 @@ namespace Managers
                             break;
                     }
                     ThemeManager.Instance.Initialization();
-                    InGameUI.Instance.Initialization();
-                    Field.Instance.Initialization();
-
-                    HistoryManager.Instance.RestartGame();
-                    ManaManager.Instance.ResetMana();
-                    ManaManager.Instance.RestoreAllMana();
-                    ManaManager.Instance.UpdateManaUI();
-
-                    TurnTimerManager.Instance.StartNewTurnTimer(PlayerManager.Instance.GetCurrentPlayer().EntityType, !IsOnline || PlayerManager.Instance.GetCurrentPlayer().SideId == Photon.Pun.PhotonNetwork.LocalPlayer.ActorNumber);
-
-                    InGameUI.Instance.NewTurn();
-                    SetGameplayState(GameplayState.None);
+                    SetGameplayState(GameplayState.NewRound);
                     break;
 
                 case GameplayState.NewTurn:
@@ -102,13 +91,13 @@ namespace Managers
                     ManaManager.Instance.SetBonusMana(0);
 
 
-
+/*
                     if (PlayerManager.Instance.Players[0].Equals(PlayerManager.Instance.GetCurrentPlayer()))
                     {
                         CoroutineManager.Instance.AddCoroutine(Field.Instance.GrowField());
 
                         ManaManager.Instance.GrowMana();
-                    }
+                    }*/
 
 
                     if (!IsOnline || PlayerManager.Instance.GetCurrentPlayer().SideId == Photon.Pun.PhotonNetwork.LocalPlayer.ActorNumber)
@@ -170,7 +159,7 @@ namespace Managers
                     _figureCount = 0;
                     AIManager.Instance.StopBotTurnForce();
                     PlayerManager.Instance.ResetCurrentPlayer();
-                    Field.Instance.Initialization();
+                    Field.Instance.Initialization(ScoreManager.Instance.GetRoundCount());
                     CoroutineManager.Instance.ClearQueue();
                     HistoryManager.Instance.RestartGame();
                     EffectManager.Instance.ClearEffect();
@@ -187,7 +176,7 @@ namespace Managers
                     SlotManager.Instance.UpdateCardPosition(false);
 
                     ManaManager.Instance.SetBonusMana(0);
-                    ManaManager.Instance.ResetMana();
+                    ManaManager.Instance.ResetMana(ScoreManager.Instance.GetRoundCount());
 
                     TurnTimerManager.Instance.StartNewTurnTimer(PlayerManager.Instance.GetCurrentPlayer().EntityType, !IsOnline || PlayerManager.Instance.GetCurrentPlayer().SideId == Photon.Pun.PhotonNetwork.LocalPlayer.ActorNumber);
 

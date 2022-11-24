@@ -3126,7 +3126,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 25a7069b364e7ab4fba4b74a7b1639cb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _startManapool: 1
+  _startManapool: 3
   _maxManaGrow: 6
   _manaPoints:
   - {fileID: 1757167845}

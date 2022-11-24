@@ -12,9 +12,7 @@ namespace Managers
         [SerializeField]
         private int _startManapool;
 
-
-        [SerializeField]
-        private int _maxManaGrow = 5;
+        private const int GROW_PER_ROUND = 1;
 
         private int _manapool = 1;
 
@@ -77,9 +75,9 @@ namespace Managers
             _currentMana = _manapool + _bonusMana;
         }
 
-        public void ResetMana()
+        public void ResetMana(int round =0)
         {
-            _manapool = _startManapool;
+            _manapool = _startManapool+round*GROW_PER_ROUND;
             _bonusMana = 0;
         }
 
@@ -100,17 +98,6 @@ namespace Managers
         public void AddBonusMana(int mana)
         {
             _bonusMana += mana;
-        }
-
-        public void GrowMana()
-        {
-            if (_isManaGrow)
-            {
-                if (_maxManaGrow > _manapool)
-                {
-                    _manapool += 1;
-                }
-            }
         }
 
         public void RestoreMana(int value)
