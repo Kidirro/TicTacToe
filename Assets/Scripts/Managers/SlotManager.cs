@@ -4,8 +4,6 @@ using UnityEngine;
 
 namespace Managers
 {
-
-
     public class SlotManager : Singleton<SlotManager>
     {
         #region Field
@@ -21,14 +19,10 @@ namespace Managers
         [SerializeField, Tooltip("Ссылка на предка в иерархии")]
         private Transform _transformParent;
 
-        [Space]
-        [Space]
-
-
         /// <summary>
         /// Отступ от нижней границы
         /// </summary>
-        [SerializeField, Tooltip("Отступ от нижней границы")]
+        [Header("Border properties"), SerializeField, Tooltip("Отступ от нижней границы")]
         private float _buttonBorder;
 
         /// <summary>
@@ -37,15 +31,35 @@ namespace Managers
         [SerializeField, Tooltip("Отступ от границ экрана по бокам")]
         private float _widthBorder;
 
-        [Space]
-        [Space]
+        /// <summary>
+        /// Высота на которую поднимится карта при ходе игрока
+        /// </summary>
+        [SerializeField, Tooltip("Высота на которую поднимится карта при ходе игрока")]
+        private float _heightLift;
 
         /// <summary>
         /// Ширина одной карты
         /// </summary>
-        [SerializeField, Tooltip("Ширина одной карты")]
+        [Header("Card properties"), SerializeField, Tooltip("Ширина одной карты")]
         private float _widthCard;
 
+        /// <summary>
+        /// Сколько карт выдается в ход
+        /// </summary>
+        [SerializeField, Tooltip("Сколько карт выдается в ход")]
+        private int _cardPerTurn;
+
+        /// <summary>
+        /// Дельта угла карт
+        /// </summary>
+        [SerializeField, Tooltip("Дельта угла карт для дуги")]
+        private float _angleDelta;
+
+        /// <summary>
+        /// Дельта высоты карт
+        /// </summary>
+        [SerializeField, Tooltip("Дельта высоты карт для дуги")]
+        private float _heightDelta;
 
         /// <summary>
         /// Позиция колоды
@@ -54,40 +68,10 @@ namespace Managers
         private float _deckPosition;
 
         /// <summary>
-        /// Дельта угла карт
-        /// </summary>
-        [SerializeField, Tooltip("Дельта угла карт")]
-        private float _angleDelta;
-
-        /// <summary>
-        /// Дельта высоты карт
-        /// </summary>
-        [SerializeField, Tooltip("Дельта высоты карт")]
-        private float _heightDelta;
-
-        /// <summary>
         /// Количество слотов
         /// </summary>
         [SerializeField, Tooltip("Максимальное количество слотов")]
         private int _slotsCount;
-
-        /// <summary>
-        /// Высота пересдачи карты
-        /// </summary>
-        [SerializeField, Tooltip("Высота пересдачи карты")]
-        private int _rechangerHeight;
-
-        /// <summary>
-        /// Пересдаватель
-        /// </summary>
-        [SerializeField, Tooltip("Пересдаватель")]
-        private Rechanger _rechanger;
-
-        /// <summary>
-        /// Сколько карт выдается в ход
-        /// </summary>
-        [SerializeField, Tooltip("Сколько карт выдается в ход")]
-        private int _cardPerTurn;
 
         /// <summary>
         /// Карты какого игрока показываются
@@ -99,14 +83,19 @@ namespace Managers
             get { return _currentPlayerSet; }
         }
 
-
         /// <summary>
         /// Использован ли заменитель на этом ходу
         /// </summary>
         private bool _isRechangerUsed = false;
 
-
-        public bool IsCurrentPlayerOnSlot => _currentPlayerSet.SideId == PlayerManager.Instance.GetCurrentPlayer().SideId;
+        public bool IsCurrentPlayerOnSlot
+        {
+            get
+            {
+                Debug.Log($"{ _currentPlayerSet.SideId} == {PlayerManager.Instance.GetCurrentPlayer().SideId}   { _currentPlayerSet.SideId == PlayerManager.Instance.GetCurrentPlayer().SideId}");
+                return _currentPlayerSet.SideId == PlayerManager.Instance.GetCurrentPlayer().SideId;
+            }
+        }
 
         #endregion
 
@@ -183,30 +172,9 @@ namespace Managers
             }
         }
 
-
-        /*    private void Update()
-            {
-                if (Input.GetKeyDown(KeyCode.Alpha1))
-                {
-                    AddCard(PlayerManager.Instance.GetCurrentPlayer());
-                    _rechanger.Show();
-                }
-
-                if (Input.GetKeyDown(KeyCode.Alpha2))
-                {
-                    RemoveCard(PlayerManager.Instance.GetCurrentPlayer(), 0);
-                    _rechanger.Hide();
-                }
-                if (Input.GetKeyDown(KeyCode.Alpha3))
-                {
-                    UpdateCardPosition(false);
-                }
-            }
-        */
         public void ResetRechanher()
         {
             _isRechangerUsed = false;
-            //Debug.Log(_isRechangerUsed);
         }
 
         public void UpdateCardPosition(bool instantly = true, Card card = null)
@@ -221,18 +189,23 @@ namespace Managers
                 _currentPlayerSet.HandPool.Add(card);
             }
 
-            float PositionY = ScreenManager.Instance.GetHeight(_buttonBorder);
+            float PositionY = ScreenManager.Instance.GetHeight(_buttonBorder + ((IsCurrentPlayerOnSlot) ? _heightLift : 0));
+
             float StepPos = (ScreenManager.Instance.ScreenDefault.x - _widthBorder * 2 + _widthCard * currentCount) / (currentCount + 1);
             float StepRot = (_angleDelta * 2) / (currentCount + 1);
+
+
 
             for (int i = 0; i < currentCount; i++)
             {
                 float posY = PositionY + (Mathf.Sin(Mathf.PI * (i + 1) / (currentCount + 1))) * _heightDelta * ScreenManager.Instance.GetHeightRatio();
                 Vector2 finPosition = new Vector2((_widthBorder + StepPos * (i + 1) - _widthCard * currentCount / 2) * ScreenManager.Instance.GetWidthRatio(), posY);
                 _currentPlayerSet.HandPool[i].HandPosition = finPosition;
+
+                Debug.Log($"Current state slot : {IsCurrentPlayerOnSlot}  PosY: {_currentPlayerSet.HandPool[i].HandPosition.y} ");
+                _currentPlayerSet.HandPool[i].SetTransformSize(0.7f, instantly);
                 _currentPlayerSet.HandPool[i].SetTransformPosition(finPosition.x, finPosition.y, instantly);
 
-                _currentPlayerSet.HandPool[i].SetTransformSize(0.7f, instantly);
 
                 _currentPlayerSet.HandPool[i].HandRotation = _angleDelta - StepRot * (i + 1);
                 _currentPlayerSet.HandPool[i].SetTransformRotation(_angleDelta - StepRot * (i + 1), instantly);
@@ -241,6 +214,14 @@ namespace Managers
                 _currentPlayerSet.HandPool[i].SetSideCard(_currentPlayerSet.SideId);
 
 
+            }
+        }
+
+        public void UpdateCardUI()
+        {
+            foreach(Card card in _currentPlayerSet.HandPool)
+            {
+                card.UpdateUI();
             }
         }
 
@@ -285,6 +266,7 @@ namespace Managers
                 {
                     _currentPlayerSet.HandPool[i].CancelDragging();
                 }
+                UpdateCardPosition(false);
                 return;
             }
             if (_currentPlayerSet != null)
@@ -295,7 +277,7 @@ namespace Managers
                 }
             }
             _currentPlayerSet = player;
-            Debug.Log("Current side id:"+_currentPlayerSet.SideId);
+            Debug.Log("Current side id:" + _currentPlayerSet.SideId);
             for (int i = 0; i < _currentPlayerSet.HandPool.Count; i++)
             {
                 _currentPlayerSet.HandPool[i].gameObject.SetActive(true);
@@ -303,28 +285,12 @@ namespace Managers
 
             for (int i = 0; i < _cardPerTurn; i++)
             {
-               AddCard(_currentPlayerSet);
+                AddCard(_currentPlayerSet);
             }
 
             UpdateCardPosition(false);
+            UpdateCardUI();
             ResetRechanher();
-        }
-
-
-        public void ShowRechanger()
-        {
-            Debug.Log(_isRechangerUsed);
-
-            if (!_isRechangerUsed)
-            {
-                _rechanger.Show();
-            }
-        }
-
-        public void HideRechanger()
-        {
-
-            _rechanger.Hide();
         }
 
         public void UseRechanger(Card card)
@@ -336,12 +302,6 @@ namespace Managers
                 AddCard(PlayerManager.Instance.GetCurrentPlayer());
                 UpdateCardPosition(false);
             }
-        }
-
-        public bool IsOnRechanger(float posY)
-        {
-            if (_isRechangerUsed) return false;
-            return posY < _rechanger.Height;
         }
 
         public void ResetHandPool(PlayerInfo player)

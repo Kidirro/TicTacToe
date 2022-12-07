@@ -110,6 +110,8 @@ namespace Managers
                     ManaManager.Instance.RestoreAllMana();
                     ManaManager.Instance.UpdateManaUI();
 
+                    SlotManager.Instance.UpdateCardUI();
+
                     InGameUI.Instance.NewTurn();
 
                     if (PlayerManager.Instance.GetCurrentPlayer().EntityType.Equals(PlayerType.AI))
@@ -171,17 +173,19 @@ namespace Managers
                             card.Info.CardBonusManacost = 0;
                         }
                     }
-                    SlotManager.Instance.NewTurn(PlayerManager.Instance.GetCurrentPlayer());
-                    ScoreManager.Instance.ClearAllScore();
-                    SlotManager.Instance.UpdateCardPosition(false);
 
                     ManaManager.Instance.SetBonusMana(0);
                     ManaManager.Instance.ResetMana(ScoreManager.Instance.GetRoundCount());
+                    ManaManager.Instance.RestoreAllMana();
+                    ManaManager.Instance.UpdateManaUI();
+
+                    SlotManager.Instance.NewTurn(PlayerManager.Instance.GetCurrentPlayer());
+                    SlotManager.Instance.UpdateCardUI();
+                    ScoreManager.Instance.ClearAllScore();
+                    SlotManager.Instance.UpdateCardPosition(false);
 
                     TurnTimerManager.Instance.StartNewTurnTimer(PlayerManager.Instance.GetCurrentPlayer().EntityType, !IsOnline || PlayerManager.Instance.GetCurrentPlayer().SideId == Photon.Pun.PhotonNetwork.LocalPlayer.ActorNumber);
 
-                    ManaManager.Instance.RestoreAllMana();
-                    ManaManager.Instance.UpdateManaUI();
 
                     InGameUI.Instance.NewTurn();
                     InGameUI.Instance.SetSideBannerTurn(1);

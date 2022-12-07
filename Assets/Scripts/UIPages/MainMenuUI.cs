@@ -116,6 +116,6 @@ public class MainMenuUI : Singleton<MainMenuUI>
 
     public void OnDiscordClick()
     {
-        Application.OpenURL("https://discord.gg/DK7M2QYZ");
+        Application.OpenURL("https://discord.gg/4PJbjRZtkU");
     }
 }

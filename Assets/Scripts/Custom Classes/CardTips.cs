@@ -68,7 +68,7 @@ public class CardTips : MonoBehaviour
                 StartCoroutine(IPositionIEnumerator(0));*/
 
             _tipRect.localPosition = _tipPosition;
-            if (!_isAlphaCoroutineWork)
+            if (!_isAlphaCoroutineWork && gameObject.activeInHierarchy)
                 StartCoroutine(IAlphaIEnumerator(0));
         }
     }

@@ -1,6 +1,7 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
+using TMPro;
 
 namespace Managers
 {
@@ -28,21 +29,24 @@ namespace Managers
             get => _currentMana;
         }
 
+        [SerializeField]
+        private TextMeshProUGUI _manaText;
+
         /// <summary>
         /// 
         /// </summary>
-        [SerializeField]
-        private List<GameObject> _manaPoints;
+        [Header("Mana colors properties"), SerializeField]
+        private List<Image> _manaPointsStroke;
 
         /// <summary>
         /// 
         /// </summary>
         [SerializeField]
-        private List<GameObject> _manaPointsFill;
+        private List<Image> _manaPointsFill;              
 
         public bool IsEnoughMana(int mana)
         {
-            return mana <= _currentMana;
+            return mana <= Mathf.Max(0, _currentMana);
         }
 
         public void IncreaseMaxMana(int mana)
@@ -75,18 +79,19 @@ namespace Managers
             _currentMana = _manapool + _bonusMana;
         }
 
-        public void ResetMana(int round =0)
+        public void ResetMana(int round = 0)
         {
-            _manapool = _startManapool+round*GROW_PER_ROUND;
+            _manapool = _startManapool + round * GROW_PER_ROUND;
             _bonusMana = 0;
         }
 
         public void UpdateManaUI()
         {
-            for (int i = 0; i < _manaPoints.Count; i++)
+            _manaText.text = $"{_currentMana}/{_manapool + _bonusMana}";
+            for (int i = 0; i < _manaPointsFill.Count; i++)
             {
-                _manaPointsFill[i].SetActive(i + 1 <= _currentMana);
-                _manaPoints[i].SetActive(i + 1 <= _manapool + _bonusMana);
+                StartCoroutine(_manaPointsFill[i].AlphaWithLerp(_manaPointsFill[i].color.a, (i + 1 <= _currentMana) ? 1 : 0, 20));
+                StartCoroutine(_manaPointsStroke[i].AlphaWithLerp(_manaPointsStroke[i].color.a, (i + 1 <= _manapool + _bonusMana) ? 1 : 0, 20));
             }
         }
 
@@ -103,7 +108,6 @@ namespace Managers
         public void RestoreMana(int value)
         {
             _currentMana = Mathf.Min(_currentMana + value, _manapool + _bonusMana);
-            Debug.Log(_currentMana);
         }
 
         private void Update()

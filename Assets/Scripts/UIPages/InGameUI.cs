@@ -12,7 +12,6 @@ public class InGameUI : Singleton<InGameUI>
         get => _gameOverPanel.gameObject.activeSelf;
     }
 
-
     [SerializeField]
     private TextMeshProUGUI _playerOneScoreText;
 
@@ -88,7 +87,6 @@ public class InGameUI : Singleton<InGameUI>
 
     [SerializeField]
     private List<GameObject> _p2RoundOverPoints;
-
 
     [Space, Header("Timer Properties"), SerializeField]
     private GameObject _timerPanel;

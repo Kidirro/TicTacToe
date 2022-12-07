@@ -130,6 +130,7 @@ namespace Managers
             }
             yield return StartCoroutine(CoroutineManager.Instance.IAwaitProcess(maxTime));
             FinishLineManager.Instance.MasterChecker(PlayerManager.Instance.GetCurrentPlayer().SideId);
+            SlotManager.Instance.UpdateCardUI();
         }
 
         private IEnumerator IEffectAwaitAsync(List<Effect> effects, float startAwait = 0)

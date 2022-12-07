@@ -122,6 +122,7 @@ public class CardInfo : ScriptableObject
     public void Decrease2MaxMana()
     {
         ManaManager.Instance.IncreaseMaxMana(-2);
+        ManaManager.Instance.IncreaseMana(-(CardManacost + CardBonusManacost - 2));
         NetworkEventManager.RaiseEventIncreaseMaxMana(-2);
         ManaManager.Instance.UpdateManaUI();
 

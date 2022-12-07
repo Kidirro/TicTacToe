@@ -22,19 +22,27 @@ public class Card : MonoBehaviour
     /// <summary>
     /// Скорость поворота
     /// </summary>
-    const float _rotationCountFrame = 12;
+    const int _rotationCountFrame = 12;
 
     /// <summary>
     /// Скорость поворота
     /// </summary>
-    const float _scaleCountFrame = 12;
-
+    const int _scaleCountFrame = 12;
 
     /// <summary>
     /// Скорость перемещения
     /// </summary>
-    const float _positionCountFrame = 12;
+    const int _positionCountFrame = 12;
 
+    /// <summary>
+    /// Скорость альфы подсветки
+    /// </summary>
+    const int _lightCountFrame = 12;
+    
+    /// <summary>
+    /// Скорость альфы карты
+    /// </summary>
+    const int _canvasAlphaCountFrame = 12;
 
     /// <summary>
     /// Текст манакоста
@@ -52,7 +60,13 @@ public class Card : MonoBehaviour
     /// Обьект карты
     /// </summary>
     [SerializeField]
-    private GameObject _cardObj;
+    private CanvasGroup _cardCanvas;
+
+    /// <summary>
+    /// Обьект подсветки
+    /// </summary>
+    [SerializeField]
+    private Image _cardLight;
 
     /// <summary>
     /// Текст описания карты
@@ -171,7 +185,9 @@ public class Card : MonoBehaviour
     [SerializeField]
     private Vector2 _fingerDistance;
 
+    private bool _lastState = true;
 
+    private Coroutine _alphaCoroutine;
 
     #endregion
 
@@ -184,7 +200,7 @@ public class Card : MonoBehaviour
 
     private void OnDisable()
     {
-        CancelDragging();
+        //CancelDragging();
         _isPositionCoroutineWork = false;
         _isSizeCoroutineWork = false;
         _isRotationCoroutineWork = false;
@@ -197,11 +213,11 @@ public class Card : MonoBehaviour
         if (Info)
         {
             UpdateUI();
-            _cardObj.SetActive(true);
+            SetGroupAlpha(_cardCanvas.alpha, 1);
             _cardTip.HideTip(true);
-            _cardObj.transform.localScale = new Vector3(ScreenManager.Instance.GetWidthRatio(), ScreenManager.Instance.GetWidthRatio());
+            _cardCanvas.transform.localScale = new Vector3(ScreenManager.Instance.GetWidthRatio(), ScreenManager.Instance.GetWidthRatio());
             _cardTip.transform.localScale = new Vector3(ScreenManager.Instance.GetWidthRatio(), ScreenManager.Instance.GetWidthRatio());
-
+            _lastState = true;
         }
     }
 
@@ -216,13 +232,22 @@ public class Card : MonoBehaviour
         _manapoints.text = (Info.CardManacost + Info.CardBonusManacost).ToString();
         SetSideCard(1);
 
+        Debug.Log($"UpdatedUICARD: {ManaManager.Instance.IsEnoughMana(Info.CardManacost + Info.CardBonusManacost)}. {Info.CardManacost}. {ManaManager.Instance.CurrentMana}");
+
         string desc = "";
         desc = I2.Loc.LocalizationManager.TryGetTranslation(Info.CardDescription, out desc) ? I2.Loc.LocalizationManager.GetTranslation(Info.CardDescription) : Info.CardDescription;
+
+        bool manaFlag = ManaManager.Instance.IsEnoughMana(Info.CardManacost + Info.CardBonusManacost);
+        bool playerFlag = (SlotManager.Instance.CurrentPlayerSet != null) &&
+            (PlayerManager.Instance.GetCurrentPlayer() != null) &&
+            (SlotManager.Instance.CurrentPlayerSet.SideId == PlayerManager.Instance.GetCurrentPlayer().SideId);
+        StartCoroutine(_cardLight.AlphaWithLerp(_cardLight.color.a, (playerFlag && manaFlag) ? 1 : 0, _lightCountFrame));
+        //_cardLight.color = new Color(_cardLight.color.r, _cardLight.color.g, _cardLight.color.b, ManaManager.Instance.IsEnoughMana(Info.CardManacost + Info.CardBonusManacost) ? 1 : 0);
         _cardDescription.text = desc;
 
         for (int i = 0; i < _bonusImageList.Count; i++)
         {
-            _bonusImageList[i].SetActive(i== (int)Info.CardBonus);
+            _bonusImageList[i].SetActive(i == (int)Info.CardBonus);
         }
     }
 
@@ -251,7 +276,6 @@ public class Card : MonoBehaviour
             string textTip = Info.TipText;
             textTip = I2.Loc.LocalizationManager.TryGetTranslation(Info.TipText, out textTip) ? I2.Loc.LocalizationManager.GetTranslation(Info.TipText) : Info.TipText;
             Debug.Log(textTip);
-
             _cardTip.ShowTip(textTip, false);
         }
         //if (SlotManager.Instance.IsCurrentPlayerOnSlot) SlotManager.Instance.ShowRechanger();
@@ -262,7 +286,7 @@ public class Card : MonoBehaviour
     /// </summary>
     public void OnDrag()
     {
-        if (SlotManager.Instance.CurrentPlayerSet != PlayerManager.Instance.GetCurrentPlayer()) return;
+        if (!SlotManager.Instance.IsCurrentPlayerOnSlot) return;
         Vector2 vector = Input.mousePosition + new Vector3(ScreenManager.Instance.GetWidth(_fingerDistance.x), ScreenManager.Instance.GetHeight(_fingerDistance.y));
         Vector2 vectorFigure = Input.mousePosition + new Vector3(ScreenManager.Instance.GetWidth(_fingerDistance.x), ScreenManager.Instance.GetHeight(_fingerDistance.y / 2));
 
@@ -301,8 +325,11 @@ public class Card : MonoBehaviour
             }
         }
 
-        _cardObj.SetActive(!Field.Instance.IsInFieldHeight(vectorFigure.y));
-
+        if (_lastState != !Field.Instance.IsInFieldHeight(vectorFigure.y))
+        {
+            _lastState = !_lastState;
+            SetGroupAlpha(_cardCanvas.alpha, _lastState ? 1 : 0, false);
+        }
 
         ChosedCell = Field.Instance.GetIdFromPosition(vectorFigure, false);
         if (_prevPosition != ChosedCell)
@@ -338,17 +365,17 @@ public class Card : MonoBehaviour
         stopWatch.Stop();
         _canvas.overrideSorting = false;
 
-    /*    if (SlotManager.Instance.IsOnRechanger(_cardPosition.y - ScreenManager.Instance.GetHeight(_fingerDistance.y)))
-        {
-            SlotManager.Instance.UseRechanger(this);
-            return;
-        }*/
+        /*    if (SlotManager.Instance.IsOnRechanger(_cardPosition.y - ScreenManager.Instance.GetHeight(_fingerDistance.y)))
+            {
+                SlotManager.Instance.UseRechanger(this);
+                return;
+            }*/
 
         bool TimeFlag = stopWatch.ElapsedMilliseconds > 80;
         bool TypeFlag = false;
         bool ManaFlag = ManaManager.Instance.IsEnoughMana(Info.CardManacost + Info.CardBonusManacost);
         bool AnimFlag = CoroutineManager.IsQueueEmpty;
-        bool PlayerFlag = SlotManager.Instance.CurrentPlayerSet == PlayerManager.Instance.GetCurrentPlayer();
+        bool PlayerFlag = SlotManager.Instance.IsCurrentPlayerOnSlot;
 
         switch (Info.CardType)
         {
@@ -366,7 +393,6 @@ public class Card : MonoBehaviour
         if (TypeFlag && TimeFlag && ManaFlag && AnimFlag && PlayerFlag)
         {
             SlotManager.Instance.RemoveCard(PlayerManager.Instance.GetCurrentPlayer(), this);
-            SlotManager.Instance.UpdateCardPosition(false);
             ManaManager.Instance.IncreaseMana(-Info.CardManacost - Info.CardBonusManacost);
             NetworkEventManager.RaiseEventIncreaseMana(-Info.CardManacost - Info.CardBonusManacost);
             ManaManager.Instance.UpdateManaUI();
@@ -375,22 +401,17 @@ public class Card : MonoBehaviour
             NetworkEventManager.RaiseEventCardInvoke(Info);
             HistoryManager.Instance.AddHistoryCard(PlayerManager.Instance.GetCurrentPlayer(), Info);
 
-            if (Info.CardCount > 1)
-            {
-                Info.CardBonusManacost += 1;
-                foreach (Card card in PlayerManager.Instance.GetCurrentPlayer().HandPool)
-                {
-                    card.UpdateUI();
-                }
-            }
+            Info.CardBonusManacost += 1;
+            SlotManager.Instance.UpdateCardUI();
+
         }
         else
         {
-
-            _cardObj.SetActive(true);
+            _lastState = true;
+            SetGroupAlpha(_cardCanvas.alpha, 1, false);
         }
         if (Info.IsNeedShowTip) _cardTip.HideTip(TypeFlag && TimeFlag && ManaFlag);
-        SlotManager.Instance.UpdateCardPosition(SlotManager.Instance.CurrentPlayerSet, false);
+        SlotManager.Instance.UpdateCardPosition(false);
     }
 
     /// <summary>
@@ -414,6 +435,18 @@ public class Card : MonoBehaviour
         _transformRect.SetParent(parent);
         SetTransformPosition(0, 0);
         _transformRect.localScale = Vector3.one;
+    }
+
+    /// <summary>
+    /// Изменение актуального положения карты
+    /// </summary>
+    /// <param name="reals"></param>
+    /// <param name="instantly"></param>
+    public void SetGroupAlpha(float init, float final, bool instantly = true)
+    {
+        if (_alphaCoroutine != null) StopCoroutine(_alphaCoroutine);
+        if (instantly) _cardCanvas.alpha = final;
+        else _alphaCoroutine = StartCoroutine(_cardCanvas.AlphaWithLerp(init, final, _canvasAlphaCountFrame));
     }
 
 
@@ -456,12 +489,10 @@ public class Card : MonoBehaviour
         stopWatch.Stop();
         _canvas.overrideSorting = false;
 
-        _cardObj.SetActive(true);
 
-        if (FindObjectOfType<SlotManager>() != null)
-        {
-            SlotManager.Instance.UpdateCardPosition(SlotManager.Instance.CurrentPlayerSet, !gameObject.activeInHierarchy);
-        }
+        _lastState = true;
+        SlotManager.Instance.UpdateCardUI();
+        //SlotManager.Instance.UpdateCardPosition(!gameObject.activeInHierarchy);
     }
 
     private IEnumerator ScaleIEnumerator()
@@ -470,7 +501,7 @@ public class Card : MonoBehaviour
         float prevS = _cardSize;
         float step = (_cardSize - transform.localScale.x) / _scaleCountFrame;
         int i = 0;
-        while (i <_scaleCountFrame)
+        while (i < _scaleCountFrame)
         {
             if (prevS != _cardSize)
             {
@@ -512,7 +543,6 @@ public class Card : MonoBehaviour
         }
         _transformRect.localPosition = _cardPosition;
         _isPositionCoroutineWork = false;
-        yield break;
     }
 
     private IEnumerator RotationIEnumerator()
@@ -523,7 +553,7 @@ public class Card : MonoBehaviour
 
         Quaternion currentRotation = _transformRect.localRotation;
         int i = 0;
-        while (i <_rotationCountFrame)
+        while (i < _rotationCountFrame)
         {
             if (prevRot != Quaternion.Euler(0, 0, _cardRotation))
             {
