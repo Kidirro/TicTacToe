@@ -572,7 +572,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &3881205741075323241
 RectTransform:
   m_ObjectHideFlags: 0
@@ -1034,7 +1034,7 @@ MonoBehaviour:
   _manapoints: {fileID: 619049843173090730}
   Info: {fileID: 0}
   _cardCanvas: {fileID: 4002906904037679547}
-  _cardLight: {fileID: 8319694464297388225}
+  _cardLight: {fileID: 834677926258902060}
   _cardDescription: {fileID: 7664159103124362204}
   _cardImage: {fileID: 3780281420396772493}
   _cardTip: {fileID: 2798174646749792582}
@@ -1523,7 +1523,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0, g: 0.851, b: 1, a: 0}
+  m_Color: {r: 0, g: 0.851, b: 1, a: 0.29803923}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1

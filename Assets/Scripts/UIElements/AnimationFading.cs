@@ -1,18 +1,20 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using Managers;
 using UnityEngine;
 
-[RequireComponent(typeof (Animator))]
+[RequireComponent(typeof(Animator))]
 public class AnimationFading : MonoBehaviour
 {
     private Animator _animator;
 
-    [SerializeField]
-    private float _fadeOutTimeAwait = 1;
+    [SerializeField] private float _frameCount = 1;
 
-    public float FadeOutTimeAwait
+    public float FrameCount 
+        
     {
-        get => _fadeOutTimeAwait;
+        get => _frameCount;
     }
 
     private void Awake()
@@ -28,34 +30,21 @@ public class AnimationFading : MonoBehaviour
     public void FadeIn()
     {
         this.gameObject.SetActive(true);
-        StopAllCoroutines();
         _animator.SetTrigger("FadeIn");
+        StopAllCoroutines();
     }
 
     public void FadeOut()
     {
-        StartCoroutine(IDisable());
         _animator.SetTrigger("FadeOut");
-
-    }
-
-
-    void Update()
-    {
-        if (Input.GetKeyDown(KeyCode.Alpha9))
-        {
-            FadeIn();
-        }
-
-        if (Input.GetKeyDown(KeyCode.Alpha0))
-        {
-            FadeOut();
-        }
+        Debug.Log("StartFadeOut");
+        StartCoroutine(IDisable());
     }
 
     IEnumerator IDisable()
     {
-        yield return new  WaitForSecondsRealtime(_fadeOutTimeAwait);
+        yield return CoroutineManager.Instance.IAwaitProcess(FrameCount);
         this.gameObject.SetActive(false);
     }
+
 }

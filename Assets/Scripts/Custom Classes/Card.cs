@@ -18,101 +18,103 @@ public class Card : MonoBehaviour
     /// </summary>
     [HideInInspector]
     public static Vector2Int ChosedCell = new Vector2Int(-1, -1);
-
+    
     /// <summary>
-    /// Скорость поворота
+    /// РЎРєРѕСЂРѕСЃС‚СЊ РїРѕРІРѕСЂРѕС‚Р°
     /// </summary>
     const int _rotationCountFrame = 12;
 
     /// <summary>
-    /// Скорость поворота
+    /// РЎРєРѕСЂРѕСЃС‚СЊ РїРѕРІРѕСЂРѕС‚Р°
     /// </summary>
     const int _scaleCountFrame = 12;
 
     /// <summary>
-    /// Скорость перемещения
+    /// РЎРєРѕСЂРѕСЃС‚СЊ РїРµСЂРµРјРµС‰РµРЅРёСЏ
     /// </summary>
-    const int _positionCountFrame = 12;
+    const int POSITION_COUNT_FRAME = 12;
 
     /// <summary>
-    /// Скорость альфы подсветки
+    /// РЎРєРѕСЂРѕСЃС‚СЊ Р°Р»СЊС„С‹ РїРѕРґСЃРІРµС‚РєРё
     /// </summary>
-    const int _lightCountFrame = 12;
+    const int LIGHT_COUNT_FRAME = 12;
     
     /// <summary>
-    /// Скорость альфы карты
+    /// РЎРєРѕСЂРѕСЃС‚СЊ Р°Р»СЊС„С‹ РєР°СЂС‚С‹
     /// </summary>
-    const int _canvasAlphaCountFrame = 12;
+    public const int CANVAS_ALPHA_COUNT_FRAME = 12;
+    
+    
 
     /// <summary>
-    /// Текст манакоста
+    /// РўРµРєСЃС‚ РјР°РЅР°РєРѕСЃС‚Р°
     /// </summary>
     [SerializeField]
     private TextMeshProUGUI _manapoints;
 
     /// <summary>
-    /// Информация карты как информационной сущности
+    /// РРЅС„РѕСЂРјР°С†РёСЏ РєР°СЂС‚С‹ РєР°Рє РёРЅС„РѕСЂРјР°С†РёРѕРЅРЅРѕР№ СЃСѓС‰РЅРѕСЃС‚Рё
     /// </summary>
     [HideInInspector]
     public CardInfo Info;
 
     /// <summary>
-    /// Обьект карты
+    /// РћР±СЊРµРєС‚ РєР°СЂС‚С‹
     /// </summary>
     [SerializeField]
     private CanvasGroup _cardCanvas;
 
     /// <summary>
-    /// Обьект подсветки
+    /// РћР±СЊРµРєС‚ РїРѕРґСЃРІРµС‚РєРё
     /// </summary>
     [SerializeField]
     private Image _cardLight;
 
     /// <summary>
-    /// Текст описания карты
+    /// РўРµРєСЃС‚ РѕРїРёСЃР°РЅРёСЏ РєР°СЂС‚С‹
     /// </summary>
     [SerializeField]
     private TextMeshProUGUI _cardDescription;
 
     /// <summary>
-    /// Изображение карты
+    /// РР·РѕР±СЂР°Р¶РµРЅРёРµ РєР°СЂС‚С‹
     /// </summary>
     [SerializeField]
     private Image _cardImage;
 
     /// <summary>
-    /// Подсказка
+    /// РџРѕРґСЃРєР°Р·РєР°
     /// </summary>
     [SerializeField]
     private CardTips _cardTip;
 
 
     /// <summary>
-    /// Изображение карты
+    /// РР·РѕР±СЂР°Р¶РµРЅРёРµ РєР°СЂС‚С‹
     /// </summary>
     [SerializeField]
     private List<GameObject> _bonusImageList = new List<GameObject>();
 
     /// <summary>
-    /// Место позиции в руке 
+    /// РњРµСЃС‚Рѕ РїРѕР·РёС†РёРё РІ СЂСѓРєРµ 
     /// </summary>
     [HideInInspector]
     public Vector2 HandPosition;
 
     /// <summary>
-    /// Место позиции в руке 
+    /// РњРµСЃС‚Рѕ РїРѕР·РёС†РёРё РІ СЂСѓРєРµ 
     /// </summary>
     [HideInInspector]
     public float HandRotation;
 
     /// <summary>
-    /// Магнитуда ло удаления подсказки
+    /// РњР°РіРЅРёС‚СѓРґР° Р»Рѕ СѓРґР°Р»РµРЅРёСЏ РїРѕРґСЃРєР°Р·РєРё
     /// </summary>
     [SerializeField]
     private float _magnitudeCard;
 
     /// <summary>
-    /// Актуальная позиция карты
+    /// РђРєС‚СѓР°Р»СЊРЅР°СЏ РїРѕР·РёС†РёСЏ РєР°СЂС‚С‹
     /// </summary>
     public Vector2 Position
     {
@@ -121,7 +123,7 @@ public class Card : MonoBehaviour
     private Vector2 _cardPosition;
 
     /// <summary>
-    /// Актуальная позиция карты
+    /// РђРєС‚СѓР°Р»СЊРЅР°СЏ РїРѕР·РёС†РёСЏ РєР°СЂС‚С‹
     /// </summary>
     public float Rotation
     {
@@ -130,12 +132,12 @@ public class Card : MonoBehaviour
     private float _cardRotation;
 
     /// <summary>
-    /// Рект трансформ 
+    /// Р РµРєС‚ С‚СЂР°РЅСЃС„РѕСЂРј 
     /// </summary>
     private RectTransform _transformRect;
 
     /// <summary>
-    /// Актуальный размер карты
+    /// РђРєС‚СѓР°Р»СЊРЅС‹Р№ СЂР°Р·РјРµСЂ РєР°СЂС‚С‹
     /// </summary>
     public float Size
     {
@@ -144,33 +146,33 @@ public class Card : MonoBehaviour
     private float _cardSize;
 
     /// <summary>
-    /// Флаг работы карутины размера
+    /// Р¤Р»Р°Рі СЂР°Р±РѕС‚С‹ РєР°СЂСѓС‚РёРЅС‹ СЂР°Р·РјРµСЂР°
     /// </summary>
     private bool _isSizeCoroutineWork = false;
 
     /// <summary>
-    /// Флаг работы карутины перемещения
+    /// Р¤Р»Р°Рі СЂР°Р±РѕС‚С‹ РєР°СЂСѓС‚РёРЅС‹ РїРµСЂРµРјРµС‰РµРЅРёСЏ
     /// </summary>
     private bool _isPositionCoroutineWork = false;
 
     /// <summary>
-    /// Флаг работы карутины перемещения
+    /// Р¤Р»Р°Рі СЂР°Р±РѕС‚С‹ РєР°СЂСѓС‚РёРЅС‹ РїРµСЂРµРјРµС‰РµРЅРёСЏ
     /// </summary>
     private bool _isRotationCoroutineWork = false;
 
     /// <summary>
-    /// Секундомер
+    /// РЎРµРєСѓРЅРґРѕРјРµСЂ
     /// </summary>
     private Stopwatch stopWatch = new Stopwatch();
 
 
     /// <summary>
-    /// Предыдущая позиция карты
+    /// РџСЂРµРґС‹РґСѓС‰Р°СЏ РїРѕР·РёС†РёСЏ РєР°СЂС‚С‹
     /// </summary>
     private Vector2Int _prevPosition;
 
     /// <summary>
-    /// Канавас объекта для 
+    /// РљР°РЅР°РІР°СЃ РѕР±СЉРµРєС‚Р° РґР»СЏ 
     /// </summary>
     private Canvas _canvas;
 
@@ -199,7 +201,7 @@ public class Card : MonoBehaviour
     }
 
     private void OnDisable()
-    {
+  {
         //CancelDragging();
         _isPositionCoroutineWork = false;
         _isSizeCoroutineWork = false;
@@ -241,7 +243,7 @@ public class Card : MonoBehaviour
         bool playerFlag = (SlotManager.Instance.CurrentPlayerSet != null) &&
             (PlayerManager.Instance.GetCurrentPlayer() != null) &&
             (SlotManager.Instance.CurrentPlayerSet.SideId == PlayerManager.Instance.GetCurrentPlayer().SideId);
-        StartCoroutine(_cardLight.AlphaWithLerp(_cardLight.color.a, (playerFlag && manaFlag) ? 1 : 0, _lightCountFrame));
+        StartCoroutine(_cardLight.AlphaWithLerp(_cardLight.color.a, (playerFlag && manaFlag) ? 1 : 0, LIGHT_COUNT_FRAME));
         //_cardLight.color = new Color(_cardLight.color.r, _cardLight.color.g, _cardLight.color.b, ManaManager.Instance.IsEnoughMana(Info.CardManacost + Info.CardBonusManacost) ? 1 : 0);
         _cardDescription.text = desc;
 
@@ -258,7 +260,7 @@ public class Card : MonoBehaviour
 
 
     /// <summary>
-    /// Начало перетягивания карты
+    /// РќР°С‡Р°Р»Рѕ РїРµСЂРµС‚СЏРіРёРІР°РЅРёСЏ РєР°СЂС‚С‹
     /// </summary>
     public void BeginDrag()
     {
@@ -282,7 +284,7 @@ public class Card : MonoBehaviour
     }
 
     /// <summary>
-    /// Перетягивание карты
+    /// РџРµСЂРµС‚СЏРіРёРІР°РЅРёРµ РєР°СЂС‚С‹
     /// </summary>
     public void OnDrag()
     {
@@ -352,7 +354,7 @@ public class Card : MonoBehaviour
     }
 
     /// <summary>
-    /// Конец движения карты от пальца
+    /// РљРѕРЅРµС† РґРІРёР¶РµРЅРёСЏ РєР°СЂС‚С‹ РѕС‚ РїР°Р»СЊС†Р°
     /// </summary>
     public void EndDraged()
     {
@@ -397,7 +399,7 @@ public class Card : MonoBehaviour
             NetworkEventManager.RaiseEventIncreaseMana(-Info.CardManacost - Info.CardBonusManacost);
             ManaManager.Instance.UpdateManaUI();
 
-            Info.СardAction.Invoke();
+            Info.РЎardAction.Invoke();
             NetworkEventManager.RaiseEventCardInvoke(Info);
             HistoryManager.Instance.AddHistoryCard(PlayerManager.Instance.GetCurrentPlayer(), Info);
 
@@ -415,7 +417,7 @@ public class Card : MonoBehaviour
     }
 
     /// <summary>
-    /// Изменение актуального размера карты
+    /// РР·РјРµРЅРµРЅРёРµ Р°РєС‚СѓР°Р»СЊРЅРѕРіРѕ СЂР°Р·РјРµСЂР° РєР°СЂС‚С‹
     /// </summary>
     /// <param name="reals"></param>
     /// <param name="instantly"></param>
@@ -427,7 +429,7 @@ public class Card : MonoBehaviour
     }
 
     /// <summary>
-    /// Установить родительский обьект
+    /// РЈСЃС‚Р°РЅРѕРІРёС‚СЊ СЂРѕРґРёС‚РµР»СЊСЃРєРёР№ РѕР±СЊРµРєС‚
     /// </summary>
     /// <param name="parent"></param>
     public void SetTransformParent(Transform parent)
@@ -438,7 +440,7 @@ public class Card : MonoBehaviour
     }
 
     /// <summary>
-    /// Изменение актуального положения карты
+    /// РР·РјРµРЅРµРЅРёРµ Р°РєС‚СѓР°Р»СЊРЅРѕРіРѕ РїРѕР»РѕР¶РµРЅРёСЏ РєР°СЂС‚С‹
     /// </summary>
     /// <param name="reals"></param>
     /// <param name="instantly"></param>
@@ -446,12 +448,12 @@ public class Card : MonoBehaviour
     {
         if (_alphaCoroutine != null) StopCoroutine(_alphaCoroutine);
         if (instantly) _cardCanvas.alpha = final;
-        else _alphaCoroutine = StartCoroutine(_cardCanvas.AlphaWithLerp(init, final, _canvasAlphaCountFrame));
+        else _alphaCoroutine = StartCoroutine(_cardCanvas.AlphaWithLerp(init, final, CANVAS_ALPHA_COUNT_FRAME));
     }
 
 
     /// <summary>
-    /// Изменение актуального положения карты
+    /// РР·РјРµРЅРµРЅРёРµ Р°РєС‚СѓР°Р»СЊРЅРѕРіРѕ РїРѕР»РѕР¶РµРЅРёСЏ РєР°СЂС‚С‹
     /// </summary>
     /// <param name="reals"></param>
     /// <param name="instantly"></param>
@@ -463,7 +465,7 @@ public class Card : MonoBehaviour
     }
 
     /// <summary>
-    /// Изменение актуального поворота карты
+    /// РР·РјРµРЅРµРЅРёРµ Р°РєС‚СѓР°Р»СЊРЅРѕРіРѕ РїРѕРІРѕСЂРѕС‚Р° РєР°СЂС‚С‹
     /// </summary>
     /// <param name="x"></param>
     /// <param name="y"></param>
@@ -524,16 +526,16 @@ public class Card : MonoBehaviour
         Vector2 prevPos = _cardPosition;
 
         Vector2 currentPosition = _transformRect.localPosition;
-        Vector2 step = (prevPos - currentPosition) / _positionCountFrame;
+        Vector2 step = (prevPos - currentPosition) / POSITION_COUNT_FRAME;
         int i = 0;
-        while (i < _positionCountFrame)
+        while (i < POSITION_COUNT_FRAME)
         {
             currentPosition = _transformRect.localPosition;
             if (prevPos != _cardPosition)
             {
                 prevPos = _cardPosition;
 
-                step = (prevPos - currentPosition) / _positionCountFrame;
+                step = (prevPos - currentPosition) / POSITION_COUNT_FRAME;
                 i = 0;
             }
 

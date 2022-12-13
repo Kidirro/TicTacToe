@@ -108,7 +108,13 @@ public class InGameUI : Singleton<InGameUI>
     [Header("Pause menu Properties"), SerializeField]
     private GameObject _pauseMenuReplyBTN;
 
-    public void UpdateReplyState()
+    [Header("Paper new turn properties"), SerializeField]
+    private AnimationFading _paperNewTurnAnimation;
+    
+    [SerializeField]
+    private Image _paperNewTurnPlayerImage;
+
+    private void UpdateReplyState()
     {
         _pauseMenuReplyBTN.SetActive(!GameplayManager.IsOnline);
         _gameOverReplyBTN.SetActive(!GameplayManager.IsOnline);
@@ -137,7 +143,7 @@ public class InGameUI : Singleton<InGameUI>
         _animatorNewTurn.SetTrigger((side == 1) ? "XTurn" : "OTurn");
     }
 
-    public void ClearTriggers()
+    private void ClearTriggers()
     {
         _animatorNewTurn.ResetTrigger("NewTurn");
         _animatorNewTurn.ResetTrigger("XTurn");
@@ -219,7 +225,6 @@ public class InGameUI : Singleton<InGameUI>
             if (ScoreManager.Instance.GetGameWinner() != -1) _gameOverLogo.sprite = ThemeManager.Instance.GetSprite((CellFigure)ScoreManager.Instance.GetGameWinner());
         }
     }
-
 
     public void RestartGame()
     {
@@ -313,13 +318,22 @@ public class InGameUI : Singleton<InGameUI>
         }
 
 
-        yield return new WaitForSecondsRealtime(_roundOverPanel.FadeOutTimeAwait);
+        yield return StartCoroutine(CoroutineManager.Instance.IAwaitProcess(( _roundOverPanel.FrameCount)));
         yield return new WaitForSeconds(0.5f);
         if (currentPoint!=null) yield return StartCoroutine(currentPoint.ScaleWithLerp(Vector2.zero, Vector2.one, 20));
         yield return new WaitForSeconds(1f);
         _roundOverPanel.FadeOut();
-        yield return new WaitForSecondsRealtime(_roundOverPanel.FadeOutTimeAwait);
+        yield return StartCoroutine(CoroutineManager.Instance.IAwaitProcess(( _roundOverPanel.FrameCount)));
     }
 
+    public IEnumerator IShowNewTurnAnimation()
+    {
+        _paperNewTurnPlayerImage.sprite = ThemeManager.Instance.GetSprite((CellFigure) PlayerManager.Instance.GetCurrentPlayer().SideId);
+        _paperNewTurnAnimation.FadeIn();
+        yield return StartCoroutine(CoroutineManager.Instance.IAwaitProcess(( _paperNewTurnAnimation.FrameCount)));
+        yield return new WaitForSeconds(0.5f);
+        _paperNewTurnAnimation.FadeOut();
+        yield return StartCoroutine(CoroutineManager.Instance.IAwaitProcess(( _paperNewTurnAnimation.FrameCount)));
+    }
 
 }

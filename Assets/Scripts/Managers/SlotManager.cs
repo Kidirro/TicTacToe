@@ -1,12 +1,15 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UIElements;
+using Button = UnityEngine.UI.Button;
 
 namespace Managers
 {
     public class SlotManager : Singleton<SlotManager>
     {
         #region Field
+
         /// <summary>
         /// Нужна ли прорисовка гизмоса
         /// </summary>
@@ -73,6 +76,9 @@ namespace Managers
         [SerializeField, Tooltip("Максимальное количество слотов")]
         private int _slotsCount;
 
+        [SerializeField] private AnimationFading _cardRechanger;
+        [SerializeField] private Button _cardRechangerBTN;
+
         /// <summary>
         /// Карты какого игрока показываются
         /// </summary>
@@ -83,16 +89,12 @@ namespace Managers
             get { return _currentPlayerSet; }
         }
 
-        /// <summary>
-        /// Использован ли заменитель на этом ходу
-        /// </summary>
-        private bool _isRechangerUsed = false;
-
         public bool IsCurrentPlayerOnSlot
         {
             get
             {
-                Debug.Log($"{ _currentPlayerSet.SideId} == {PlayerManager.Instance.GetCurrentPlayer().SideId}   { _currentPlayerSet.SideId == PlayerManager.Instance.GetCurrentPlayer().SideId}");
+                Debug.Log(
+                    $"{_currentPlayerSet.SideId} == {PlayerManager.Instance.GetCurrentPlayer().SideId}   {_currentPlayerSet.SideId == PlayerManager.Instance.GetCurrentPlayer().SideId}");
                 return _currentPlayerSet.SideId == PlayerManager.Instance.GetCurrentPlayer().SideId;
             }
         }
@@ -104,15 +106,22 @@ namespace Managers
             if (_isNeedGizmos)
             {
                 float PositionY = ScreenManager.Instance.GetHeight(_buttonBorder);
-                float StepX = (Camera.main.pixelWidth - _widthBorder * 2 + _widthCard * _slotsCount) / (_slotsCount + 1);
+                float StepX = (Camera.main.pixelWidth - _widthBorder * 2 + _widthCard * _slotsCount) /
+                              (_slotsCount + 1);
                 Gizmos.color = Color.green;
                 for (int i = 0; i < _slotsCount; i++)
                 {
                     float posY = PositionY + (Mathf.Sin(Mathf.PI * (i + 1) / (_slotsCount + 1))) * _heightDelta;
-                    Gizmos.DrawCube(Camera.main.ScreenToWorldPoint(new Vector2(_widthBorder - _widthCard * _slotsCount / 2 + StepX * (i + 1), posY)), Vector3.one / 2);
+                    Gizmos.DrawCube(
+                        Camera.main.ScreenToWorldPoint(
+                            new Vector2(_widthBorder - _widthCard * _slotsCount / 2 + StepX * (i + 1), posY)),
+                        Vector3.one / 2);
                 }
-                Gizmos.DrawLine(Camera.main.ScreenToWorldPoint(new Vector2(_widthBorder - _widthCard * _slotsCount / 2, PositionY)),
-                    Camera.main.ScreenToWorldPoint(new Vector2(Camera.main.pixelWidth - _widthBorder + _widthCard * _slotsCount / 2, PositionY)));
+
+                Gizmos.DrawLine(
+                    Camera.main.ScreenToWorldPoint(new Vector2(_widthBorder - _widthCard * _slotsCount / 2, PositionY)),
+                    Camera.main.ScreenToWorldPoint(
+                        new Vector2(Camera.main.pixelWidth - _widthBorder + _widthCard * _slotsCount / 2, PositionY)));
             }
         }
 
@@ -129,13 +138,14 @@ namespace Managers
             player.DeckPool.RemoveRange(card, 1);
             card = player.HandPool.Count - 1;
             player.HandPool[card].SetTransformParent(_transformParent);
-            player.HandPool[card].SetTransformPosition(ScreenManager.Instance.GetWidth(_deckPosition), ScreenManager.Instance.GetHeight(_buttonBorder));
+            player.HandPool[card].SetTransformPosition(ScreenManager.Instance.GetWidth(_deckPosition),
+                ScreenManager.Instance.GetHeight(_buttonBorder));
             player.HandPool[card].SetTransformRotation(0);
 
             player.HandPool[card].gameObject.SetActive(true);
             PrintCArd();
-
         }
+
         public void RemoveCard(PlayerInfo player, int id)
         {
             if (player.HandPool.Count == 0) return;
@@ -164,18 +174,19 @@ namespace Managers
         {
             for (int i = 0; i < PlayerManager.Instance.GetCurrentPlayer().HandPool.Count; i++)
             {
-                Debug.LogFormat("[{0}/{1}] карта в руке с названием {2} ", i + 1, PlayerManager.Instance.GetCurrentPlayer().HandPool.Count, PlayerManager.Instance.GetCurrentPlayer().HandPool[i].Info.CardName);
+                Debug.LogFormat("[{0}/{1}] карта в руке с названием {2} ", i + 1,
+                    PlayerManager.Instance.GetCurrentPlayer().HandPool.Count,
+                    PlayerManager.Instance.GetCurrentPlayer().HandPool[i].Info.CardName);
             }
+
             for (int i = 0; i < PlayerManager.Instance.GetCurrentPlayer().DeckPool.Count; i++)
             {
-                Debug.LogFormat("[{0}/{1}] карта в колоде с названием {2} ", i + 1, PlayerManager.Instance.GetCurrentPlayer().DeckPool.Count, PlayerManager.Instance.GetCurrentPlayer().DeckPool[i].Info.CardName);
+                Debug.LogFormat("[{0}/{1}] карта в колоде с названием {2} ", i + 1,
+                    PlayerManager.Instance.GetCurrentPlayer().DeckPool.Count,
+                    PlayerManager.Instance.GetCurrentPlayer().DeckPool[i].Info.CardName);
             }
         }
 
-        public void ResetRechanher()
-        {
-            _isRechangerUsed = false;
-        }
 
         public void UpdateCardPosition(bool instantly = true, Card card = null)
         {
@@ -189,20 +200,26 @@ namespace Managers
                 _currentPlayerSet.HandPool.Add(card);
             }
 
-            float PositionY = ScreenManager.Instance.GetHeight(_buttonBorder + ((IsCurrentPlayerOnSlot) ? _heightLift : 0));
+            float PositionY =
+                ScreenManager.Instance.GetHeight(_buttonBorder + ((IsCurrentPlayerOnSlot) ? _heightLift : 0));
 
-            float StepPos = (ScreenManager.Instance.ScreenDefault.x - _widthBorder * 2 + _widthCard * currentCount) / (currentCount + 1);
+            float StepPos = (ScreenManager.Instance.ScreenDefault.x - _widthBorder * 2 + _widthCard * currentCount) /
+                            (currentCount + 1);
             float StepRot = (_angleDelta * 2) / (currentCount + 1);
-
 
 
             for (int i = 0; i < currentCount; i++)
             {
-                float posY = PositionY + (Mathf.Sin(Mathf.PI * (i + 1) / (currentCount + 1))) * _heightDelta * ScreenManager.Instance.GetHeightRatio();
-                Vector2 finPosition = new Vector2((_widthBorder + StepPos * (i + 1) - _widthCard * currentCount / 2) * ScreenManager.Instance.GetWidthRatio(), posY);
+                float posY = PositionY + (Mathf.Sin(Mathf.PI * (i + 1) / (currentCount + 1))) * _heightDelta *
+                    ScreenManager.Instance.GetHeightRatio();
+                Vector2 finPosition =
+                    new Vector2(
+                        (_widthBorder + StepPos * (i + 1) - _widthCard * currentCount / 2) *
+                        ScreenManager.Instance.GetWidthRatio(), posY);
                 _currentPlayerSet.HandPool[i].HandPosition = finPosition;
 
-                Debug.Log($"Current state slot : {IsCurrentPlayerOnSlot}  PosY: {_currentPlayerSet.HandPool[i].HandPosition.y} ");
+                Debug.Log(
+                    $"Current state slot : {IsCurrentPlayerOnSlot}  PosY: {_currentPlayerSet.HandPool[i].HandPosition.y} ");
                 _currentPlayerSet.HandPool[i].SetTransformSize(0.7f, instantly);
                 _currentPlayerSet.HandPool[i].SetTransformPosition(finPosition.x, finPosition.y, instantly);
 
@@ -212,14 +229,12 @@ namespace Managers
 
 
                 _currentPlayerSet.HandPool[i].SetSideCard(_currentPlayerSet.SideId);
-
-
             }
         }
 
         public void UpdateCardUI()
         {
-            foreach(Card card in _currentPlayerSet.HandPool)
+            foreach (Card card in _currentPlayerSet.HandPool)
             {
                 card.UpdateUI();
             }
@@ -239,13 +254,18 @@ namespace Managers
             }
 
             float PositionY = ScreenManager.Instance.GetHeight(_buttonBorder);
-            float StepPos = (ScreenManager.Instance.ScreenDefault.x - _widthBorder * 2 + _widthCard * currentCount) / (currentCount + 1);
+            float StepPos = (ScreenManager.Instance.ScreenDefault.x - _widthBorder * 2 + _widthCard * currentCount) /
+                            (currentCount + 1);
             float StepRot = (_angleDelta * 2) / (currentCount + 1);
 
             for (int i = 0; i < currentCount; i++)
             {
-                float posY = PositionY + (Mathf.Sin(Mathf.PI * (i + 1) / (currentCount + 1))) * _heightDelta * ScreenManager.Instance.GetHeightRatio();
-                Vector2 finPosition = new Vector2((_widthBorder + StepPos * (i + 1) - _widthCard * currentCount / 2) * ScreenManager.Instance.GetWidthRatio(), posY);
+                float posY = PositionY + (Mathf.Sin(Mathf.PI * (i + 1) / (currentCount + 1))) * _heightDelta *
+                    ScreenManager.Instance.GetHeightRatio();
+                Vector2 finPosition =
+                    new Vector2(
+                        (_widthBorder + StepPos * (i + 1) - _widthCard * currentCount / 2) *
+                        ScreenManager.Instance.GetWidthRatio(), posY);
                 player.HandPool[i].HandPosition = finPosition;
                 player.HandPool[i].SetTransformPosition(finPosition.x, finPosition.y, instantly);
 
@@ -266,9 +286,11 @@ namespace Managers
                 {
                     _currentPlayerSet.HandPool[i].CancelDragging();
                 }
+
                 UpdateCardPosition(false);
                 return;
             }
+
             if (_currentPlayerSet != null)
             {
                 for (int i = 0; i < _currentPlayerSet.HandPool.Count; i++)
@@ -276,6 +298,7 @@ namespace Managers
                     _currentPlayerSet.HandPool[i].gameObject.SetActive(false);
                 }
             }
+
             _currentPlayerSet = player;
             Debug.Log("Current side id:" + _currentPlayerSet.SideId);
             for (int i = 0; i < _currentPlayerSet.HandPool.Count; i++)
@@ -290,20 +313,17 @@ namespace Managers
 
             UpdateCardPosition(false);
             UpdateCardUI();
-            ResetRechanher();
+            _cardRechanger.FadeIn();
+            _cardRechangerBTN.interactable = true;
         }
 
-        public void UseRechanger(Card card)
+        public void UseRechanger()
         {
-            if (!_isRechangerUsed)
-            {
-                _isRechangerUsed = true;
-                RemoveCard(PlayerManager.Instance.GetCurrentPlayer(), card);
-                AddCard(PlayerManager.Instance.GetCurrentPlayer());
-                UpdateCardPosition(false);
-            }
+            Card card = _currentPlayerSet.HandPool[Random.Range(0,  _currentPlayerSet.HandPool.Count)];
+            _cardRechanger.FadeOut();
+            _cardRechangerBTN.interactable = false;
+            CoroutineManager.Instance.AddCoroutine(IRechanherProcess(card));
         }
-
         public void ResetHandPool(PlayerInfo player)
         {
             while (player.HandPool.Count > 0)
@@ -311,6 +331,15 @@ namespace Managers
                 Debug.Log(player.HandPool[0].Info.name);
                 RemoveCard(player, player.HandPool[0]);
             }
+        }
+
+        private IEnumerator IRechanherProcess(Card card)
+        {
+            card.SetGroupAlpha(1,0,false);
+            yield return StartCoroutine(CoroutineManager.Instance.IAwaitProcess(Card.CANVAS_ALPHA_COUNT_FRAME*1.1f));
+            RemoveCard(PlayerManager.Instance.GetCurrentPlayer(), card);
+            AddCard(PlayerManager.Instance.GetCurrentPlayer());
+            UpdateCardPosition(false);
         }
     }
 }

@@ -90,14 +90,7 @@ namespace Managers
                     PlayerManager.Instance.NextPlayer();
                     ManaManager.Instance.SetBonusMana(0);
 
-
-/*
-                    if (PlayerManager.Instance.Players[0].Equals(PlayerManager.Instance.GetCurrentPlayer()))
-                    {
-                        CoroutineManager.Instance.AddCoroutine(Field.Instance.GrowField());
-
-                        ManaManager.Instance.GrowMana();
-                    }*/
+                    CoroutineManager.Instance.AddCoroutine(InGameUI.Instance.IShowNewTurnAnimation());
 
 
                     if (!IsOnline || PlayerManager.Instance.GetCurrentPlayer().SideId == Photon.Pun.PhotonNetwork.LocalPlayer.ActorNumber)

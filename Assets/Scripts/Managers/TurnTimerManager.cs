@@ -7,7 +7,7 @@ namespace Managers
     public class TurnTimerManager : Singleton<TurnTimerManager>
     {
         public const float PlayerTurnTime = 30f;
-        public const float BotTurnTime = 5f;
+        public const float BotTurnTime = 10f;
 
         private float _timeLeft = 0f;
 
