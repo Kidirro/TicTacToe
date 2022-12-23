@@ -24,8 +24,6 @@ public class MainMenuUI : Singleton<MainMenuUI>
 
     private bool _showPre = false;
 
-
-
     private void Awake()
     {
         QualitySettings.vSyncCount = 0;
@@ -104,11 +102,6 @@ public class MainMenuUI : Singleton<MainMenuUI>
     {
         CoinManager.CoinPerUnlock = int.Parse(text);
     }
-/*    public void DEV_PointsPerWin(string text)
-    {
-        ScoreManager._scoreForWin = int.Parse(text);
-    }*/
-
     public void PlayButtonClick()
     {
         OnAIButtonStart();

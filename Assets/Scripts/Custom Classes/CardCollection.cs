@@ -9,29 +9,29 @@ using UnityEngine.EventSystems;
 public class CardCollection : MonoBehaviour
 {
     /// <summary>
-    /// Открыта ли карта по умолчанию
+    /// РћС‚РєСЂС‹С‚Р° Р»Рё РєР°СЂС‚Р° РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ
     /// </summary>
      public bool IsUnlock => Info!=null && (Info.IsDefaultUnlock || PlayerPrefs.GetInt("IsCard"+Info.name+"Unlocked",0)==1);
 
     /// <summary>
-    /// Информация карты как информационной сущности
+    /// РРЅС„РѕСЂРјР°С†РёСЏ РєР°СЂС‚С‹ РєР°Рє РёРЅС„РѕСЂРјР°С†РёРѕРЅРЅРѕР№ СЃСѓС‰РЅРѕСЃС‚Рё
     /// </summary>
     public CardInfo Info;
 
     /// <summary>
-    /// Текст манакоста
+    /// РўРµРєСЃС‚ РјР°РЅР°РєРѕСЃС‚Р°
     /// </summary>
     [Header("Texts"),SerializeField]
     private TextMeshProUGUI _manapoints;
 
     /// <summary>
-    /// Текст описания карты
+    /// РўРµРєСЃС‚ РѕРїРёСЃР°РЅРёСЏ РєР°СЂС‚С‹
     /// </summary>
     [SerializeField]
     private TextMeshProUGUI _cardDescription;
 
     /// <summary>
-    /// Обьект карты
+    /// РћР±СЊРµРєС‚ РєР°СЂС‚С‹
     /// </summary>
     [Header("Objects"), SerializeField]
     private GameObject _cardObj;
@@ -40,19 +40,19 @@ public class CardCollection : MonoBehaviour
     private CanvasGroup _canvasGroup;
 
     /// <summary>
-    /// Обьект карты (закрытое состояние)
+    /// РћР±СЊРµРєС‚ РєР°СЂС‚С‹ (Р·Р°РєСЂС‹С‚РѕРµ СЃРѕСЃС‚РѕСЏРЅРёРµ)
     /// </summary>
     [SerializeField]
     private GameObject _cardObjClose;
 
     /// <summary>
-    /// Изображение карты
+    /// РР·РѕР±СЂР°Р¶РµРЅРёРµ РєР°СЂС‚С‹
     /// </summary>
     [SerializeField]
     private List<GameObject> _bonusImageList = new List<GameObject>();
 
     /// <summary>
-    /// Изображение карты
+    /// РР·РѕР±СЂР°Р¶РµРЅРёРµ РєР°СЂС‚С‹
     /// </summary>
     [SerializeField]
     private Image _cardImage;

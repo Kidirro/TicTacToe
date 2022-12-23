@@ -71,6 +71,7 @@ namespace Managers
             {
                 _cardListStat[i].CardId = i;
             }
+
             if (_cardCollections.Count == 0) CreateCollectionList();
             if (_cardDeck.Count == 0) CreateDeckList();
 
@@ -88,9 +89,10 @@ namespace Managers
                 {
                     _currentDeck.Array.Add(_cardCollections[i].IsUnlock);
                 }
-                SaveCurrentDeck();
 
+                SaveCurrentDeck();
             }
+
             _redactedDeck = _currentDeck;
             CreateCardPull();
 
@@ -105,10 +107,11 @@ namespace Managers
             foreach (bool i in _redactedDeck.Array)
             {
                 if (i)
-                {                
-                    countDeck +=1;
+                {
+                    countDeck += 1;
                 }
             }
+
             return countDeck;
         }
 
@@ -150,7 +153,8 @@ namespace Managers
         {
             for (int i = 0; i < _cardListStat.Count; i++)
             {
-                CardCollection cardCollection = Instantiate(_cardPrefab, _collectionParent).GetComponent<CardCollection>();
+                CardCollection cardCollection =
+                    Instantiate(_cardPrefab, _collectionParent).GetComponent<CardCollection>();
                 cardCollection.Info = _cardListStat[i];
                 _cardCollections.Add(cardCollection);
             }
@@ -163,31 +167,42 @@ namespace Managers
                 CardCollection cardCollection = Instantiate(_cardPrefab, _deckParent).GetComponent<CardCollection>();
                 cardCollection.Info = _cardListStat[i];
                 _cardDeck.Add(cardCollection);
-
             }
         }
 
-        public void UnlockRandomCard()
+        public void UnlockRandomCard(bool isNeedUsekCoin = true)
         {
-            if (CoinManager.AllCoins < CoinManager.CoinPerUnlock) return;
+            if (isNeedUsekCoin && CoinManager.AllCoins < CoinManager.CoinPerUnlock) return;
             List<CardCollection> _lockedList = new List<CardCollection>();
-            foreach (CardCollection card in _cardCollections) if (!card.IsUnlock) _lockedList.Add(card);
+            foreach (CardCollection card in _cardCollections)
+                if (!card.IsUnlock)
+                    _lockedList.Add(card);
             if (_lockedList.Count == 0) return;
             int valuerand = UnityEngine.Random.Range(0, _lockedList.Count);
             _lockedList[valuerand].UnlockCard();
             _lockedList[valuerand].UpdateUI();
-            CoinManager.AllCoins -= CoinManager.CoinPerUnlock;
-
-            _moneyValue.text = CoinManager.AllCoins.ToString();
-
+            if (isNeedUsekCoin)
+            {
+                CoinManager.AllCoins -= CoinManager.CoinPerUnlock;
+                _moneyValue.text = CoinManager.AllCoins.ToString();
+            }
 
             _currentDeck.Array[_cardsList.IndexOf(_lockedList[valuerand].Info)] = true;
             SaveCurrentDeck();
             CreateCardPull();
         }
+
+        public void UnlockAllCard()
+        {
+            for (int i = 0; i < _cardCollections.Count; i++)
+            {
+                _cardCollections[i].UnlockCard();
+                _cardCollections[i].UpdateUI();
+            }
+        }
+
         public static CardInfo GetCardFromId(int id)
         {
-
             return (id > 0 && id < _cardListStat.Count) ? _cardListStat[id] : null;
         }
 
@@ -230,6 +245,7 @@ namespace Managers
                     flagEmpty = true;
                 }
             }
+
             if (flagEmpty)
             {
                 if (CountCardInDeck() >= _minDeckPool)
@@ -242,7 +258,6 @@ namespace Managers
                 else throw new Exception("Card count less minimum");
             }
             else throw new Exception("No one card in deck!");
-
         }
 
         public void StartTap(CardCollection cardCollection)
@@ -261,21 +276,23 @@ namespace Managers
             }
             else
             {
-                int value = (_redactedDeck.Array[_cardListStat.IndexOf(cardCollection.Info)])? 1:-1;
-                if (_isEdit && CountCardInDeck() - value>=_minDeckPool) cardCollection.PickCard();
+                int value = (_redactedDeck.Array[_cardListStat.IndexOf(cardCollection.Info)]) ? 1 : -1;
+                if (_isEdit && CountCardInDeck() - value >= _minDeckPool) cardCollection.PickCard();
             }
         }
 
         public void UpdateCardViewImage(CardInfo info)
         {
             string desc = "";
-            desc = I2.Loc.LocalizationManager.TryGetTranslation(info.CardDescription, out desc) ? I2.Loc.LocalizationManager.GetTranslation(info.CardDescription) : info.CardDescription;
+            desc = I2.Loc.LocalizationManager.TryGetTranslation(info.CardDescription, out desc)
+                ? I2.Loc.LocalizationManager.GetTranslation(info.CardDescription)
+                : info.CardDescription;
             _viewCardDescription.text = desc;
             _viewCardImage.sprite = info.CardImageP1;
             _viewManapoints.text = info.CardManacost.ToString();
             for (int i = 0; i < _viewBonusImageList.Count; i++)
             {
-                _viewBonusImageList[i].SetActive(i == (int)info.CardBonus);
+                _viewBonusImageList[i].SetActive(i == (int) info.CardBonus);
             }
         }
 
@@ -296,7 +313,6 @@ namespace Managers
                 _viewCardCanvas.alpha += ALPHA_PER_STEP;
                 yield return null;
             }
-
         }
 
         private IEnumerator IEndTap()
@@ -306,9 +322,9 @@ namespace Managers
                 _viewCardCanvas.alpha -= ALPHA_PER_STEP;
                 yield return null;
             }
+
             _viewCardCanvas.alpha = 0;
             _viewCardCanvas.gameObject.SetActive(false);
-
         }
 
         [Serializable]
