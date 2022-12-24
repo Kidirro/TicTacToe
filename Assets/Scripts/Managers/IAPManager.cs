@@ -7,7 +7,7 @@ namespace Managers
 {
     public class IAPManager : Singleton<IAPManager>, IStoreListener
     {
-        private const string _betatestBundle = "bandle_1";
+        private const string _betatestBundle = "betatest_bundle";
 
         public string BetatestBundle
         {

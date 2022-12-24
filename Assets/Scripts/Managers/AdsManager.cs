@@ -1,231 +1,90 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using GoogleMobileAds.Api;
+//using GoogleMobileAds.Api;
 using UnityEngine;
+using Yodo1.MAS;
 
 namespace Managers
 {
     public class AdsManager : Singleton<AdsManager>
     {
-        private const string ADUnitRewardExpensive = "ca-app-pub-8340576279106634/5414961328";
-        private const string ADUnitRewardNormal = "ca-app-pub-8340576279106634/2788797989";
         private const string ADUnitRewardCheep = "ca-app-pub-8340576279106634/2054300816";
-        private const string ADUnitInterstitialExpensive = "ca-app-pub-8340576279106634/8288536672";
-        private const string ADUnitInterstitialNormal = "ca-app-pub-8340576279106634/3367382484";
-        private const string ADUnitInterstitialCheep = "ca-app-pub-8340576279106634/5662373334";
-
-
-        private Coroutine _load;
-
-        [SerializeField]
-        private GameObject _notFoundReward;
-
-        private void Awake()
+       
+        private void Start()
         {
-            MobileAds.Initialize((initStatus) =>
+            Yodo1U3dMas.SetCOPPA(false);
+            Yodo1U3dMas.SetGDPR(true);
+            Yodo1U3dMas.SetCCPA(false);
+            Yodo1U3dMas.InitializeMasSdk();
+
+            Yodo1U3dMasCallback.OnSdkInitializedEvent += (success, error) =>
             {
-                Dictionary<string, AdapterStatus> map = initStatus.getAdapterStatusMap();
-                foreach (KeyValuePair<string, AdapterStatus> keyValuePair in map)
-                {
-                    string className = keyValuePair.Key;
-                    AdapterStatus status = keyValuePair.Value;
-                    switch (status.InitializationState)
-                    {
-                        case AdapterState.NotReady:
-                            // The adapter initialization did not complete.
-                            MonoBehaviour.print("Adapter: " + className + " not ready.");
-                            break;
-                        case AdapterState.Ready:
-                            // The adapter was successfully initialized.
-                            MonoBehaviour.print("Adapter: " + className + " is initialized.");
-                            break;
-                    }
-                }
-            });
-            InitInterstitial();
-            InitRewarded();
+                Debug.Log("[Yodo1 Mas] OnSdkInitializedEvent, success:" + success + ", error: " + error.ToString());
+                Debug.Log(success
+                    ? "[Yodo1 Mas] The initialization has succeeded"
+                    : "[Yodo1 Mas] The initialization has failed");
+            };
+
+            InitializeRewardedAds();
             Debug.Log("Ads init successful");
         }
 
-        #region Interstital
-        private InterstitialAd _interstitialExpensive;
-        private InterstitialAd _interstitialNormal;
-        private InterstitialAd _interstitialCheep;
-
-        private void InitInterstitial()
-        {
-            // Create an empty ad request.
-            string adUnitId = ADUnitInterstitialExpensive;
-            string adUnitIdNormal = ADUnitInterstitialNormal;
-            string adUnitIdCheep = ADUnitInterstitialCheep;
-            this._interstitialExpensive = new InterstitialAd(adUnitId);
-            this._interstitialNormal = new InterstitialAd(adUnitIdNormal);
-            this._interstitialCheep = new InterstitialAd(adUnitIdCheep);
-            RequestInterstitial();
-        }
-        AdRequest requestExp;
-        AdRequest requestNormal;
-        AdRequest requestCheep;
-        private void RequestInterstitial()
-        {
-            requestExp = new AdRequest.Builder().Build();
-            requestNormal = new AdRequest.Builder().Build();
-            requestCheep = new AdRequest.Builder().Build();
-            // Load the interstitial with the request.
-            this._interstitialExpensive.LoadAd(requestExp);
-            this._interstitialNormal.LoadAd(requestNormal);
-            this._interstitialCheep.LoadAd(requestCheep);
-        }
-
-
-        public void ShowInterstitial()
-        {
-            if (IAPManager.IsSubscribeEnable) return;
-            if (this._interstitialExpensive.IsLoaded())
-            {
-                _interstitialExpensive.Show();
-                requestExp = new AdRequest.Builder().Build();
-                this._interstitialExpensive.LoadAd(requestExp);
-            }
-            else if (this._interstitialNormal.IsLoaded())
-            {
-                _interstitialNormal.Show();
-
-                requestNormal = new AdRequest.Builder().Build();
-                this._interstitialNormal.LoadAd(requestNormal);
-            }
-            else if (this._interstitialCheep.IsLoaded())
-            {
-                _interstitialCheep.Show();
-
-                requestCheep = new AdRequest.Builder().Build();
-                this._interstitialCheep.LoadAd(requestCheep);
-            }
-            else
-            {
-                Debug.Log("Interstitial is not ready yet");
-                StartCoroutine(TryToLoadInterstitialVideo());
-            }
-        }
-
-
-        private IEnumerator TryToLoadInterstitialVideo()
-        {
-            for (int i = 0; i < 5; i++)
-            {
-                if (this._interstitialExpensive.IsLoaded())
-                {
-                    _interstitialExpensive.Show();
-                    AdRequest request = new AdRequest.Builder().Build();
-                    this._interstitialExpensive.LoadAd(request);
-                    yield break;
-                }
-                else if (this._interstitialNormal.IsLoaded())
-                {
-                    _interstitialNormal.Show();
-
-                    AdRequest request = new AdRequest.Builder().Build();
-                    this._interstitialNormal.LoadAd(request);
-                    yield break;
-                }
-                else if (this._interstitialCheep.IsLoaded())
-                {
-                    _interstitialCheep.Show();
-
-                    AdRequest request = new AdRequest.Builder().Build();
-                    this._interstitialCheep.LoadAd(request);
-                    yield break;
-                }
-
-                yield return new WaitForSeconds(0.5f);
-            }
-        }
-        #endregion
-
         #region Rewarded
-        private RewardedAd _rewardedAdExpensive;
-        private RewardedAd _rewardedAdNormal;
-        private RewardedAd _rewardedAdCheep;
 
-        private void InitRewarded()
+   
+        private void InitializeRewardedAds()
         {
-#if UNITY_ANDROID
-            string adUnitIdExpensive = ADUnitRewardExpensive;
-            string adUnitIdNormal = ADUnitRewardNormal;
-            string adUnitIdCheep = ADUnitRewardCheep;
-#elif UNITY_IPHONE
-        string adUnitId = "R-M-DEMO-rewarded-client-side-rtb";
-#else
-        string adUnitId = "unexpected_platform";
-#endif
-            this._rewardedAdExpensive = new RewardedAd(adUnitIdExpensive);
-            this._rewardedAdNormal = new RewardedAd(adUnitIdNormal);
-            this._rewardedAdCheep = new RewardedAd(adUnitIdCheep);
-            _rewardedAdExpensive.OnAdClosed += HandleRewarded;
-            _rewardedAdNormal.OnAdClosed += HandleRewarded;
-            _rewardedAdCheep.OnAdClosed += HandleRewarded;
-            RequestRewarded();
+            // Instantiate
+            Yodo1U3dRewardAd.GetInstance();
+
+            // Ad Events
+            Yodo1U3dRewardAd.GetInstance().OnAdLoadedEvent += OnRewardAdLoadedEvent;
+            Yodo1U3dRewardAd.GetInstance().OnAdLoadFailedEvent += OnRewardAdLoadFailedEvent;
+            Yodo1U3dRewardAd.GetInstance().OnAdOpenedEvent += OnRewardAdOpenedEvent;
+            Yodo1U3dRewardAd.GetInstance().OnAdOpenFailedEvent += OnRewardAdOpenFailedEvent;
+            Yodo1U3dRewardAd.GetInstance().OnAdClosedEvent += OnRewardAdClosedEvent;
+            Yodo1U3dRewardAd.GetInstance().OnAdEarnedEvent += OnRewardAdEarnedEvent;
         }
 
-        private void HandleRewarded(object sender, EventArgs args)
+        private void OnRewardAdLoadedEvent(Yodo1U3dRewardAd ad)
         {
-            RequestRewarded();
-        }
-        AdRequest requestExpensiveReward;
-        AdRequest requestNormalReward;
-        AdRequest requestCheepReward;
-        private void RequestRewarded()
-        {
-            // Create an empty ad request.
-            requestExpensiveReward = new AdRequest.Builder().Build();
-            requestNormalReward = new AdRequest.Builder().Build();
-            requestCheepReward = new AdRequest.Builder().Build();
-            // Load the rewarded with the request.
-            this._rewardedAdExpensive.LoadAd(requestExpensiveReward);
-            this._rewardedAdNormal.LoadAd(requestNormalReward);
-            this._rewardedAdCheep.LoadAd(requestCheepReward);
+            Debug.Log("[Yodo1 Mas] OnRewardAdLoadedEvent event received");
         }
 
-
-        public void ShowRewardedAd(Action action = null)
+        private void OnRewardAdLoadFailedEvent(Yodo1U3dRewardAd ad, Yodo1U3dAdError adError)
         {
-            if (this._rewardedAdExpensive.IsLoaded())
-            {
-                _rewardedAdExpensive.Show();
-                action?.Invoke();
-                requestExpensiveReward = new AdRequest.Builder().Build();
-                this._rewardedAdExpensive.LoadAd(requestExpensiveReward);
-            }
-            else if (_rewardedAdNormal.IsLoaded())
-            {
-                _rewardedAdNormal.Show();
-                action?.Invoke();
-                requestNormalReward = new AdRequest.Builder().Build();
-                this._rewardedAdNormal.LoadAd(requestNormalReward);
-            }
-            else if (_rewardedAdCheep.IsLoaded())
-            {
-                _rewardedAdCheep.Show();
-                action?.Invoke();
-                requestCheepReward = new AdRequest.Builder().Build();
-                this._rewardedAdCheep.LoadAd(requestCheepReward);
-            }
-            else
-            {
-                _notFoundReward.SetActive(true);
-                Invoke(nameof(RewardNotLoadDisable), 2f);
-                Debug.Log("RewardNotLoad");
-            }
+            Debug.Log("[Yodo1 Mas] OnRewardAdLoadFailedEvent event received with error: " + adError.ToString());
         }
 
-        private void RewardNotLoadDisable()
+        private void OnRewardAdOpenedEvent(Yodo1U3dRewardAd ad)
         {
-            _notFoundReward.SetActive(false);
+            Debug.Log("[Yodo1 Mas] OnRewardAdOpenedEvent event received");
         }
+
+        private void OnRewardAdOpenFailedEvent(Yodo1U3dRewardAd ad, Yodo1U3dAdError adError)
+        {
+            Debug.Log("[Yodo1 Mas] OnRewardAdOpenFailedEvent event received with error: " + adError.ToString());
+            // Load the next ad
+            Yodo1U3dRewardAd.GetInstance().LoadAd();
+        }
+
+        private void OnRewardAdClosedEvent(Yodo1U3dRewardAd ad)
+        {
+            Debug.Log("[Yodo1 Mas] OnRewardAdClosedEvent event received");
+            // Load the next ad
+            Yodo1U3dRewardAd.GetInstance().LoadAd();
+        }
+
+        private void OnRewardAdEarnedEvent(Yodo1U3dRewardAd ad)
+        {
+            Debug.Log("[Yodo1 Mas] OnRewardAdEarnedEvent event received");
+            // Add your reward code here
+        }
+        
         #endregion
-
-     
+        
+        
 
         //private IEnumerator TryToLoadRewardVideo(Action action = null)
         //{
