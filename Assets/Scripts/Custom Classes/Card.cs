@@ -232,7 +232,7 @@ public class Card : MonoBehaviour
     public void UpdateUI()
     {
         _manapoints.text = (Info.CardManacost + Info.CardBonusManacost).ToString();
-        SetSideCard(1);
+        SetSideCard(PlayerManager.Instance.GetCurrentSideOnDevice());
 
         Debug.Log($"UpdatedUICARD: {ManaManager.Instance.IsEnoughMana(Info.CardManacost + Info.CardBonusManacost)}. {Info.CardManacost}. {ManaManager.Instance.CurrentMana}");
 

@@ -119,15 +119,7 @@ public class InGameUI : Singleton<InGameUI>
         _pauseMenuReplyBTN.SetActive(!GameplayManager.IsOnline);
         _gameOverReplyBTN.SetActive(!GameplayManager.IsOnline);
     }
-
-    public void Initialization()
-    {
-        _playerOneScoreText.text = "0";
-        _playerTwoScorText.text = "0";
-
-        UpdatePlayerRP();
-    }
-
+    
     public void NewTurn()
     {
         StopTimer();
@@ -326,10 +318,11 @@ public class InGameUI : Singleton<InGameUI>
         yield return StartCoroutine(CoroutineManager.Instance.IAwaitProcess(( _roundOverPanel.FrameCount)));
     }
 
-    public IEnumerator IShowNewTurnAnimation()
+    public IEnumerator IShowNewTurnAnimation(CellFigure cellFigure)
     {
-        _paperNewTurnPlayerImage.sprite = ThemeManager.Instance.GetSprite((CellFigure) PlayerManager.Instance.GetCurrentPlayer().SideId);
+        _paperNewTurnPlayerImage.sprite = ThemeManager.Instance.GetSprite(cellFigure);
         _paperNewTurnAnimation.FadeIn();
+        Debug.Log("BegunAnim");
         yield return StartCoroutine(CoroutineManager.Instance.IAwaitProcess(( _paperNewTurnAnimation.FrameCount)));
         yield return new WaitForSeconds(0.5f);
         _paperNewTurnAnimation.FadeOut();

@@ -24,7 +24,7 @@ namespace Managers
                 while (_coroutineQueue.Count > 0)
                 {
                     IsQueueEmpty = false;
-                    Debug.Log(_coroutineQueue);
+                    Debug.Log("BegunAnim");
                     yield return StartCoroutine(_coroutineQueue.Dequeue());
 
                 }
@@ -36,7 +36,8 @@ namespace Managers
         public void AddCoroutine(IEnumerator coroutine)
         {
             IsQueueEmpty = false;
-            _coroutineQueue.Enqueue(coroutine);            
+            _coroutineQueue.Enqueue(coroutine);
+            Debug.Log($"BegunAnim {_coroutineQueue.Count}");
         }
 
         public void AddAwaitTime(float time)

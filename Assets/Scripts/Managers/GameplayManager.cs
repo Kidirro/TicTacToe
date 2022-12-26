@@ -4,7 +4,6 @@ using UnityEngine;
 
 namespace Managers
 {
-
     public class GameplayManager : Singleton<GameplayManager>
     {
         private static GameplayState _gameplayState = GameplayState.NewGame;
@@ -33,10 +32,12 @@ namespace Managers
         public void AddScore(int value, int sideId)
         {
             ScoreManager.Instance.AddScore(sideId, value);
-            if (ScoreManager.Instance.IsExistRoundWinner() && GameplayManager.CurrentGameplayState != GameplayState.GameOver)
+            if (ScoreManager.Instance.IsExistRoundWinner() &&
+                GameplayManager.CurrentGameplayState != GameplayState.GameOver)
             {
                 SetGamePlayStateQueue(GameplayState.RoundOver);
             }
+
             InGameUI.Instance.UpdateScore();
         }
 
@@ -57,7 +58,8 @@ namespace Managers
                             ScoreManager.Instance.AddPlayer(1);
                             PlayerManager.Instance.AddPlayer(PlayerType.AI);
                             ScoreManager.Instance.AddPlayer(2);
-                            SlotManager.Instance.NewTurn(PlayerManager.Instance.Players[0]);
+                            CoroutineManager.Instance.AddCoroutine(
+                                InGameUI.Instance.IShowNewTurnAnimation((CellFigure) PlayerManager.Instance.GetCurrentSideOnDevice()));
                             break;
                         case GameType.SingleHuman:
                             IsOnline = false;
@@ -65,7 +67,8 @@ namespace Managers
                             ScoreManager.Instance.AddPlayer(1);
                             PlayerManager.Instance.AddPlayer(PlayerType.Human);
                             ScoreManager.Instance.AddPlayer(2);
-                            SlotManager.Instance.NewTurn(PlayerManager.Instance.Players[0]);
+                            CoroutineManager.Instance.AddCoroutine(
+                                InGameUI.Instance.IShowNewTurnAnimation((CellFigure) PlayerManager.Instance.GetCurrentSideOnDevice()));
                             break;
                         case GameType.MultiplayerHuman:
                             IsOnline = true;
@@ -73,9 +76,11 @@ namespace Managers
                             ScoreManager.Instance.AddPlayer(1);
                             PlayerManager.Instance.AddPlayer(PlayerType.Human);
                             ScoreManager.Instance.AddPlayer(2);
-                            SlotManager.Instance.NewTurn(PlayerManager.Instance.Players[RoomManager.GetCurrentPlayerSide() - 1]);
+                            CoroutineManager.Instance.AddCoroutine(
+                                InGameUI.Instance.IShowNewTurnAnimation((CellFigure) PlayerManager.Instance.GetCurrentSideOnDevice()));
                             break;
                     }
+
                     ThemeManager.Instance.Initialization();
                     SetGameplayState(GameplayState.NewRound);
                     break;
@@ -87,22 +92,30 @@ namespace Managers
                     {
                         card.Info.CardBonusManacost = 0;
                     }
+
                     PlayerManager.Instance.NextPlayer();
                     ManaManager.Instance.SetBonusMana(0);
 
-                    CoroutineManager.Instance.AddCoroutine(InGameUI.Instance.IShowNewTurnAnimation());
+                    CoroutineManager.Instance.AddCoroutine(
+                        InGameUI.Instance.IShowNewTurnAnimation((CellFigure) PlayerManager.Instance.GetCurrentPlayer()
+                            .SideId));
 
 
-                    if (!IsOnline || PlayerManager.Instance.GetCurrentPlayer().SideId == Photon.Pun.PhotonNetwork.LocalPlayer.ActorNumber)
+                    if (!IsOnline || PlayerManager.Instance.GetCurrentPlayer().SideId ==
+                        RoomManager.GetCurrentPlayerSide())
                     {
                         SlotManager.Instance.NewTurn(PlayerManager.Instance.GetCurrentPlayer());
                         CoroutineManager.Instance.AddCoroutine(EffectManager.Instance.UpdateEffectTurn());
                     }
-                    TurnTimerManager.Instance.StartNewTurnTimer(PlayerManager.Instance.GetCurrentPlayer().EntityType, !IsOnline || PlayerManager.Instance.GetCurrentPlayer().SideId == Photon.Pun.PhotonNetwork.LocalPlayer.ActorNumber);
+
+                    TurnTimerManager.Instance.StartNewTurnTimer(PlayerManager.Instance.GetCurrentPlayer().EntityType,
+                        !IsOnline || PlayerManager.Instance.GetCurrentPlayer().SideId ==
+                        Photon.Pun.PhotonNetwork.LocalPlayer.ActorNumber);
 
                     ManaManager.Instance.RestoreAllMana();
                     ManaManager.Instance.UpdateManaUI();
 
+                    SlotManager.Instance.UpdateCardPosition(false);
                     SlotManager.Instance.UpdateCardUI();
 
                     InGameUI.Instance.NewTurn();
@@ -123,8 +136,11 @@ namespace Managers
                     if (InGameUI.Instance.IsGameOverShowed) return;
                     if (IsOnline) RoomManager.LeaveRoom(false);
                     int valueMoney = 0;
-                    if (GameplayManager.TypeGame != GameType.SingleHuman && ScoreManager.Instance.GetRoundWinner() != -1 && PlayerManager.Instance.Players[ScoreManager.Instance.GetRoundWinner() - 1].EntityType == PlayerType.Human) valueMoney = CoinManager.CoinPerWin;
-                    else if (GameplayManager.TypeGame != GameType.SingleHuman && ScoreManager.Instance.GetRoundWinner() == -1) valueMoney = CoinManager.CoinPerWin / 2;
+                    if (GameplayManager.TypeGame != GameType.SingleHuman &&
+                        ScoreManager.Instance.GetRoundWinner() != -1 &&
+                        PlayerManager.Instance.GetCurrentSideOnDevice()==ScoreManager.Instance.GetRoundWinner()) valueMoney = CoinManager.CoinPerWin;
+                    else if (GameplayManager.TypeGame != GameType.SingleHuman &&
+                             ScoreManager.Instance.GetRoundWinner() == -1) valueMoney = CoinManager.CoinPerWin / 2;
                     CoinManager.AllCoins += valueMoney;
                     CoinManager.AllCoins += valueMoney;
                     InGameUI.Instance.StateGameOverPanel(true, valueMoney);
@@ -149,6 +165,7 @@ namespace Managers
                         CoroutineManager.Instance.AddCoroutine(InGameUI.Instance.ShowRoundOverAnimation());
                         CoroutineManager.Instance.AddCoroutine(ISetStateQueueProcess(GameplayState.NewRound));
                     }
+
                     break;
                 case GameplayState.NewRound:
                     _figureCount = 0;
@@ -172,12 +189,13 @@ namespace Managers
                     ManaManager.Instance.RestoreAllMana();
                     ManaManager.Instance.UpdateManaUI();
 
-                    SlotManager.Instance.NewTurn(PlayerManager.Instance.GetCurrentPlayer());
-                    SlotManager.Instance.UpdateCardUI();
+                    SlotManager.Instance.NewTurn(PlayerManager.Instance.GetCurrentPlayerOnDevice());
                     ScoreManager.Instance.ClearAllScore();
                     SlotManager.Instance.UpdateCardPosition(false);
 
-                    TurnTimerManager.Instance.StartNewTurnTimer(PlayerManager.Instance.GetCurrentPlayer().EntityType, !IsOnline || PlayerManager.Instance.GetCurrentPlayer().SideId == Photon.Pun.PhotonNetwork.LocalPlayer.ActorNumber);
+                    TurnTimerManager.Instance.StartNewTurnTimer(PlayerManager.Instance.GetCurrentPlayer().EntityType,
+                        !IsOnline || PlayerManager.Instance.GetCurrentPlayer().SideId ==
+                        Photon.Pun.PhotonNetwork.LocalPlayer.ActorNumber);
 
 
                     InGameUI.Instance.NewTurn();
@@ -189,7 +207,6 @@ namespace Managers
 
         private void Update()
         {
-
             if (Input.GetKeyDown(KeyCode.I)) Debug.Log(RoomManager.GetPlayerInfo());
             if (Input.GetKeyDown(KeyCode.K)) NetworkEventManager.RaiseEventEndTurn();
         }
@@ -203,7 +220,6 @@ namespace Managers
 
         public void SetGamePlayStateQueue(GameplayState state)
         {
-
             if (!_isNewStateInQueue)
             {
                 _isNewStateInQueue = true;
@@ -213,12 +229,10 @@ namespace Managers
 
         private IEnumerator ISetStateQueueProcess(GameplayState state)
         {
-
             SetGameplayState(state);
             _isNewStateInQueue = false;
             yield return null;
         }
-
 
 
         public enum GameplayState

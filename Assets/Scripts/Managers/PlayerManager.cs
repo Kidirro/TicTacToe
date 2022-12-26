@@ -16,7 +16,7 @@ namespace Managers
         }
 
         private int _currentPlayer = 0;
-
+      
         public void AddPlayer(PlayerType type)
         {
             PlayerInfo player = new PlayerInfo();
@@ -69,6 +69,22 @@ namespace Managers
         public void ResetCurrentPlayer()
         {
             _currentPlayer = 0;
+        }
+
+        public int GetCurrentSideOnDevice()
+        {
+            int result = (GameplayManager.IsOnline) ? RoomManager.GetCurrentPlayerSide() :
+                (GameplayManager.TypeGame == GameplayManager.GameType.SingleHuman) ? GetCurrentPlayer().SideId : 1;
+            
+            return result;
+        }      
+        
+        public PlayerInfo GetCurrentPlayerOnDevice()
+        {
+            PlayerInfo result = (GameplayManager.IsOnline) ? Players[RoomManager.GetCurrentPlayerSide()-1] :
+                (GameplayManager.TypeGame == GameplayManager.GameType.SingleHuman) ? GetCurrentPlayer() : Players[0];
+            
+            return result;
         }
     }
 }

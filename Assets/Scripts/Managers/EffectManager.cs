@@ -94,7 +94,7 @@ namespace Managers
                     lastPriority = effectList[0].EffectPriority;
                     if (isAwaitNeed)
                     {
-                        //Выполняется при переходе на следующий уровень приоритета
+                        //Р’С‹РїРѕР»РЅСЏРµС‚СЃСЏ РїСЂРё РїРµСЂРµС…РѕРґРµ РЅР° СЃР»РµРґСѓСЋС‰РёР№ СѓСЂРѕРІРµРЅСЊ РїСЂРёРѕСЂРёС‚РµС‚Р°
                         StartCoroutine(IEffectAwaitAsync(effectList, maxTime));
                         yield break;
                     }
