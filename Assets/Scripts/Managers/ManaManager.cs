@@ -2,10 +2,10 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using UnityEngine.Serialization;
 
 namespace Managers
 {
-
     public class ManaManager : Singleton<ManaManager>
     {
         private bool _isManaGrow = true;
@@ -36,13 +36,13 @@ namespace Managers
         /// 
         /// </summary>
         [Header("Mana colors properties"), SerializeField]
-        private List<Image> _manaPointsStroke;
+        private List<CanvasGroup> _manaPointsGroup;
 
-        /// <summary>
-        /// 
-        /// </summary>
-        [SerializeField]
-        private List<Image> _manaPointsFill;              
+        // /// <summary>
+        // /// 
+        // /// </summary>
+        // [SerializeField]
+        // private List<Image> _manaPointsFill;              
 
         public bool IsEnoughMana(int mana)
         {
@@ -75,7 +75,6 @@ namespace Managers
 
         public void RestoreAllMana()
         {
-
             _currentMana = _manapool + _bonusMana;
         }
 
@@ -88,10 +87,13 @@ namespace Managers
         public void UpdateManaUI()
         {
             _manaText.text = $"{_currentMana}/{_manapool + _bonusMana}";
-            for (int i = 0; i < _manaPointsFill.Count; i++)
+            for (int i = 0; i < _manaPointsGroup.Count; i++)
             {
-                StartCoroutine(_manaPointsFill[i].AlphaWithLerp(_manaPointsFill[i].color.a, (i + 1 <= _currentMana) ? 1 : 0, 20));
-                StartCoroutine(_manaPointsStroke[i].AlphaWithLerp(_manaPointsStroke[i].color.a, (i + 1 <= _manapool + _bonusMana) ? 1 : 0, 20));
+                if (i + 1 > _manapool + _bonusMana)
+                    StartCoroutine(_manaPointsGroup[i].AlphaWithLerp(_manaPointsGroup[i].alpha, 0, 20));
+                else
+                    StartCoroutine(_manaPointsGroup[i]
+                        .AlphaWithLerp(_manaPointsGroup[i].alpha, 1 + i <= _currentMana ? 1 : 0.2f, 20));
             }
         }
 
@@ -114,7 +116,5 @@ namespace Managers
         {
             if (Input.GetKeyDown(KeyCode.S)) RestoreMana(1);
         }
-
-
     }
 }
