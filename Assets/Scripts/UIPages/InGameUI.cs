@@ -71,9 +71,6 @@ public class InGameUI : Singleton<InGameUI>
     private GameObject _loseRoundOverBG;
 
     [SerializeField]
-    private List<GameObject> _bgListRoundOver;
-
-    [SerializeField]
     private TextMeshProUGUI _winnerRoundOverText;
 
     [SerializeField]
@@ -125,8 +122,9 @@ public class InGameUI : Singleton<InGameUI>
         StopTimer();
         ClearTriggers();
         _animatorNewTurn.SetTrigger("NewTurn");
-        _timerCoroutine = StartCoroutine(ITimerProcess());
+        _timerCoroutine = StartCoroutine(ITimerProcess());;
         _newTurnBTN.SetActive(SlotManager.Instance.IsCurrentPlayerOnSlot);
+        Debug.Log($"Current side : {_newTurnBTN.activeSelf}");
     }
 
     public void SetSideBannerTurn(int side)

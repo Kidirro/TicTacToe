@@ -94,7 +94,7 @@ namespace Managers
             get
             {
                 Debug.Log(
-                    $"{_currentPlayerSet.SideId} == {PlayerManager.Instance.GetCurrentPlayer().SideId}   {_currentPlayerSet.SideId == PlayerManager.Instance.GetCurrentPlayer().SideId}");
+                    $"Current side {_currentPlayerSet.SideId} == {PlayerManager.Instance.GetCurrentPlayer().SideId}   {_currentPlayerSet.SideId == PlayerManager.Instance.GetCurrentPlayer().SideId}");
                 return _currentPlayerSet.SideId == PlayerManager.Instance.GetCurrentPlayer().SideId;
             }
         }

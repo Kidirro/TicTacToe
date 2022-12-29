@@ -58,8 +58,6 @@ namespace Managers
                             ScoreManager.Instance.AddPlayer(1);
                             PlayerManager.Instance.AddPlayer(PlayerType.AI);
                             ScoreManager.Instance.AddPlayer(2);
-                            CoroutineManager.Instance.AddCoroutine(
-                                InGameUI.Instance.IShowNewTurnAnimation((CellFigure) PlayerManager.Instance.GetCurrentSideOnDevice()));
                             break;
                         case GameType.SingleHuman:
                             IsOnline = false;
@@ -67,8 +65,6 @@ namespace Managers
                             ScoreManager.Instance.AddPlayer(1);
                             PlayerManager.Instance.AddPlayer(PlayerType.Human);
                             ScoreManager.Instance.AddPlayer(2);
-                            CoroutineManager.Instance.AddCoroutine(
-                                InGameUI.Instance.IShowNewTurnAnimation((CellFigure) PlayerManager.Instance.GetCurrentSideOnDevice()));
                             break;
                         case GameType.MultiplayerHuman:
                             IsOnline = true;
@@ -76,13 +72,13 @@ namespace Managers
                             ScoreManager.Instance.AddPlayer(1);
                             PlayerManager.Instance.AddPlayer(PlayerType.Human);
                             ScoreManager.Instance.AddPlayer(2);
-                            CoroutineManager.Instance.AddCoroutine(
-                                InGameUI.Instance.IShowNewTurnAnimation((CellFigure) PlayerManager.Instance.GetCurrentSideOnDevice()));
                             break;
                     }
 
                     ThemeManager.Instance.Initialization();
                     SetGameplayState(GameplayState.NewRound);
+                    CoroutineManager.Instance.AddCoroutine(
+                        InGameUI.Instance.IShowNewTurnAnimation((CellFigure) PlayerManager.Instance.GetCurrentSideOnDevice()));
                     break;
 
                 case GameplayState.NewTurn:
