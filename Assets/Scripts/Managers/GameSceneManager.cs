@@ -1,53 +1,53 @@
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
 namespace Managers
 {
-
     public class GameSceneManager : Singleton<GameSceneManager>
     {
-        private GameScene _currentScene = 0;
+        // Переписать залупу
 
-        public void SetGameScene(GameScene state)
+        private static AsyncOperation _asyncOperation = null;
+
+        private string _currentAsyncLoad = "";
+
+        public void BeginLoadGameScene(GameScene state)
         {
-            _currentScene = state;
-            CheckState();
-        }
-        public void CheckState()
-        {
-            switch (_currentScene)
+            if (_currentAsyncLoad != "")
+            {
+                AsyncOperation ao  =  SceneManager.UnloadSceneAsync(_currentAsyncLoad);
+            }
+
+            switch (state)
             {
                 case GameScene.Game:
-                    if (!IsCurrentScene("GameplayScene"))
-                    {
-                     
-                     SceneManager.LoadScene("GameplayScene");
-                    }
+                    _currentAsyncLoad = "GameplayScene";
                     break;
                 case GameScene.MainMenu:
-
-                    if (!IsCurrentScene("MainMenu"))
-                    {
-                      SceneManager.LoadScene("MainMenu");
-                    }
+                    _currentAsyncLoad = "MainMenu";
+                    break;
+                case GameScene.Tutorial:
+                    _currentAsyncLoad = "TutorialScene";
                     break;
             }
+
+            _asyncOperation = SceneManager.LoadSceneAsync(_currentAsyncLoad);
+            _asyncOperation.allowSceneActivation = false;
         }
 
-        private bool IsCurrentScene(string SceneName)
+        public void BeginTransaction()
         {
-            return SceneManager.GetActiveScene().name.Equals(SceneName);
+            _currentAsyncLoad = "";
+            _asyncOperation.allowSceneActivation = true;
+            _asyncOperation = null;
         }
-
-
 
         public enum GameScene
         {
             MainMenu,
-
-            Game
+            Game,
+            Tutorial
         }
     }
 }

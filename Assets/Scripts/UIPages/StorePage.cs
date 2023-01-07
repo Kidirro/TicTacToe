@@ -21,8 +21,16 @@ namespace UIPages
             _warningPopup.FadeIn();
         }
 
-        public void BuyBetaBundle() => IAPManager.BuyProductID(IAPManager.Instance.BetatestBundle,
-            delegate { CollectionManager.Instance.UnlockAllCard(); });
+        public void BuyBetaBundle()
+        {
+            AnalitycManager.Player_Try_Purchase(IAPManager.Instance.BetatestBundle);
+            IAPManager.BuyProductID(IAPManager.Instance.BetatestBundle,
+                delegate
+                {
+                    CollectionManager.Instance.UnlockAllCard();
+                    AnalitycManager.Player_Bought_Bundle(IAPManager.Instance.BetatestBundle);
+                });
+        }
 
         public void UnlockCardWithRewardAd()
         {
@@ -30,6 +38,15 @@ namespace UIPages
             {
                 CollectionManager.Instance.UnlockRandomCard(false);
             }
+        }
+
+        public void FindAdd() => AnalitycManager.Player_Try_Watch_Add();
+        
+        public void WatchedAdd() => AnalitycManager.Player_Watched_Add();
+
+        public void Player_Open_Store()
+        {
+            AnalitycManager.Player_Open_Store();
         }
     }
 }

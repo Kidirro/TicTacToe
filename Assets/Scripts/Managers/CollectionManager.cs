@@ -301,6 +301,22 @@ namespace Managers
             _isEdit = true;
         }
 
+        public void Player_Open_Collection()
+        {
+            AnalitycManager.Player_Open_Collection();
+        }
+        public void Player_Bought_Random_Card()
+        {
+            if (CoinManager.AllCoins < CoinManager.CoinPerUnlock) return;
+            AnalitycManager.Player_Bought_Random_Card();
+        }
+        
+        public void Player_Open_Deckbuild()
+        {
+            AnalitycManager.Player_Open_Deckbuild();
+        }
+        
+
         private IEnumerator IStartTap(CardCollection cardCollection)
         {
             yield return new WaitForSeconds(TIME_TAP_VIEW);

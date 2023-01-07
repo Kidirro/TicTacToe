@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -22,13 +23,21 @@ public class MainMenuUI : Singleton<MainMenuUI>
     [SerializeField]
     private GameObject _multiplayerNotAvaibleObject;
 
+    [Header("Tutorial area properties"), SerializeField]
+    private GameObject _tutorialShowedArea;
+    [SerializeField]
+    private GameObject _tutorialNotShowedArea;
+
     private bool _showPre = false;
 
     private void Awake()
     {
         QualitySettings.vSyncCount = 0;
         Application.targetFrameRate = 60;
-        UpdateNetworkUI(MasterConecctorManager.IsConnected);
+        UpdateNetworkUI(MasterConectorManager.IsConnected);
+        Debug.Log($"TutorialManager.IsTutorialShowed {TutorialManager.IsTutorialShowed}" );
+        _tutorialShowedArea.SetActive(TutorialManager.IsTutorialShowed);
+        _tutorialNotShowedArea.SetActive(!TutorialManager.IsTutorialShowed);
     }
 
     private void OnEnable()
@@ -38,28 +47,30 @@ public class MainMenuUI : Singleton<MainMenuUI>
 
     public void UpdateTexts()
     {
-
         _moneyValue.text = CoinManager.AllCoins.ToString();
     }
 
     public void OnAIButtonStart()
     {
-        Debug.Log("asdasd");
+        AnalitycManager.Player_Start_Match(GameplayManager.GameType.SingleAI, CardManager.CardList);
         GameplayManager.TypeGame = GameplayManager.GameType.SingleAI;
-        GameSceneManager.Instance.SetGameScene(GameSceneManager.GameScene.Game);
+        GameSceneManager.Instance.BeginLoadGameScene(GameSceneManager.GameScene.Game);
+        GameSceneManager.Instance.BeginTransaction();
     }
 
 
     public void OnHumanButtonStart()
     {
+        AnalitycManager.Player_Start_Match(GameplayManager.GameType.SingleHuman, CardManager.CardList);
         GameplayManager.TypeGame = GameplayManager.GameType.SingleHuman;
-        GameSceneManager.Instance.SetGameScene(GameSceneManager.GameScene.Game);
+        GameSceneManager.Instance.BeginLoadGameScene(GameSceneManager.GameScene.Game);
+        GameSceneManager.Instance.BeginTransaction();
     }
 
-    public void OnMultiplierOButtonStart()
+    public void OnTutorialButtonClick()
     {
-        GameplayManager.TypeGame = GameplayManager.GameType.MultiplayerHuman;
-        GameSceneManager.Instance.SetGameScene(GameSceneManager.GameScene.Game);
+        GameSceneManager.Instance.BeginLoadGameScene(GameSceneManager.GameScene.Tutorial);
+        GameSceneManager.Instance.BeginTransaction();
     }
 
     public void DEV_ChangeFieldSize(int i)
@@ -67,7 +78,7 @@ public class MainMenuUI : Singleton<MainMenuUI>
         Field.SetStartSize(new Vector2Int(i, i));
     }
 
-    public void ChangeMultiplayerButtonState(bool state)
+    private void ChangeMultiplayerButtonState(bool state)
     {
         _multiplayerButton.interactable = state;
         _multiplayerNotAvaibleObject.SetActive(!state);
@@ -76,16 +87,6 @@ public class MainMenuUI : Singleton<MainMenuUI>
     public void UpdateNetworkUI(bool isConnected)
     {
         ChangeMultiplayerButtonState(isConnected);
-    }
-
-    public void SetGrowTurn(string value)
-    {
-        _growTurnDEV = int.Parse(value);
-    }
-
-    public void SetMaxManaGrow(string value)
-    {
-        _growManaDEV = int.Parse(value);
     }
 
     public void DEV_ChangePreShow()
@@ -102,6 +103,7 @@ public class MainMenuUI : Singleton<MainMenuUI>
     {
         CoinManager.CoinPerUnlock = int.Parse(text);
     }
+
     public void PlayButtonClick()
     {
         OnAIButtonStart();

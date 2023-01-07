@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace Managers
 {
@@ -26,7 +27,7 @@ namespace Managers
         private void Start()
         {
             SetGameplayState(GameplayState.NewGame);
-            GameSceneManager.Instance.SetGameScene(GameSceneManager.GameScene.Game);
+            GameSceneManager.Instance.BeginLoadGameScene(GameSceneManager.GameScene.MainMenu);
         }
 
         public void AddScore(int value, int sideId)
@@ -141,6 +142,28 @@ namespace Managers
                     CoinManager.AllCoins += valueMoney;
                     InGameUI.Instance.StateGameOverPanel(true, valueMoney);
                     CoroutineManager.Instance.ClearQueue();
+                    
+                    int currentWinner = ScoreManager.Instance.GetGameWinner();
+                    if (currentWinner == -1)
+                    {
+                        AnalitycManager.Player_Draw_Match(TypeGame,CardManager.CardList);
+                    }
+                    else
+                    {
+                        bool isWin = false;
+                        switch (TypeGame)
+                        {
+                            case GameType.MultiplayerHuman:
+                                isWin = currentWinner == RoomManager.GetCurrentPlayerSide();
+                                break;
+                            case GameType.SingleAI:
+                                isWin = PlayerManager.Instance.Players[currentWinner - 1].EntityType == PlayerType.Human;
+                                break;
+                        }
+                        if (isWin) AnalitycManager.Player_Win_Match(TypeGame,CardManager.CardList);
+                        else AnalitycManager.Player_Lose_Match(TypeGame,CardManager.CardList);
+                    }
+
                     break;
                 case GameplayState.RestartGame:
                     ScoreManager.Instance.ClearRoundWinners();

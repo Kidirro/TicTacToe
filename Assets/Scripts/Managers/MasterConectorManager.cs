@@ -7,7 +7,7 @@ using Photon.Realtime;
 
 namespace Managers {
 
-    public class MasterConecctorManager : MonoBehaviourPunCallbacks
+    public class MasterConectorManager : MonoBehaviourPunCallbacks
     {
 
         public static bool IsConnected = false;
@@ -39,7 +39,7 @@ namespace Managers {
             {
                 if (PhotonNetwork.IsMasterClient) PhotonNetwork.CurrentRoom.IsOpen = false;
                 GameplayManager.TypeGame = GameplayManager.GameType.MultiplayerHuman;
-                GameSceneManager.Instance.SetGameScene(GameSceneManager.GameScene.Game);
+                GameSceneManager.Instance.BeginTransaction();
             }
         }
 
@@ -50,7 +50,7 @@ namespace Managers {
             {
                 if (PhotonNetwork.IsMasterClient) PhotonNetwork.CurrentRoom.IsOpen = false;
                 GameplayManager.TypeGame = GameplayManager.GameType.MultiplayerHuman;
-                GameSceneManager.Instance.SetGameScene(GameSceneManager.GameScene.Game);
+                GameSceneManager.Instance.BeginTransaction();
             }
         }
 

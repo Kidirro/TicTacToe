@@ -41,7 +41,7 @@ public class CardInfo : ScriptableObject
     public int CardManacost;
     [HideInInspector]
     public int CardBonusManacost = 0;
-    public UnityEvent ÑardAction;
+    public UnityEvent Ð¡ardAction;
 
 
 

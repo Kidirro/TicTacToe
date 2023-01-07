@@ -4,20 +4,17 @@ using UnityEngine;
 
 namespace Managers
 {
-
     public class CardManager : Singleton<CardManager>
     {
-
-        [SerializeField] private bool _isNeedGizmos;
+        [SerializeField]
+        private bool _isNeedGizmos;
 
         [SerializeField]
         private Card _cardPrefab;
 
-        private List<Card> _cardList = new List<Card>();
-
-        public List<Card> CardAvaible
+        public static List<CardInfo> CardList
         {
-            get { return _cardList; }
+            get { return _cardInfoListStatic; }
         }
 
         private static List<CardInfo> _cardInfoListStatic = new List<CardInfo>();
@@ -35,7 +32,6 @@ namespace Managers
             {
                 _cardInfoListStatic.Add(card);
             }
-
         }
 
         public static void CardListRemove(CardInfo card)
@@ -45,7 +41,6 @@ namespace Managers
             {
                 _cardInfoListStatic.Remove(card);
             }
-
         }
 
         public static void CardListClear()
@@ -70,6 +65,7 @@ namespace Managers
                     newDeck.Add(card);
                 }
             }
+
             return newDeck;
         }
     }
