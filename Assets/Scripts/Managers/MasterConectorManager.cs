@@ -13,11 +13,18 @@ namespace Managers {
         public static bool IsConnected = false;
         void Start()
         {
-            if (!PhotonNetwork.IsConnected)
+            IsConnected = PhotonNetwork.IsConnected;
+            if (PhotonNetwork.IsConnected)
+            {
+                Debug.Log("Connected" + PhotonNetwork.NickName);
+                MainMenuUI.Instance.UpdateNetworkUI(true);
+            }
+            else
             {
                 PhotonNetwork.NickName = "Player" + Random.Range(1000, 9999);
                 PhotonNetwork.GameVersion = Application.version;
                 PhotonNetwork.ConnectUsingSettings();
+                
             }
         }
 

@@ -1,11 +1,8 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-
 namespace Managers
 {
-
     public class ScoreManager : Singleton<ScoreManager>
     {
         private Dictionary<int, int> _currentScoreList = new Dictionary<int, int>();
@@ -35,8 +32,8 @@ namespace Managers
         {
             _currentScoreList.Add(player, 0);
         }
- 
-        public void RemovePlayer (int player)
+
+        public void RemovePlayer(int player)
         {
             _currentScoreList.Remove(player);
         }
@@ -57,9 +54,10 @@ namespace Managers
             {
                 if (_currentScoreList[res] >= SCORE_FOR_WIN) return true;
             }
+
             return false;
         }
-        
+
 
         public int GetRoundWinner()
         {
@@ -78,6 +76,7 @@ namespace Managers
                     maxKey = -1;
                 }
             }
+
             return maxKey;
         }
 
@@ -86,13 +85,13 @@ namespace Managers
             int p1Count = GetCountRoundWin(1);
             int p2Count = GetCountRoundWin(2);
             return (p1Count == ROUND_FOR_WIN || p2Count == ROUND_FOR_WIN || _roundWinner.Count == MAX_ROUNDS);
-        }   
-        
+        }
+
         public int GetGameWinner()
         {
             int p1Count = _roundWinner.FindAll(x => x == 1).Count;
             int p2Count = _roundWinner.FindAll(x => x == 2).Count;
-            if (p1Count == ROUND_FOR_WIN || (_roundWinner.Count == MAX_ROUNDS && p1Count>p2Count)) return 1;
+            if (p1Count == ROUND_FOR_WIN || (_roundWinner.Count == MAX_ROUNDS && p1Count > p2Count)) return 1;
             else if (p2Count == ROUND_FOR_WIN || (_roundWinner.Count == MAX_ROUNDS && p2Count > p1Count)) return 2;
             else return -1;
         }
@@ -116,7 +115,5 @@ namespace Managers
         {
             return _roundWinner.Count;
         }
-
-        
     }
 }
