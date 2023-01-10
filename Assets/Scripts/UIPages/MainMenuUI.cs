@@ -30,11 +30,12 @@ public class MainMenuUI : Singleton<MainMenuUI>
 
     private bool _showPre = false;
 
-    private void Awake()
+    private void Start()
     {
         QualitySettings.vSyncCount = 0;
         Application.targetFrameRate = 60;
-        UpdateNetworkUI(MasterConectorManager.IsConnected);
+        Vibration.Init();
+        UpdateNetworkUI(MasterConectorManager.isConnected);
         Debug.Log($"TutorialManager.IsTutorialShowed {TutorialManager.IsTutorialShowed}" );
         _tutorialShowedArea.SetActive(TutorialManager.IsTutorialShowed);
         _tutorialNotShowedArea.SetActive(!TutorialManager.IsTutorialShowed);

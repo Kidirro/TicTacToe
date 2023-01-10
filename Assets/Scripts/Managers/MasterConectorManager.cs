@@ -1,51 +1,54 @@
-using System.Collections;
-using System.Collections.Generic;
+using System;
+using System.Threading.Tasks;
+using ExitGames.Client.Photon;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 using Photon.Pun;
 using Photon.Realtime;
+using Random = UnityEngine.Random;
 
-namespace Managers {
-
+namespace Managers
+{
     public class MasterConectorManager : MonoBehaviourPunCallbacks
     {
+        public static bool isConnected = false;
 
-        public static bool IsConnected = false;
         void Start()
         {
-            IsConnected = PhotonNetwork.IsConnected;
-            if (PhotonNetwork.IsConnected)
-            {
-                Debug.Log("Connected" + PhotonNetwork.NickName);
-                MainMenuUI.Instance.UpdateNetworkUI(true);
-            }
-            else
-            {
-                PhotonNetwork.NickName = "Player" + Random.Range(1000, 9999);
-                PhotonNetwork.GameVersion = Application.version;
-                PhotonNetwork.ConnectUsingSettings();
-                
-            }
+            PhotonNetwork.NickName = "Player" + Random.Range(1000, 9999);
+            PhotonNetwork.GameVersion = Application.version;
+            PhotonNetwork.ConnectUsingSettings();
+            isConnected = PhotonNetwork.IsConnectedAndReady;
         }
 
         public static void StartSearchRoom()
         {
-            PhotonNetwork.JoinRandomOrCreateRoom(roomName: Random.Range(1000, 9999).ToString(), roomOptions: new Photon.Realtime.RoomOptions { MaxPlayers = 2 });
+            PhotonNetwork.JoinRandomOrCreateRoom(roomName: Random.Range(1000, 9999).ToString(),
+                roomOptions: new Photon.Realtime.RoomOptions {MaxPlayers = 2});
             Debug.Log("Start search!");
         }
 
         public static void StopSearñh()
         {
-            PhotonNetwork.LeaveRoom();
+            if (PhotonNetwork.InRoom) PhotonNetwork.LeaveRoom();
+            else CancelJoinRoom();
+            isConnected = PhotonNetwork.IsConnectedAndReady;
+            MainMenuUI.Instance.UpdateNetworkUI(isConnected);
         }
 
-        public  override  void OnPlayerEnteredRoom(Player newPlayer)
+        public override void OnPlayerEnteredRoom(Player newPlayer)
         {
             base.OnPlayerEnteredRoom(newPlayer);
+            Debug.Log("Async enter room");
+            Debug.Log("Connect player!");
             if (PhotonNetwork.CurrentRoom.PlayerCount == 2)
             {
                 if (PhotonNetwork.IsMasterClient) PhotonNetwork.CurrentRoom.IsOpen = false;
                 GameplayManager.TypeGame = GameplayManager.GameType.MultiplayerHuman;
+
+                Vibration.Vibrate(500);
+                AnalitycManager.Player_Found_Match(SearchingEnemyWindow.TimePass);
+                AnalitycManager.Player_Start_Match(GameplayManager.GameType.MultiplayerHuman, CardManager.CardList);
+                GameSceneManager.Instance.BeginLoadGameScene(GameSceneManager.GameScene.Game);
                 GameSceneManager.Instance.BeginTransaction();
             }
         }
@@ -53,21 +56,43 @@ namespace Managers {
         public override void OnJoinedRoom()
         {
             base.OnJoinedRoom();
+            Debug.Log("Async enter room");
+            Debug.Log("Connect player!");
             if (PhotonNetwork.CurrentRoom.PlayerCount == 2)
             {
                 if (PhotonNetwork.IsMasterClient) PhotonNetwork.CurrentRoom.IsOpen = false;
                 GameplayManager.TypeGame = GameplayManager.GameType.MultiplayerHuman;
+
+                Vibration.Vibrate(500);
+                AnalitycManager.Player_Found_Match(SearchingEnemyWindow.TimePass);
+                AnalitycManager.Player_Start_Match(GameplayManager.GameType.MultiplayerHuman, CardManager.CardList);
+                GameSceneManager.Instance.BeginLoadGameScene(GameSceneManager.GameScene.Game);
                 GameSceneManager.Instance.BeginTransaction();
             }
         }
 
         public override void OnConnectedToMaster()
         {
-            IsConnected = true;
             base.OnConnectedToMaster();
             Debug.Log("Connected" + PhotonNetwork.NickName);
-            MainMenuUI.Instance.UpdateNetworkUI(true);
+            isConnected = PhotonNetwork.IsConnectedAndReady;
+            MainMenuUI.Instance.UpdateNetworkUI(isConnected);
         }
-    }
 
+        private static async void CancelJoinRoom()
+        {
+            Debug.Log("Async enter");
+            while (!PhotonNetwork.InRoom)
+            {
+                Debug.Log("Async wait");
+                await Task.Yield();
+            }
+
+            PhotonNetwork.LeaveRoom();
+            Debug.Log("Async end");
+            isConnected = PhotonNetwork.IsConnectedAndReady;
+            MainMenuUI.Instance.UpdateNetworkUI(isConnected);
+        }
+
+    }
 }

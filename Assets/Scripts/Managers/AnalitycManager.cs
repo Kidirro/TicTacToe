@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using Object = System.Object;
 
 namespace Managers
 {
@@ -256,6 +257,52 @@ namespace Managers
             try
             {
                 AppMetrica.Instance.ReportEvent("Player_Watched_Add");
+            }
+            catch (Exception e)
+            {
+                Debug.Log(e);
+            }
+        }    
+     
+     public static void Player_Try_Find_Match()
+        {
+            try
+            {
+                Debug.Log(
+                    $"Player_Try_Find_Match");
+            }
+            catch (Exception e)
+            {
+                Debug.Log(e);
+            }
+
+            try
+            {
+                AppMetrica.Instance.ReportEvent("Player_Try_Find_Match");
+            }
+            catch (Exception e)
+            {
+                Debug.Log(e);
+            }
+        } 
+     
+     public static void Player_Found_Match(float time)
+        {
+            try
+            {
+                Debug.Log(
+                    $"Player_Found_Match. Time : {time}");
+            }
+            catch (Exception e)
+            {
+                Debug.Log(e);
+            }
+
+            try
+            {
+                var dict = new Dictionary<string, Object>();
+                dict["Time"] = time;
+                AppMetrica.Instance.ReportEvent("Player_Try_Find_Match",dict);
             }
             catch (Exception e)
             {
