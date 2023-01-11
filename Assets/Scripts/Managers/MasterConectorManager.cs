@@ -14,10 +14,22 @@ namespace Managers
 
         void Start()
         {
-            PhotonNetwork.NickName = "Player" + Random.Range(1000, 9999);
-            PhotonNetwork.GameVersion = Application.version;
-            PhotonNetwork.ConnectUsingSettings();
+            ConnectToMaster();
+        }
+
+        public static void ConnectToMaster()
+        {
             isConnected = PhotonNetwork.IsConnectedAndReady;
+
+            if (!isConnected)
+            {
+                PhotonNetwork.NickName = "Player" + Random.Range(1000, 9999);
+                PhotonNetwork.GameVersion = Application.version;
+                PhotonNetwork.ConnectUsingSettings();
+                isConnected = PhotonNetwork.IsConnectedAndReady;
+            }
+
+            MainMenuUI.Instance.UpdateNetworkUI(isConnected);
         }
 
         public static void StartSearchRoom()
@@ -94,5 +106,27 @@ namespace Managers
             MainMenuUI.Instance.UpdateNetworkUI(isConnected);
         }
 
+        private void Update()
+        {
+            if (Input.GetKeyDown(KeyCode.I))
+            {
+                Debug.Log(
+                    $"Is in master :{PhotonNetwork.IsConnectedAndReady}. Is local :{PhotonNetwork.IsConnectedAndReady}. Player count on master :{PhotonNetwork.CountOfPlayersOnMaster}");
+                try
+                {
+                    Debug.Log(
+                        $"Is in master :{PhotonNetwork.CurrentRoom} Player count :{PhotonNetwork.CurrentRoom.PlayerCount}");
+                }
+                catch
+                {
+                }
+            }
+        }
+
+        private void OnApplicationPause(bool pauseStatus)
+        {
+            Debug.Log($"Pause {pauseStatus}");
+            if (!pauseStatus) ConnectToMaster();
+        }
     }
 }
