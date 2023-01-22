@@ -133,10 +133,10 @@ namespace Managers
                     if (InGameUI.Instance.IsGameOverShowed) return;
                     if (IsOnline) RoomManager.LeaveRoom(false);
                     int valueMoney = 0;
-                    if (GameplayManager.TypeGame != GameType.SingleHuman &&
+                    if (TypeGame != GameType.SingleHuman &&
                         ScoreManager.Instance.GetRoundWinner() != -1 &&
                         PlayerManager.Instance.GetCurrentSideOnDevice()==ScoreManager.Instance.GetRoundWinner()) valueMoney = CoinManager.CoinPerWin;
-                    else if (GameplayManager.TypeGame != GameType.SingleHuman &&
+                    else if (TypeGame != GameType.SingleHuman &&
                              ScoreManager.Instance.GetRoundWinner() == -1) valueMoney = CoinManager.CoinPerWin / 2;
                     CoinManager.AllCoins += valueMoney;
                     CoinManager.AllCoins += valueMoney;
@@ -253,7 +253,11 @@ namespace Managers
             yield return null;
         }
 
-
+        public static bool IsCurrentGameplayState(GameplayState state)
+        {
+            return _gameplayState == state;
+        }
+        
         public enum GameplayState
         {
             None,

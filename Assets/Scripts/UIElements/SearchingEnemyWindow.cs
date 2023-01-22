@@ -24,6 +24,7 @@ public class SearchingEnemyWindow : MonoBehaviour
     public void StopLoadingProcess()
     {
         StopAllCoroutines();
+        AnalitycManager.Player_Cancel_Find_Match(TimePass);
     }
 
     public IEnumerator ILoadingProcess()

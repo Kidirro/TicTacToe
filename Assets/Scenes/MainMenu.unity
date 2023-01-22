@@ -6549,7 +6549,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 481ab606793a67349be805c13febeba0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  mTarget: {fileID: 2139763710}
+  mTarget: {fileID: 542061006}
   mAlignment_RTL: 514
   mAlignment_LTR: 514
   mAlignmentWasRTL: 0
@@ -10022,10 +10022,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   mTarget: {fileID: 1239522152}
-  mAlignment_RTL: 516
-  mAlignment_LTR: 513
+  mAlignment_RTL: 514
+  mAlignment_LTR: 514
   mAlignmentWasRTL: 0
-  mInitializeAlignment: 1
+  mInitializeAlignment: 0
 --- !u!1 &1259119721
 GameObject:
   m_ObjectHideFlags: 0
@@ -12262,10 +12262,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   mTarget: {fileID: 1806115391}
-  mAlignment_RTL: 516
-  mAlignment_LTR: 513
+  mAlignment_RTL: 514
+  mAlignment_LTR: 514
   mAlignmentWasRTL: 0
-  mInitializeAlignment: 1
+  mInitializeAlignment: 0
 --- !u!1 &1575691556
 GameObject:
   m_ObjectHideFlags: 0
@@ -12703,7 +12703,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 481ab606793a67349be805c13febeba0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  mTarget: {fileID: 1716676721}
+  mTarget: {fileID: 1553646516}
   mAlignment_RTL: 514
   mAlignment_LTR: 514
   mAlignmentWasRTL: 0
@@ -13473,7 +13473,7 @@ MonoBehaviour:
   mAlignment_RTL: 516
   mAlignment_LTR: 513
   mAlignmentWasRTL: 0
-  mInitializeAlignment: 1
+  mInitializeAlignment: 0
 --- !u!1 &1728752564
 GameObject:
   m_ObjectHideFlags: 0

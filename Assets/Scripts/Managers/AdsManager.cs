@@ -45,6 +45,7 @@ namespace Managers
             Yodo1U3dRewardAd.GetInstance().OnAdOpenFailedEvent += OnRewardAdOpenFailedEvent;
             Yodo1U3dRewardAd.GetInstance().OnAdClosedEvent += OnRewardAdClosedEvent;
             Yodo1U3dRewardAd.GetInstance().OnAdEarnedEvent += OnRewardAdEarnedEvent;
+            Yodo1U3dRewardAd.GetInstance().LoadAd();
         }
 
         private void OnRewardAdLoadedEvent(Yodo1U3dRewardAd ad)

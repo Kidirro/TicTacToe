@@ -81,6 +81,30 @@ namespace Managers
                 Debug.Log(e);
             }
         }
+        public static void Player_Leave_Match(GameplayManager.GameType gameType, List<CardInfo> cardList)
+        {
+            try
+            {
+                Debug.Log(
+                    $"Player_Leave_Match. GameType {gameType.ToString()}. CardCount {cardList.Count}. {GenerateCardString(cardList)}");
+            }
+            catch (Exception e)
+            {
+                Debug.Log(e);
+            }
+
+            try
+            {
+                var dict = GenerateCardParams(cardList);
+                dict["CardCount"] = cardList.Count;
+                dict["GameType"] = gameType.ToString();
+                AppMetrica.Instance.ReportEvent("Player_Leave_Match", dict);
+            }
+            catch (Exception e)
+            {
+                Debug.Log(e);
+            }
+        }
 
         public static void Player_Draw_Match(GameplayManager.GameType gameType, List<CardInfo> cardList)
         {
@@ -309,6 +333,30 @@ namespace Managers
                 Debug.Log(e);
             }
         }
+
+     public static void Player_Cancel_Find_Match(float time)
+        {
+            try
+            {
+                Debug.Log(
+                    $"Player_Cancel_Find_Match. Time : {time}");
+            }
+            catch (Exception e)
+            {
+                Debug.Log(e);
+            }
+
+            try
+            {
+                var dict = new Dictionary<string, Object>();
+                dict["Time"] = time;
+                AppMetrica.Instance.ReportEvent("Player_Cancel_Find_Match",dict);
+            }
+            catch (Exception e)
+            {
+                Debug.Log(e);
+            }
+        }
      
      public static void Player_Bought_Random_Card()
         {
@@ -325,6 +373,50 @@ namespace Managers
             try
             {
                 AppMetrica.Instance.ReportEvent("Player_Bought_Random_Card");
+            }
+            catch (Exception e)
+            {
+                Debug.Log(e);
+            }
+        }
+     
+     public static void Player_Start_Tutorial()
+        {
+            try
+            {
+                Debug.Log(
+                    $"Player_Start_Tutorial");
+            }
+            catch (Exception e)
+            {
+                Debug.Log(e);
+            }
+
+            try
+            {
+                AppMetrica.Instance.ReportEvent("Player_Start_Tutorial");
+            }
+            catch (Exception e)
+            {
+                Debug.Log(e);
+            }
+        }
+     
+  public static void Player_Complete_Tutorial()
+        {
+            try
+            {
+                Debug.Log(
+                    $"Player_Complete_Tutorial");
+            }
+            catch (Exception e)
+            {
+                Debug.Log(e);
+            }
+
+            try
+            {
+                AppMetrica.Instance.ReportEvent("Player_Complete_Tutorial");
             }
             catch (Exception e)
             {

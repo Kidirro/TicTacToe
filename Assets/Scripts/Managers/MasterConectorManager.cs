@@ -20,16 +20,15 @@ namespace Managers
         public static void ConnectToMaster()
         {
             isConnected = PhotonNetwork.IsConnectedAndReady;
-
-            if (!isConnected)
+            MainMenuUI.Instance.UpdateNetworkUI(isConnected);
+            if (!isConnected && PhotonNetwork.NetworkClientState!= ClientState.Leaving)
             {
                 PhotonNetwork.NickName = "Player" + Random.Range(1000, 9999);
                 PhotonNetwork.GameVersion = Application.version;
                 PhotonNetwork.ConnectUsingSettings();
-                isConnected = PhotonNetwork.IsConnectedAndReady;
+                PhotonNetwork.ConnectToRegion("us");
+                //isConnected = PhotonNetwork.IsConnectedAndReady;
             }
-
-            MainMenuUI.Instance.UpdateNetworkUI(isConnected);
         }
 
         public static void StartSearchRoom()
@@ -110,7 +109,7 @@ namespace Managers
         {
             if (Input.GetKeyDown(KeyCode.I))
             {
-                Debug.Log(
+                        Debug.Log(
                     $"Is in master :{PhotonNetwork.IsConnectedAndReady}. Is local :{PhotonNetwork.IsConnectedAndReady}. Player count on master :{PhotonNetwork.CountOfPlayersOnMaster}");
                 try
                 {

@@ -511,7 +511,7 @@ public class Card : MonoBehaviour
                 step = (_cardSize - transform.localScale.x) / _scaleCountFrame;
                 i = 0;
             }
-            transform.localScale = transform.localScale + new Vector3(step, step);
+            transform.localScale += new Vector3(step, step);
             i++;
             yield return null;
         }

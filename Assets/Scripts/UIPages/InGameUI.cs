@@ -107,7 +107,7 @@ public class InGameUI : Singleton<InGameUI>
 
     [Header("Paper new turn properties"), SerializeField]
     private AnimationFading _paperNewTurnAnimation;
-    
+
     [SerializeField]
     private Image _paperNewTurnPlayerImage;
 
@@ -116,13 +116,14 @@ public class InGameUI : Singleton<InGameUI>
         _pauseMenuReplyBTN.SetActive(!GameplayManager.IsOnline);
         _gameOverReplyBTN.SetActive(!GameplayManager.IsOnline);
     }
-    
+
     public void NewTurn()
     {
         StopTimer();
         ClearTriggers();
         _animatorNewTurn.SetTrigger("NewTurn");
-        _timerCoroutine = StartCoroutine(ITimerProcess());;
+        _timerCoroutine = StartCoroutine(ITimerProcess());
+        ;
         _newTurnBTN.SetActive(SlotManager.Instance.IsCurrentPlayerOnSlot);
         Debug.Log($"Current side : {_newTurnBTN.activeSelf}");
     }
@@ -150,7 +151,6 @@ public class InGameUI : Singleton<InGameUI>
 
     private void UpdatePlayerRP()
     {
-
         for (int i = 0; i < _playerOneRPList.Count; i++)
         {
             _playerOneRPList[i].SetActive(i < ScoreManager.Instance.GetCountRoundWin(1));
@@ -164,13 +164,20 @@ public class InGameUI : Singleton<InGameUI>
 
     public void ReturnHome()
     {
+        if (!GameplayManager.IsCurrentGameplayState(GameplayManager.GameplayState.GameOver))
+        {
+            AnalitycManager.Player_Lose_Match(GameplayManager.TypeGame, CardManager.CardList);
+            AnalitycManager.Player_Leave_Match(GameplayManager.TypeGame, CardManager.CardList);
+        }
+
         if (GameplayManager.IsOnline) RoomManager.LeaveRoom(true);
         GameSceneManager.Instance.BeginTransaction();
     }
 
     public void EndButtonPressed()
     {
-        if (GameplayManager.IsOnline && PlayerManager.Instance.GetCurrentPlayer().SideId != Photon.Pun.PhotonNetwork.LocalPlayer.ActorNumber) return;
+        if (GameplayManager.IsOnline && PlayerManager.Instance.GetCurrentPlayer().SideId !=
+            Photon.Pun.PhotonNetwork.LocalPlayer.ActorNumber) return;
         GameplayManager.Instance.SetGamePlayStateQueue(GameplayManager.GameplayState.NewTurn);
         NetworkEventManager.RaiseEventEndTurn();
     }
@@ -199,12 +206,13 @@ public class InGameUI : Singleton<InGameUI>
                         break;
                 }
             }
+
             _windrawBG.SetActive(isWin || currentWinner == -1);
             _loseBG.SetActive(!(isWin || currentWinner == -1));
             _moneyValue.text = "+" + value.ToString();
 
             _winnerText.text = (currentWinner == -1) ? "Draw" :
-            (isWin) ? "You\nwin" : "You\nlose";
+                (isWin) ? "You\nwin" : "You\nlose";
 
             _drawArea.SetActive(ScoreManager.Instance.GetGameWinner() == -1);
             _winnerArea.SetActive(ScoreManager.Instance.GetGameWinner() != -1);
@@ -212,7 +220,10 @@ public class InGameUI : Singleton<InGameUI>
             {
                 _bgList[i].SetActive(i == Mathf.Max(0, currentWinner));
             }
-            if (ScoreManager.Instance.GetGameWinner() != -1) _gameOverLogo.sprite = ThemeManager.Instance.GetSprite((CellFigure)ScoreManager.Instance.GetGameWinner());
+
+            if (ScoreManager.Instance.GetGameWinner() != -1)
+                _gameOverLogo.sprite =
+                    ThemeManager.Instance.GetSprite((CellFigure) ScoreManager.Instance.GetGameWinner());
         }
     }
 
@@ -268,11 +279,12 @@ public class InGameUI : Singleton<InGameUI>
                     break;
             }
         }
+
         _windrawRoundOverBG.SetActive(isWin || currentWinner == -1);
         _loseRoundOverBG.SetActive(!(isWin || currentWinner == -1));
 
         _winnerRoundOverText.text = (currentWinner == -1) ? "Draw" :
-        (isWin) ? "You\nwin" : "You\nlose";
+            (isWin) ? "You\nwin" : "You\nlose";
 
         _drawRoundOverArea.SetActive(ScoreManager.Instance.GetRoundWinner() == -1);
         _winnerRoundOverArea.SetActive(ScoreManager.Instance.GetRoundWinner() != -1);
@@ -281,7 +293,9 @@ public class InGameUI : Singleton<InGameUI>
             _bgList[i].SetActive(i == Mathf.Max(0, currentWinner));
         }
 
-        if (ScoreManager.Instance.GetRoundWinner() != -1) _roundOverLogo.sprite = ThemeManager.Instance.GetSprite((CellFigure)ScoreManager.Instance.GetRoundWinner());
+        if (ScoreManager.Instance.GetRoundWinner() != -1)
+            _roundOverLogo.sprite =
+                ThemeManager.Instance.GetSprite((CellFigure) ScoreManager.Instance.GetRoundWinner());
 
         int p1Count = ScoreManager.Instance.GetCountRoundWin(1);
         int p2Count = ScoreManager.Instance.GetCountRoundWin(2);
@@ -290,6 +304,7 @@ public class InGameUI : Singleton<InGameUI>
         {
             _p1RoundOverPoints[i].SetActive(i < p1Count);
         }
+
         for (int i = 0; i < _p2RoundOverPoints.Count; i++)
         {
             _p2RoundOverPoints[i].SetActive(i < p2Count);
@@ -302,18 +317,20 @@ public class InGameUI : Singleton<InGameUI>
             currentPoint = _p1RoundOverPoints[p1Count - 1].transform;
             currentPoint.localScale = Vector2.zero;
         }
-        else if (ScoreManager.Instance.GetRoundWinner() == 2) {
-            currentPoint =_p2RoundOverPoints[p2Count - 1].transform;
-            currentPoint.localScale = Vector2.zero; 
+        else if (ScoreManager.Instance.GetRoundWinner() == 2)
+        {
+            currentPoint = _p2RoundOverPoints[p2Count - 1].transform;
+            currentPoint.localScale = Vector2.zero;
         }
 
 
-        yield return StartCoroutine(CoroutineManager.Instance.IAwaitProcess(( _roundOverPanel.FrameCount)));
+        yield return StartCoroutine(CoroutineManager.Instance.IAwaitProcess((_roundOverPanel.FrameCount)));
         yield return new WaitForSeconds(0.5f);
-        if (currentPoint!=null) yield return StartCoroutine(currentPoint.ScaleWithLerp(Vector2.zero, Vector2.one, 20));
+        if (currentPoint != null)
+            yield return StartCoroutine(currentPoint.ScaleWithLerp(Vector2.zero, Vector2.one, 20));
         yield return new WaitForSeconds(1f);
         _roundOverPanel.FadeOut();
-        yield return StartCoroutine(CoroutineManager.Instance.IAwaitProcess(( _roundOverPanel.FrameCount)));
+        yield return StartCoroutine(CoroutineManager.Instance.IAwaitProcess((_roundOverPanel.FrameCount)));
     }
 
     public IEnumerator IShowNewTurnAnimation(CellFigure cellFigure)
@@ -321,10 +338,9 @@ public class InGameUI : Singleton<InGameUI>
         _paperNewTurnPlayerImage.sprite = ThemeManager.Instance.GetSprite(cellFigure);
         _paperNewTurnAnimation.FadeIn();
         Debug.Log("BegunAnim");
-        yield return StartCoroutine(CoroutineManager.Instance.IAwaitProcess(( _paperNewTurnAnimation.FrameCount)));
+        yield return StartCoroutine(CoroutineManager.Instance.IAwaitProcess((_paperNewTurnAnimation.FrameCount)));
         yield return new WaitForSeconds(0.5f);
         _paperNewTurnAnimation.FadeOut();
-        yield return StartCoroutine(CoroutineManager.Instance.IAwaitProcess(( _paperNewTurnAnimation.FrameCount)));
+        yield return StartCoroutine(CoroutineManager.Instance.IAwaitProcess((_paperNewTurnAnimation.FrameCount)));
     }
-
 }

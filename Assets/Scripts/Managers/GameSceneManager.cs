@@ -6,19 +6,12 @@ namespace Managers
 {
     public class GameSceneManager : Singleton<GameSceneManager>
     {
-        // Переписать залупу
-
         private static AsyncOperation _asyncOperation = null;
 
         private string _currentAsyncLoad = "";
 
         public void BeginLoadGameScene(GameScene state)
         {
-            if (_currentAsyncLoad != "")
-            {
-                AsyncOperation ao  =  SceneManager.UnloadSceneAsync(_currentAsyncLoad);
-            }
-
             switch (state)
             {
                 case GameScene.Game:
