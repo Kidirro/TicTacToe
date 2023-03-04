@@ -1,3 +1,5 @@
+using Analytic;
+using Cards;
 using Managers;
 using UnityEngine;
 
@@ -23,12 +25,12 @@ namespace UIPages
 
         public void BuyBetaBundle()
         {
-            AnalitycManager.Player_Try_Purchase(IAPManager.Instance.BetatestBundle);
+            AnalyticController.Player_Try_Purchase(IAPManager.Instance.BetatestBundle);
             IAPManager.BuyProductID(IAPManager.Instance.BetatestBundle,
                 delegate
                 {
                     CollectionManager.Instance.UnlockAllCard();
-                    AnalitycManager.Player_Bought_Bundle(IAPManager.Instance.BetatestBundle);
+                    AnalyticController.Player_Bought_Bundle(IAPManager.Instance.BetatestBundle);
                 });
         }
 
@@ -40,13 +42,13 @@ namespace UIPages
             }
         }
 
-        public void FindAdd() => AnalitycManager.Player_Try_Watch_Add();
+        public void FindAdd() => AnalyticController.Player_Try_Watch_Add();
         
-        public void WatchedAdd() => AnalitycManager.Player_Watched_Add();
+        public void WatchedAdd() => AnalyticController.Player_Watched_Add();
 
         public void Player_Open_Store()
         {
-            AnalitycManager.Player_Open_Store();
+            AnalyticController.Player_Open_Store();
         }
     }
 }

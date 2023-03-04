@@ -1,6 +1,6 @@
-using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
+using Cards;
+using Cards.CustomType;
 
 public class PlayerInfo
 {
@@ -8,15 +8,14 @@ public class PlayerInfo
 
     public int SideId;
 
-    public List<Card> HandPool = new List<Card>();
-    public List<Card> DeckPool = new List<Card>();
-    public List<Card> FullDeckPool = new List<Card>();
-
+    public List<CardModel> HandPool = new List<CardModel>();
+    public List<CardModel> DeckPool = new List<CardModel>();
+    public List<CardModel> FullDeckPool = new List<CardModel>();
 }
 
 
 public enum PlayerType
 {
-    Human, 
+    Human,
     AI
 }

@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using Analytic;
+using GameScene;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -21,7 +23,7 @@ namespace Managers
 
         private void Start()
         {
-            AnalitycManager.Player_Start_Tutorial();
+            AnalyticController.Player_Start_Tutorial();
             GameSceneManager.Instance.BeginLoadGameScene(GameSceneManager.GameScene.MainMenu);
             InvokePageAction(_currentPage);
         }
@@ -37,7 +39,7 @@ namespace Managers
             if (_currentPage >= _pageAction.Count)
             {
                 IsTutorialShowed = true;
-                AnalitycManager.Player_Complete_Tutorial();
+                AnalyticController.Player_Complete_Tutorial();
                 Debug.Log($"TutorialManager.IsTutorialShowed {TutorialManager.IsTutorialShowed}" );
                 GameSceneManager.Instance.BeginTransaction();
             }

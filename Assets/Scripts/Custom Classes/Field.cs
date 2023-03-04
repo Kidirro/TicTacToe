@@ -2,13 +2,19 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System;
+using AI;
+using Area;
+using Coroutine;
+using Network;
+using Players;
+using ScreenScaler;
+using Theme;
+using Zenject;
 
 namespace Managers
 {
-
     public class Field : Singleton<Field>
     {
-
         [SerializeField]
         private bool _isNeedGizmos;
 
@@ -16,7 +22,6 @@ namespace Managers
         [Space]
         [Space]
         [Space]
-
         [Header("Parent properties"), SerializeField]
         private GameObject _lineParent;
 
@@ -56,16 +61,20 @@ namespace Managers
             get { return _cellList; }
         }
 
-        [Header("Prefabs properties"),SerializeField] private GameObject _cellPrefab;
-        [SerializeField] private GameObject _linePrefab;
-        [SerializeField] private GameObject _finishLinePrefab;
+        [Header("Prefabs properties"), SerializeField]
+        private GameObject _cellPrefab;
 
-        [Space]
-        [Space]
-        [Space]
+        [SerializeField]
+        private GameObject _linePrefab;
 
-        [SerializeField] private float _lineWidthPercent;
-        [SerializeField] private float _borderPercent;
+        [SerializeField]
+        private GameObject _finishLinePrefab;
+
+        [Space, Space, Space, SerializeField]
+        private float _lineWidthPercent;
+
+        [SerializeField]
+        private float _borderPercent;
 
         public float LineWidthPercent
         {
@@ -74,7 +83,9 @@ namespace Managers
 
         //In screen cord
         private float _startPositionX;
+
         private float _endPositionX;
+
         //In screen cord
         private float _startPositionY;
         private float _endPositionY;
@@ -82,10 +93,22 @@ namespace Managers
         private float _remainX;
         private float _remainY;
 
-        public void Initialization(int round=0)
+        #region Interfaces
+
+        private IScreenScaler _screenScaler;
+
+        #endregion
+
+        [Inject]
+        private void Construct(IScreenScaler screenScaler)
+        {
+            _screenScaler = _screenScaler;
+        }
+
+        public void Initialization(int round = 0)
         {
             StopAllCoroutines();
-            int size = _startFieldSize + round*GROW_PER_ROUND;
+            int size = _startFieldSize + round * GROW_PER_ROUND;
 
             _fieldSize = new Vector2Int(size, size);
             InitializeField();
@@ -95,11 +118,11 @@ namespace Managers
 
         private void GetStartPosition()
         {
-            _startPositionX = ScreenManager.Instance.GetWidth(_screenBorderX.x);
-            _endPositionX = ScreenManager.Instance.GetWidth(ScreenManager.Instance.ScreenDefault.x - _screenBorderX.y);
+            _startPositionX = _screenScaler.GetWidth(_screenBorderX.x);
+            _endPositionX = _screenScaler.GetWidth(_screenScaler.GetScreenDefault().x - _screenBorderX.y);
 
-            _startPositionY = ScreenManager.Instance.GetHeight(_screenBorderY.x);
-            _endPositionY = ScreenManager.Instance.GetHeight(ScreenManager.Instance.ScreenDefault.y - _screenBorderY.y);
+            _startPositionY = _screenScaler.GetHeight(_screenBorderY.x);
+            _endPositionY = _screenScaler.GetHeight(_screenScaler.GetScreenDefault().y - _screenBorderY.y);
         }
 
         /// <summary>
@@ -113,12 +136,15 @@ namespace Managers
             newLine.transform.position = Vector2.zero;
             LR.SetTransformParent(_lineParent.transform);
             _lineListVertical.Insert(0, LR);
-            _lineListVertical[0].SetPositions(_lineListVertical[1].StartPoint - new Vector2(_cellList[0][0].CellSize, 0), _lineListVertical[1].EndPoint - new Vector2(_cellList[0][0].CellSize, 0));
+            _lineListVertical[0]
+                .SetPositions(_lineListVertical[1].StartPoint - new Vector2(_cellList[0][0].CellSize, 0),
+                    _lineListVertical[1].EndPoint - new Vector2(_cellList[0][0].CellSize, 0));
             _lineListVertical[0].SetWidthWorldCord(0);
             for (int i = 0; i < _lineListVertical.Count; i++)
             {
                 _lineListVertical[i].name = "Vertical Line " + i;
             }
+
             _cellList.Insert(0, new List<Cell>());
             for (int j = 0; j < _fieldSize.y; j++)
             {
@@ -126,20 +152,22 @@ namespace Managers
                 Cell cell = newCellObject.GetComponent<Cell>();
                 cell.SetTransformParent(_cellParent.transform);
                 _cellList[0].Add(cell);
-                _cellList[0][j].SetTransformPosition((_cellList[1][j].Position - new Vector2(_cellList[0][0].CellSize, 0)).x, _cellList[1][j].Position.y);
+                _cellList[0][j]
+                    .SetTransformPosition((_cellList[1][j].Position - new Vector2(_cellList[0][0].CellSize, 0)).x,
+                        _cellList[1][j].Position.y);
             }
 
             for (int i = 0; i < _fieldSize.x; i++)
             {
                 for (int j = 0; j < _fieldSize.y; j++)
                 {
-
                     _cellList[i][j].Id = new Vector2Int(i, j);
                     _cellList[i][j].name = "[" + i + "][" + j + "]cell";
                 }
             }
+
             NewCellSize(_fieldSize, false);
-            yield return StartCoroutine(CoroutineManager.Instance.IAwaitProcess(Cell.AnimationTime));
+            yield return StartCoroutine(CoroutineQueueController.Instance.IAwaitProcess(Cell.AnimationTime));
         }
 
         public IEnumerator AddLineRight()
@@ -150,14 +178,17 @@ namespace Managers
             newLine.transform.position = Vector2.zero;
             LR.SetTransformParent(_lineParent.transform);
             _lineListVertical.Add(LR);
-            Vector2 newPosition1 = _lineListVertical[_lineListVertical.Count - 2].StartPoint + new Vector2(_cellList[0][0].CellSize, 0);
-            Vector2 newPosition2 = _lineListVertical[_lineListVertical.Count - 2].EndPoint + new Vector2(_cellList[0][0].CellSize, 0);
+            Vector2 newPosition1 = _lineListVertical[_lineListVertical.Count - 2].StartPoint +
+                                   new Vector2(_cellList[0][0].CellSize, 0);
+            Vector2 newPosition2 = _lineListVertical[_lineListVertical.Count - 2].EndPoint +
+                                   new Vector2(_cellList[0][0].CellSize, 0);
             _lineListVertical[_lineListVertical.Count - 1].SetPositions(newPosition1, newPosition2);
             _lineListVertical[_lineListVertical.Count - 1].SetWidthWorldCord(0);
             for (int i = 0; i < _lineListVertical.Count; i++)
             {
                 _lineListVertical[i].name = "Vertical Line " + i;
             }
+
             _cellList.Add(new List<Cell>());
             for (int j = 0; j < _fieldSize.y; j++)
             {
@@ -165,21 +196,22 @@ namespace Managers
                 Cell cell = newCellObject.GetComponent<Cell>();
                 cell.SetTransformParent(_cellParent.transform);
                 _cellList[_fieldSize.x - 1].Add(cell);
-                _cellList[_fieldSize.x - 1][j].SetTransformPosition((_cellList[_fieldSize.x - 2][j].Position - new Vector2(_cellList[0][0].CellSize, 0)).x, _cellList[_fieldSize.x - 2][j].Position.y);
+                _cellList[_fieldSize.x - 1][j].SetTransformPosition(
+                    (_cellList[_fieldSize.x - 2][j].Position - new Vector2(_cellList[0][0].CellSize, 0)).x,
+                    _cellList[_fieldSize.x - 2][j].Position.y);
             }
 
             for (int i = 0; i < _fieldSize.x; i++)
             {
                 for (int j = 0; j < _fieldSize.y; j++)
                 {
-
                     _cellList[i][j].Id = new Vector2Int(i, j);
                     _cellList[i][j].name = "[" + i + "][" + j + "]cell";
                 }
             }
-            NewCellSize(_fieldSize, false);
-            yield return StartCoroutine(CoroutineManager.Instance.IAwaitProcess(Cell.AnimationTime));
 
+            NewCellSize(_fieldSize, false);
+            yield return StartCoroutine(CoroutineQueueController.Instance.IAwaitProcess(Cell.AnimationTime));
         }
 
         public IEnumerator AddLineUp()
@@ -190,34 +222,38 @@ namespace Managers
             newLine.transform.position = Vector2.zero;
             LR.SetTransformParent(_lineParent.transform);
             _lineListHorizontal.Add(LR);
-            Vector2 newPosition1 = _lineListHorizontal[_lineListHorizontal.Count - 2].StartPoint + new Vector2(0, _cellList[0][0].CellSize);
-            Vector2 newPosition2 = _lineListHorizontal[_lineListHorizontal.Count - 2].EndPoint + new Vector2(0, _cellList[0][0].CellSize);
+            Vector2 newPosition1 = _lineListHorizontal[_lineListHorizontal.Count - 2].StartPoint +
+                                   new Vector2(0, _cellList[0][0].CellSize);
+            Vector2 newPosition2 = _lineListHorizontal[_lineListHorizontal.Count - 2].EndPoint +
+                                   new Vector2(0, _cellList[0][0].CellSize);
             _lineListHorizontal[_lineListHorizontal.Count - 1].SetPositions(newPosition1, newPosition2);
             _lineListHorizontal[_lineListHorizontal.Count - 1].SetWidthWorldCord(0);
             for (int i = 0; i < _lineListHorizontal.Count; i++)
             {
                 _lineListHorizontal[i].name = "Horizontal Line " + i;
             }
+
             for (int j = 0; j < _fieldSize.x; j++)
             {
                 GameObject newCellObject = Instantiate(_cellPrefab);
                 Cell cell = newCellObject.GetComponent<Cell>();
                 cell.SetTransformParent(_cellParent.transform);
                 _cellList[j].Add(cell);
-                _cellList[j][_fieldSize.y - 1].SetTransformPosition(_cellList[j][_fieldSize.y - 2].Position.x, _cellList[j][_fieldSize.y - 2].Position.y + new Vector2(0, _cellList[0][0].CellSize).y);
+                _cellList[j][_fieldSize.y - 1].SetTransformPosition(_cellList[j][_fieldSize.y - 2].Position.x,
+                    _cellList[j][_fieldSize.y - 2].Position.y + new Vector2(0, _cellList[0][0].CellSize).y);
             }
 
             for (int i = 0; i < _fieldSize.x; i++)
             {
                 for (int j = 0; j < _fieldSize.y; j++)
                 {
-
                     _cellList[i][j].Id = new Vector2Int(i, j);
                     _cellList[i][j].name = "[" + i + "][" + j + "]cell";
                 }
             }
+
             NewCellSize(_fieldSize, false);
-            yield return StartCoroutine(CoroutineManager.Instance.IAwaitProcess(Cell.AnimationTime));
+            yield return StartCoroutine(CoroutineQueueController.Instance.IAwaitProcess(Cell.AnimationTime));
         }
 
         public IEnumerator AddLineDown()
@@ -236,26 +272,28 @@ namespace Managers
             {
                 _lineListHorizontal[i].name = "Horizontal Line " + i;
             }
+
             for (int j = 0; j < _fieldSize.x; j++)
             {
                 GameObject newCellObject = Instantiate(_cellPrefab);
                 Cell cell = newCellObject.GetComponent<Cell>();
                 cell.SetTransformParent(_cellParent.transform);
                 _cellList[j].Insert(0, cell);
-                _cellList[j][0].SetTransformPosition(_cellList[j][1].Position.x, _cellList[j][1].Position.y - new Vector2(0, _cellList[0][0].CellSize).y);
+                _cellList[j][0].SetTransformPosition(_cellList[j][1].Position.x,
+                    _cellList[j][1].Position.y - new Vector2(0, _cellList[0][0].CellSize).y);
             }
 
             for (int i = 0; i < _fieldSize.x; i++)
             {
                 for (int j = 0; j < _fieldSize.y; j++)
                 {
-
                     _cellList[i][j].Id = new Vector2Int(i, j);
                     _cellList[i][j].name = "[" + i + "][" + j + "]cell";
                 }
             }
+
             NewCellSize(_fieldSize, false);
-            yield return StartCoroutine(CoroutineManager.Instance.IAwaitProcess(Cell.AnimationTime));
+            yield return StartCoroutine(CoroutineQueueController.Instance.IAwaitProcess(Cell.AnimationTime));
         }
 
         private float GetCellSize(int x_size = 3, int y_size = 3)
@@ -276,10 +314,10 @@ namespace Managers
                     for (int j = 0; j < _cellList[i].Count; j++)
                     {
                         Destroy(_cellList[i][j].gameObject);
-
                     }
                 }
             }
+
             _cellList = new List<List<Cell>>();
             for (int i = 0; i < _fieldSize.x; i++)
             {
@@ -327,11 +365,10 @@ namespace Managers
                 GameObject newLine = Instantiate(_linePrefab);
                 Line LR = newLine.GetComponent<Line>();
                 LR.SetTransformParent(_lineParent.transform);
-                LR.SetPositions(new Vector2(Camera.main.pixelWidth / 2, Camera.main.pixelHeight / 2), new Vector2(Camera.main.pixelWidth / 2, Camera.main.pixelHeight / 2));
+                LR.SetPositions(new Vector2(Camera.main.pixelWidth / 2, Camera.main.pixelHeight / 2),
+                    new Vector2(Camera.main.pixelWidth / 2, Camera.main.pixelHeight / 2));
                 _lineListVertical.Add(LR);
                 newLine.name = "Vertical Line " + i;
-
-
             }
 
             for (int j = 0; j < horizontalSize; j++)
@@ -339,11 +376,10 @@ namespace Managers
                 GameObject newLine = Instantiate(_linePrefab);
                 Line LR = newLine.GetComponent<Line>();
                 LR.SetTransformParent(_lineParent.transform);
-                LR.SetPositions(new Vector2(Camera.main.pixelWidth / 2, Camera.main.pixelHeight / 2), new Vector2(Camera.main.pixelWidth / 2, Camera.main.pixelHeight / 2));
+                LR.SetPositions(new Vector2(Camera.main.pixelWidth / 2, Camera.main.pixelHeight / 2),
+                    new Vector2(Camera.main.pixelWidth / 2, Camera.main.pixelHeight / 2));
                 _lineListHorizontal.Add(LR);
                 newLine.name = "Horizontal Line " + j;
-
-
             }
         }
 
@@ -352,12 +388,14 @@ namespace Managers
             _cellSize = GetCellSize(VirtualfieldSize.x, VirtualfieldSize.y);
             _remainX = (_endPositionX - _startPositionX - _cellSize * _fieldSize.x) / 2;
             _remainY = (_endPositionY - _startPositionY - _cellSize * _fieldSize.y) / 2;
-            Vector2 StartPositionMatrix = new Vector2(_startPositionX + _remainX + _cellSize / 2, _startPositionY + _remainY + _cellSize / 2);
+            Vector2 StartPositionMatrix = new Vector2(_startPositionX + _remainX + _cellSize / 2,
+                _startPositionY + _remainY + _cellSize / 2);
             for (int i = 0; i < _fieldSize.x; i++)
             {
                 for (int j = 0; j < _fieldSize.y; j++)
                 {
-                    _cellList[i][j].SetTransformPosition(StartPositionMatrix.x + i * _cellSize, StartPositionMatrix.y + j * _cellSize, instantly);
+                    _cellList[i][j].SetTransformPosition(StartPositionMatrix.x + i * _cellSize,
+                        StartPositionMatrix.y + j * _cellSize, instantly);
                     _cellList[i][j].SetTransformSize(_cellSize * (1 - _borderPercent), instantly);
                 }
             }
@@ -365,20 +403,32 @@ namespace Managers
             for (int i = 0; i < _lineListVertical.Count; i++)
             {
                 Vector3[] points = new Vector3[2];
-                points[0] = new Vector2(_cellList[i][0].Position.x * 0.5f + _cellList[i + 1][0].Position.x * 0.5f, _cellList[i][0].Position.y - _cellList[0][0].CellSize / 2);
-                points[1] = new Vector2(_cellList[i][_cellList[0].Count - 1].Position.x * 0.5f + _cellList[i + 1][_cellList[0].Count - 1].Position.x * 0.5f, _cellList[i][_cellList[0].Count - 1].Position.y + _cellList[0][0].CellSize / 2);
+                points[0] = new Vector2(_cellList[i][0].Position.x * 0.5f + _cellList[i + 1][0].Position.x * 0.5f,
+                    _cellList[i][0].Position.y - _cellList[0][0].CellSize / 2);
+                points[1] = new Vector2(
+                    _cellList[i][_cellList[0].Count - 1].Position.x * 0.5f +
+                    _cellList[i + 1][_cellList[0].Count - 1].Position.x * 0.5f,
+                    _cellList[i][_cellList[0].Count - 1].Position.y + _cellList[0][0].CellSize / 2);
 
-                _lineListVertical[i].SetWidthScreenCord(_cellSize * _lineWidthPercent / ScreenManager.Instance.GetWidthRatio(), instantly);
+                _lineListVertical[i]
+                    .SetWidthScreenCord(
+                        _cellSize * _lineWidthPercent / _screenScaler.GetWidthRatio(),
+                        instantly);
                 _lineListVertical[i].SetPositions(points[0], points[1], instantly);
             }
 
             for (int i = 0; i < _lineListHorizontal.Count; i++)
             {
                 Vector3[] points = new Vector3[2];
-                points[0] = new Vector2(_cellList[0][i].Position.x - _cellSize / 2, _cellList[0][i].Position.y * 0.5f + _cellList[0][i + 1].Position.y * 0.5f);
-                points[1] = new Vector2(_cellList[_cellList.Count - 1][i].Position.x + _cellSize / 2, _cellList[1][i].Position.y * 0.5f + _cellList[1][i + 1].Position.y * 0.5f);
+                points[0] = new Vector2(_cellList[0][i].Position.x - _cellSize / 2,
+                    _cellList[0][i].Position.y * 0.5f + _cellList[0][i + 1].Position.y * 0.5f);
+                points[1] = new Vector2(_cellList[_cellList.Count - 1][i].Position.x + _cellSize / 2,
+                    _cellList[1][i].Position.y * 0.5f + _cellList[1][i + 1].Position.y * 0.5f);
 
-                _lineListHorizontal[i].SetWidthScreenCord(_cellSize * _lineWidthPercent / ScreenManager.Instance.GetWidthRatio(), instantly);
+                _lineListHorizontal[i]
+                    .SetWidthScreenCord(
+                        _cellSize * _lineWidthPercent / _screenScaler.GetWidthRatio(),
+                        instantly);
                 _lineListHorizontal[i].SetPositions(points[0], points[1], instantly);
             }
         }
@@ -392,26 +442,32 @@ namespace Managers
             {
                 NewCellSize(_fieldSize, false);
             }
+
             if (Input.GetKeyDown(KeyCode.K))
             {
                 NewCellSize(_fieldSize + Vector2Int.one, false);
             }
+
             if (Input.GetKeyDown(KeyCode.LeftArrow))
             {
                 AddLineLeft();
             }
+
             if (Input.GetKeyDown(KeyCode.RightArrow))
             {
                 AddLineRight();
             }
+
             if (Input.GetKeyDown(KeyCode.UpArrow))
             {
                 AddLineUp();
             }
+
             if (Input.GetKeyDown(KeyCode.DownArrow))
             {
                 AddLineDown();
             }
+
             if (Input.GetKeyDown(KeyCode.Space))
             {
                 var kk = _cellList[0][0];
@@ -427,7 +483,6 @@ namespace Managers
                 _cellList[1][0] = kk;
                 NewCellSize(_fieldSize, false);
             }
-
         }
 
         public void SwapVerticalLines(int fl, int sl, bool instantly = true)
@@ -442,7 +497,6 @@ namespace Managers
             }
 
             NewCellSize(_fieldSize, instantly);
-
         }
 
         public void SwapHorizontalLines(int fl, int sl, bool instantly = true)
@@ -457,19 +511,23 @@ namespace Managers
             }
 
             NewCellSize(_fieldSize, instantly);
-
-
         }
 
         private void OnDrawGizmos()
         {
             if (_isNeedGizmos)
             {
-                float StartPositionX = Camera.main.ScreenToWorldPoint(new Vector3(ScreenManager.Instance.GetWidth(_screenBorderX.x), 0)).x;
-                float EndPositionX = Camera.main.ScreenToWorldPoint(new Vector2(ScreenManager.Instance.GetWidth(ScreenManager.Instance.ScreenDefault.x - _screenBorderX.y), 0)).x;
+                float StartPositionX = Camera.main
+                    .ScreenToWorldPoint(
+                        new Vector3(_screenScaler.GetWidth(_screenBorderX.x), 0)).x;
+                float EndPositionX = Camera.main.ScreenToWorldPoint(new Vector2(
+                    _screenScaler.GetWidth(_screenScaler.GetScreenDefault().x - _screenBorderX.y), 0)).x;
 
-                float StartPositionY = Camera.main.ScreenToWorldPoint(new Vector2(0, ScreenManager.Instance.GetHeight(_screenBorderY.x))).y;
-                float EndPositionY = Camera.main.ScreenToWorldPoint(new Vector2(0, ScreenManager.Instance.GetHeight(ScreenManager.Instance.ScreenDefault.y - _screenBorderY.y))).y;
+                float StartPositionY = Camera.main.ScreenToWorldPoint(new Vector2(0,
+                    _screenScaler.GetHeight(_screenBorderY.x))).y;
+                float EndPositionY = Camera.main.ScreenToWorldPoint(new Vector2(0,
+                    _screenScaler.GetHeight(
+                        _screenScaler.GetScreenDefault().y - _screenBorderY.y))).y;
                 Gizmos.color = Color.blue;
                 Gizmos.DrawLine(new Vector2(StartPositionX, StartPositionY), new Vector2(EndPositionX, StartPositionY));
                 Gizmos.DrawLine(new Vector2(EndPositionX, StartPositionY), new Vector2(EndPositionX, EndPositionY));
@@ -484,8 +542,10 @@ namespace Managers
             FinishLine FL = _lineFinishEnabled[0];
             _lineFinishEnabled.Remove(FL);
             FL.SetAlphaFinishLine(0);
-            FL.SetWidthScreenCord(_cellSize * _lineWidthPercent / ScreenManager.Instance.GetWidthRatio());
-            FL.SetPositions(CellList[ids[0].x][ids[0].y].Position, CellList[ids[ids.Count - 1].x][ids[ids.Count - 1].x].Position);
+            FL.SetWidthScreenCord(_cellSize * _lineWidthPercent /
+                                  _screenScaler.GetWidthRatio());
+            FL.SetPositions(CellList[ids[0].x][ids[0].y].Position,
+                CellList[ids[ids.Count - 1].x][ids[ids.Count - 1].x].Position);
             //CoroutineManager.Instance.AddCoroutine(FL.FinishLineCleaning(ids, score));
             StartCoroutine(FL.FinishLineCleaning(ids, score));
         }
@@ -517,12 +577,12 @@ namespace Managers
             {
                 result.AddRange(CellList[i].FindAll(x => x.Figure == figure));
             }
+
             return result;
         }
 
         public bool IsInFieldHeight(float h)
         {
-
             return h >= (_startPositionY + _remainY);
         }
 
@@ -533,53 +593,60 @@ namespace Managers
             Cell checkedPos;
 
             checkedPos = IsOnField(startPos, Vector2Int.down);
-            if (checkedPos != null && IsCellEnableToPlace(checkedPos.Id)) cells.Add(CellList[checkedPos.Id.x][checkedPos.Id.y]);
+            if (checkedPos != null && IsCellEnableToPlace(checkedPos.Id))
+                cells.Add(CellList[checkedPos.Id.x][checkedPos.Id.y]);
 
             checkedPos = IsOnField(startPos, Vector2Int.up);
-            if (checkedPos != null && IsCellEnableToPlace(checkedPos.Id)) cells.Add(CellList[checkedPos.Id.x][checkedPos.Id.y]);
+            if (checkedPos != null && IsCellEnableToPlace(checkedPos.Id))
+                cells.Add(CellList[checkedPos.Id.x][checkedPos.Id.y]);
 
             checkedPos = IsOnField(startPos, Vector2Int.right);
-            if (checkedPos != null && IsCellEnableToPlace(checkedPos.Id)) cells.Add(CellList[checkedPos.Id.x][checkedPos.Id.y]);
+            if (checkedPos != null && IsCellEnableToPlace(checkedPos.Id))
+                cells.Add(CellList[checkedPos.Id.x][checkedPos.Id.y]);
 
             checkedPos = IsOnField(startPos, Vector2Int.left);
-            if (checkedPos != null && IsCellEnableToPlace(checkedPos.Id)) cells.Add(CellList[checkedPos.Id.x][checkedPos.Id.y]);
+            if (checkedPos != null && IsCellEnableToPlace(checkedPos.Id))
+                cells.Add(CellList[checkedPos.Id.x][checkedPos.Id.y]);
 
             return cells;
         }
 
         /// <summary>
-        ///при выходе за границы при включенном флаге - последн€€ точка
+        ///??? ?????? ?? ??????? ??? ?????????? ????? - ????????? ?????
         /// </summary>
         /// <param name="pos"> Position</param>
-        /// <param name="IsFindBorder">ѕрив выходе за границы: крайн€€ точка (true) или (-1,-1) (false) </param>
+        /// <param name="IsFindBorder">???? ?????? ?? ???????: ??????? ????? (true) ??? (-1,-1) (false) </param>
         /// <returns></returns>
         public Vector2Int GetIdFromPosition(Vector2 pos, bool IsFindBorder)
         {
             Vector2Int pos_final = Vector2Int.zero;
-            pos_final.y = (int)Mathf.Clamp((float)Math.Floor((pos.y - (_startPositionY + _remainY)) / _cellSize), 0, _fieldSize.y - 1);
-            pos_final.x = (int)Mathf.Clamp((float)Math.Floor((pos.x - (_startPositionX + _remainX)) / _cellSize), 0, _fieldSize.x - 1);
+            pos_final.y = (int) Mathf.Clamp((float) Math.Floor((pos.y - (_startPositionY + _remainY)) / _cellSize), 0,
+                _fieldSize.y - 1);
+            pos_final.x = (int) Mathf.Clamp((float) Math.Floor((pos.x - (_startPositionX + _remainX)) / _cellSize), 0,
+                _fieldSize.x - 1);
             if (CheckIsInField(pos) || IsFindBorder) return pos_final;
             else return (new Vector2Int(-1, -1));
         }
 
         public void ResetSubStateZone(Vector2Int Position, Vector2Int AreaSize, bool IsQueue = true)
         {
-            Vector4 CurrentArea = AreaManager.GetArea(Position, AreaSize);
-            for (int x = (int)CurrentArea.x; x <= CurrentArea.z; x++)
+            Vector4 CurrentArea = AreaController.GetArea(Position, AreaSize);
+            for (int x = (int) CurrentArea.x; x <= CurrentArea.z; x++)
             {
-                for (int y = (int)CurrentArea.y; y <= CurrentArea.w; y++)
+                for (int y = (int) CurrentArea.y; y <= CurrentArea.w; y++)
                 {
                     CellList[x][y].ResetSubState(IsQueue);
                 }
             }
         }
 
-        public void SetSubStateZone(Vector2Int Position, Vector2Int AreaSize, Sprite sprite, Color color, CellSubState cellSubState, bool isQueue = true)
+        public void SetSubStateZone(Vector2Int Position, Vector2Int AreaSize, Sprite sprite, Color color,
+            CellSubState cellSubState, bool isQueue = true)
         {
-            Vector4 CurrentArea = AreaManager.GetArea(Position, AreaSize);
-            for (int x = (int)CurrentArea.x; x <= CurrentArea.z; x++)
+            Vector4 CurrentArea = AreaController.GetArea(Position, AreaSize);
+            for (int x = (int) CurrentArea.x; x <= CurrentArea.z; x++)
             {
-                for (int y = (int)CurrentArea.y; y <= CurrentArea.w; y++)
+                for (int y = (int) CurrentArea.y; y <= CurrentArea.w; y++)
                 {
                     CellList[x][y].SetSubState(sprite, color, cellSubState, isQueue);
                 }
@@ -588,10 +655,10 @@ namespace Managers
 
         public void UnhighlightZone(Vector2Int Position, Vector2Int AreaSize)
         {
-            Vector4 CurrentArea = AreaManager.GetArea(Position, AreaSize);
-            for (int x = (int)CurrentArea.x; x <= CurrentArea.z; x++)
+            Vector4 CurrentArea = AreaController.GetArea(Position, AreaSize);
+            for (int x = (int) CurrentArea.x; x <= CurrentArea.z; x++)
             {
-                for (int y = (int)CurrentArea.y; y <= CurrentArea.w; y++)
+                for (int y = (int) CurrentArea.y; y <= CurrentArea.w; y++)
                 {
                     CellList[x][y].UnhighlightCell();
                 }
@@ -600,10 +667,10 @@ namespace Managers
 
         public void HighlightZone(Vector2Int Position, Vector2Int AreaSize, Sprite sprite, Color color)
         {
-            Vector4 CurrentArea = AreaManager.GetArea(Position, AreaSize);
-            for (int x = (int)CurrentArea.x; x <= CurrentArea.z; x++)
+            Vector4 CurrentArea = AreaController.GetArea(Position, AreaSize);
+            for (int x = (int) CurrentArea.x; x <= CurrentArea.z; x++)
             {
-                for (int y = (int)CurrentArea.y; y <= CurrentArea.w; y++)
+                for (int y = (int) CurrentArea.y; y <= CurrentArea.w; y++)
                 {
                     CellList[x][y].HighlightCell(sprite, color);
                 }
@@ -612,27 +679,29 @@ namespace Managers
 
         public bool IsZoneEmpty(Vector2Int Position, Vector2Int AreaSize)
         {
-            Vector4 CurrentArea = AreaManager.GetArea(Position, AreaSize);
-            for (int x = (int)CurrentArea.x; x <= CurrentArea.z; x++)
+            Vector4 CurrentArea = AreaController.GetArea(Position, AreaSize);
+            for (int x = (int) CurrentArea.x; x <= CurrentArea.z; x++)
             {
-                for (int y = (int)CurrentArea.y; y <= CurrentArea.w; y++)
+                for (int y = (int) CurrentArea.y; y <= CurrentArea.w; y++)
                 {
                     if (!IsCellEmpty(x, y)) return false;
                 }
             }
+
             return true;
         }
 
         public bool IsZoneEnableToPlace(Vector2Int Position, Vector2Int AreaSize)
         {
-            Vector4 CurrentArea = AreaManager.GetArea(Position, AreaSize);
-            for (int x = (int)CurrentArea.x; x <= CurrentArea.z; x++)
+            Vector4 CurrentArea = AreaController.GetArea(Position, AreaSize);
+            for (int x = (int) CurrentArea.x; x <= CurrentArea.z; x++)
             {
-                for (int y = (int)CurrentArea.y; y <= CurrentArea.w; y++)
+                for (int y = (int) CurrentArea.y; y <= CurrentArea.w; y++)
                 {
                     if (!IsCellEnableToPlace(x, y)) return false;
                 }
             }
+
             return true;
         }
 
@@ -677,7 +746,8 @@ namespace Managers
         public Cell IsOnField(Vector2Int currentId, Vector2Int step)
         {
             Vector2Int nextId = currentId + step;
-            if (nextId.x < 0 || nextId.y < 0 || nextId.x >= Field.Instance.FieldSize.x || nextId.y >= Field.Instance.FieldSize.y) return null;
+            if (nextId.x < 0 || nextId.y < 0 || nextId.x >= Field.Instance.FieldSize.x ||
+                nextId.y >= Field.Instance.FieldSize.y) return null;
             return Field.Instance.CellList[nextId.x][nextId.y];
         }
 
@@ -686,19 +756,19 @@ namespace Managers
             //_startFieldSize = newSize;
         }
 
-      /*  public IEnumerator GrowField()
-        {
-
-                if (_fieldSize.y < _growSizeMax.y)
-                {
-                    Debug.Log($"Grow_Started {Cell.AnimationTime}");
-                    StartCoroutine(AddLineDown());
-                    yield return StartCoroutine(AddLineRight());
-                    Debug.Log($"Grow_Ended {Cell.AnimationTime}");
-                }
-            
-
-        }*/
+        /*  public IEnumerator GrowField()
+          {
+  
+                  if (_fieldSize.y < _growSizeMax.y)
+                  {
+                      Debug.Log($"Grow_Started {Cell.AnimationTime}");
+                      StartCoroutine(AddLineDown());
+                      yield return StartCoroutine(AddLineRight());
+                      Debug.Log($"Grow_Ended {Cell.AnimationTime}");
+                  }
+              
+  
+          }*/
 
         public bool IsExistEmptyCell()
         {
@@ -709,6 +779,7 @@ namespace Managers
                     if (IsCellEnableToPlace(i, j)) return true;
                 }
             }
+
             return false;
         }
 
@@ -723,9 +794,8 @@ namespace Managers
 
         public void PlaceInRandomCell(bool isNeedQueue = true)
         {
-            if (isNeedQueue) CoroutineManager.Instance.AddCoroutine(IPlaceInRandomCell());
+            if (isNeedQueue) CoroutineQueueController.Instance.AddCoroutine(IPlaceInRandomCell());
             else StartCoroutine(IPlaceInRandomCell());
-
         }
 
         public void FreezeCell(Vector2Int id, Sprite sprite, bool isNeedEvent = true)
@@ -733,18 +803,18 @@ namespace Managers
             if (CellList[id.x][id.y].Figure == CellFigure.none)
             {
                 SetSubStateZone(id,
-                                Vector2Int.one,
-                                sprite,
-                                Color.black,
-                                CellSubState.freeze, false);
+                    Vector2Int.one,
+                    sprite,
+                    Color.black,
+                    CellSubState.freeze, false);
             }
             else
             {
                 ResetFigureWithPlaceSubState(id,
-                                             Vector2Int.one,
-                                             sprite,
-                                             Color.black,
-                                             CellSubState.freeze);
+                    Vector2Int.one,
+                    sprite,
+                    Color.black,
+                    CellSubState.freeze);
             }
 
             if (isNeedEvent) NetworkEventManager.RaiseEventFreezeCell(id);
@@ -755,18 +825,18 @@ namespace Managers
             if (CellList[id.x][id.y].Figure == CellFigure.none)
             {
                 SetSubStateZone(id,
-                                Vector2Int.one,
-                                ThemeManager.Instance.GetSprite(CellSubState.freeze),
-                                Color.black,
-                                CellSubState.freeze, false);
+                    Vector2Int.one,
+                    ThemeManager.Instance.GetSprite(CellSubState.freeze),
+                    Color.black,
+                    CellSubState.freeze, false);
             }
             else
             {
                 ResetFigureWithPlaceSubState(id,
-                                             Vector2Int.one,
-                                             ThemeManager.Instance.GetSprite(CellSubState.freeze),
-                                             Color.black,
-                                             CellSubState.freeze);
+                    Vector2Int.one,
+                    ThemeManager.Instance.GetSprite(CellSubState.freeze),
+                    Color.black,
+                    CellSubState.freeze);
             }
 
             if (isNeedEvent) NetworkEventManager.RaiseEventFreezeCell(id);
@@ -774,16 +844,18 @@ namespace Managers
 
         public void ResetSubStateWithPlaceFigure(Vector2Int Position, bool isNeedEvent = true)
         {
-            CellList[Position.x][Position.y].ResetSubStateWithPlace((CellFigure)PlayerManager.Instance.GetCurrentPlayer().SideId);
+            CellList[Position.x][Position.y]
+                .ResetSubStateWithPlace((CellFigure) PlayerManager.Instance.GetCurrentPlayer().SideId);
             if (isNeedEvent) NetworkEventManager.RaiseEventUnFreezeCell(Position);
         }
 
-        public void ResetFigureWithPlaceSubState(Vector2Int Position, Vector2Int AreaSize, Sprite sprite, Color color, CellSubState cellSubState)
+        public void ResetFigureWithPlaceSubState(Vector2Int Position, Vector2Int AreaSize, Sprite sprite, Color color,
+            CellSubState cellSubState)
         {
-            Vector4 CurrentArea = AreaManager.GetArea(Position, AreaSize);
-            for (int x = (int)CurrentArea.x; x <= CurrentArea.z; x++)
+            Vector4 CurrentArea = AreaController.GetArea(Position, AreaSize);
+            for (int x = (int) CurrentArea.x; x <= CurrentArea.z; x++)
             {
-                for (int y = (int)CurrentArea.y; y <= CurrentArea.w; y++)
+                for (int y = (int) CurrentArea.y; y <= CurrentArea.w; y++)
                 {
                     CellList[x][y].ResetFigureWithPlaceState(sprite, color, cellSubState);
                 }
@@ -792,19 +864,17 @@ namespace Managers
 
         IEnumerator IPlaceInRandomCell()
         {
-
-            Vector2Int id = AIManager.Instance.GenerateRandomPosition(FieldSize);
+            Vector2Int id = AIController.Instance.GenerateRandomPosition(FieldSize);
             Debug.Log(id);
             if (id != new Vector2Int(-1, -1))
             {
                 PlaceInCell(id, isQueue: false);
-                yield return StartCoroutine(CoroutineManager.Instance.IAwaitProcess(Cell.AnimationTime));
+                yield return StartCoroutine(CoroutineQueueController.Instance.IAwaitProcess(Cell.AnimationTime));
             }
             else
             {
                 yield return null;
             }
-
         }
     }
 }

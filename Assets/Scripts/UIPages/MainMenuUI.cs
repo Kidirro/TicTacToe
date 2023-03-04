@@ -1,10 +1,18 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Analytic;
+using Cards;
+using Cards.Interfaces;
+using Coin;
+using GameScene;
+using GameState;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using Managers;
+using Network;
+using Zenject;
 
 public class MainMenuUI : Singleton<MainMenuUI>
 {
@@ -30,6 +38,15 @@ public class MainMenuUI : Singleton<MainMenuUI>
 
     private bool _showPre = false;
 
+
+    private ICardList _cardList;
+
+    [Inject]
+    private void Construct(ICardList cardList)
+    {
+        _cardList = cardList;
+    }
+    
     private void Start()
     {
         QualitySettings.vSyncCount = 0;
@@ -48,12 +65,12 @@ public class MainMenuUI : Singleton<MainMenuUI>
 
     public void UpdateTexts()
     {
-        _moneyValue.text = CoinManager.AllCoins.ToString();
+        _moneyValue.text = CoinController.AllCoins.ToString();
     }
 
     public void OnAIButtonStart()
     {
-        AnalitycManager.Player_Start_Match(GameplayManager.GameType.SingleAI, CardManager.CardList);
+        AnalyticController.Player_Start_Match(GameplayManager.GameType.SingleAI, _cardList.GetCardList());
         GameplayManager.TypeGame = GameplayManager.GameType.SingleAI;
         GameSceneManager.Instance.BeginLoadGameScene(GameSceneManager.GameScene.Game);
         GameSceneManager.Instance.BeginTransaction();
@@ -62,7 +79,7 @@ public class MainMenuUI : Singleton<MainMenuUI>
 
     public void OnHumanButtonStart()
     {
-        AnalitycManager.Player_Start_Match(GameplayManager.GameType.SingleHuman, CardManager.CardList);
+        AnalyticController.Player_Start_Match(GameplayManager.GameType.SingleHuman, _cardList.GetCardList());
         GameplayManager.TypeGame = GameplayManager.GameType.SingleHuman;
         GameSceneManager.Instance.BeginLoadGameScene(GameSceneManager.GameScene.Game);
         GameSceneManager.Instance.BeginTransaction();
@@ -97,12 +114,12 @@ public class MainMenuUI : Singleton<MainMenuUI>
 
     public void DEV_SetCoinPerWin(string text)
     {
-        CoinManager.CoinPerWin = int.Parse(text);
+        CoinController.coinPerWin = int.Parse(text);
     }
 
     public void DEV_SetCoinPerCard(string text)
     {
-        CoinManager.CoinPerUnlock = int.Parse(text);
+        CoinController.coinPerUnlock = int.Parse(text);
     }
 
     public void PlayButtonClick()

@@ -1,9 +1,20 @@
 using System.Collections;
 using System.Collections.Generic;
+using Analytic;
+using Cards;
+using Cards.Interfaces;
+using Coroutine;
+using GameScene;
+using GameState;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using Managers;
+using Network;
+using Players;
+using Score;
+using Theme;
+using Zenject;
 
 public class InGameUI : Singleton<InGameUI>
 {
@@ -111,6 +122,16 @@ public class InGameUI : Singleton<InGameUI>
     [SerializeField]
     private Image _paperNewTurnPlayerImage;
 
+
+
+    private ICardList _cardList;
+    
+    [Inject]
+    private void Construct(ICardList cardList)
+    {
+        _cardList = cardList;
+    }
+    
     private void UpdateReplyState()
     {
         _pauseMenuReplyBTN.SetActive(!GameplayManager.IsOnline);
@@ -124,7 +145,7 @@ public class InGameUI : Singleton<InGameUI>
         _animatorNewTurn.SetTrigger("NewTurn");
         _timerCoroutine = StartCoroutine(ITimerProcess());
         ;
-        _newTurnBTN.SetActive(SlotManager.Instance.IsCurrentPlayerOnSlot);
+        _newTurnBTN.SetActive(CardPoolController.Instance.IsCurrentPlayerOnSlot);
         Debug.Log($"Current side : {_newTurnBTN.activeSelf}");
     }
 
@@ -166,8 +187,8 @@ public class InGameUI : Singleton<InGameUI>
     {
         if (!GameplayManager.IsCurrentGameplayState(GameplayManager.GameplayState.GameOver))
         {
-            AnalitycManager.Player_Lose_Match(GameplayManager.TypeGame, CardManager.CardList);
-            AnalitycManager.Player_Leave_Match(GameplayManager.TypeGame, CardManager.CardList);
+            AnalyticController.Player_Lose_Match(GameplayManager.TypeGame, _cardList.GetCardList());
+            AnalyticController.Player_Leave_Match(GameplayManager.TypeGame, _cardList.GetCardList());
         }
 
         if (GameplayManager.IsOnline) RoomManager.LeaveRoom(true);
@@ -324,13 +345,13 @@ public class InGameUI : Singleton<InGameUI>
         }
 
 
-        yield return StartCoroutine(CoroutineManager.Instance.IAwaitProcess((_roundOverPanel.FrameCount)));
+        yield return StartCoroutine(CoroutineQueueController.Instance.IAwaitProcess((_roundOverPanel.FrameCount)));
         yield return new WaitForSeconds(0.5f);
         if (currentPoint != null)
             yield return StartCoroutine(currentPoint.ScaleWithLerp(Vector2.zero, Vector2.one, 20));
         yield return new WaitForSeconds(1f);
         _roundOverPanel.FadeOut();
-        yield return StartCoroutine(CoroutineManager.Instance.IAwaitProcess((_roundOverPanel.FrameCount)));
+        yield return StartCoroutine(CoroutineQueueController.Instance.IAwaitProcess((_roundOverPanel.FrameCount)));
     }
 
     public IEnumerator IShowNewTurnAnimation(CellFigure cellFigure)
@@ -338,9 +359,9 @@ public class InGameUI : Singleton<InGameUI>
         _paperNewTurnPlayerImage.sprite = ThemeManager.Instance.GetSprite(cellFigure);
         _paperNewTurnAnimation.FadeIn();
         Debug.Log("BegunAnim");
-        yield return StartCoroutine(CoroutineManager.Instance.IAwaitProcess((_paperNewTurnAnimation.FrameCount)));
+        yield return StartCoroutine(CoroutineQueueController.Instance.IAwaitProcess((_paperNewTurnAnimation.FrameCount)));
         yield return new WaitForSeconds(0.5f);
         _paperNewTurnAnimation.FadeOut();
-        yield return StartCoroutine(CoroutineManager.Instance.IAwaitProcess((_paperNewTurnAnimation.FrameCount)));
+        yield return StartCoroutine(CoroutineQueueController.Instance.IAwaitProcess((_paperNewTurnAnimation.FrameCount)));
     }
 }

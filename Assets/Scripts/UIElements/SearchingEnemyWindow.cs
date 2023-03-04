@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
 using System;
+using Analytic;
 using Managers;
 
 public class SearchingEnemyWindow : MonoBehaviour
@@ -17,14 +18,14 @@ public class SearchingEnemyWindow : MonoBehaviour
     
     public void StartLoadingProcess()
     {
-        AnalitycManager.Player_Try_Find_Match();
+        AnalyticController.Player_Try_Find_Match();
         StartCoroutine(ILoadingProcess());
     }
 
     public void StopLoadingProcess()
     {
         StopAllCoroutines();
-        AnalitycManager.Player_Cancel_Find_Match(TimePass);
+        AnalyticController.Player_Cancel_Find_Match(TimePass);
     }
 
     public IEnumerator ILoadingProcess()

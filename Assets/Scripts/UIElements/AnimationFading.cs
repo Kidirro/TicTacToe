@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Coroutine;
 using Managers;
 using UnityEngine;
 
@@ -43,7 +44,7 @@ public class AnimationFading : MonoBehaviour
 
     IEnumerator IDisable()
     {
-        yield return CoroutineManager.Instance.IAwaitProcess(FrameCount);
+        yield return CoroutineQueueController.Instance.IAwaitProcess(FrameCount);
         this.gameObject.SetActive(false);
     }
 

@@ -1,9 +1,10 @@
 using System.Collections;
 using System.Collections.Generic;
+using Coroutine;
 using UnityEngine;
 using UnityEngine.UI;
 using Managers;
-
+using Theme;
 
 
 public class Cell : MonoBehaviour
@@ -83,7 +84,7 @@ public class Cell : MonoBehaviour
             case CellFigure.none:
                 if (isNeedPlace)
                 {
-                    if (isQueue) CoroutineManager.Instance.AddCoroutine(IFigureFillProcess((CellFigure)s, true));
+                    if (isQueue) CoroutineQueueController.Instance.AddCoroutine(IFigureFillProcess((CellFigure)s, true));
                     else StartCoroutine(IFigureFillProcess((CellFigure)s, true));
                 }
                 break;
@@ -92,7 +93,7 @@ public class Cell : MonoBehaviour
                 _image.fillOrigin = 0; 
                 if (isNeedPlace)
                 {
-                    if (isQueue) CoroutineManager.Instance.AddCoroutine(IFigureFillProcess((CellFigure)s, false));
+                    if (isQueue) CoroutineQueueController.Instance.AddCoroutine(IFigureFillProcess((CellFigure)s, false));
                     else StartCoroutine(IFigureFillProcess((CellFigure)s, false));
                 }
                 break;
@@ -101,7 +102,7 @@ public class Cell : MonoBehaviour
                 _image.fillOrigin = 0;
                 if (isNeedPlace)
                 {
-                    if (isQueue) CoroutineManager.Instance.AddCoroutine(IFigureFillProcess((CellFigure)s, false));
+                    if (isQueue) CoroutineQueueController.Instance.AddCoroutine(IFigureFillProcess((CellFigure)s, false));
                     else StartCoroutine(IFigureFillProcess((CellFigure)s, false));
                 }
                 break;
@@ -117,7 +118,7 @@ public class Cell : MonoBehaviour
             case CellFigure.none:
                 if (isNeedPlace)
                 {
-                    if (isQueue) CoroutineManager.Instance.AddCoroutine(IFigureFillProcess((CellFigure)s, true));
+                    if (isQueue) CoroutineQueueController.Instance.AddCoroutine(IFigureFillProcess((CellFigure)s, true));
                     else StartCoroutine(IFigureFillProcess((CellFigure)s, true));
                 }
                 break;
@@ -126,7 +127,7 @@ public class Cell : MonoBehaviour
                 _image.fillOrigin = 0;
                 if (isNeedPlace)
                 {
-                    if (isQueue) CoroutineManager.Instance.AddCoroutine(IFigureFillProcess((CellFigure)s, false));
+                    if (isQueue) CoroutineQueueController.Instance.AddCoroutine(IFigureFillProcess((CellFigure)s, false));
                     else StartCoroutine(IFigureFillProcess((CellFigure)s, false));
                 }
                 break;
@@ -135,7 +136,7 @@ public class Cell : MonoBehaviour
                 _image.fillOrigin = 0;
                 if (isNeedPlace)
                 {
-                    if (isQueue) CoroutineManager.Instance.AddCoroutine(IFigureFillProcess((CellFigure)s, false));
+                    if (isQueue) CoroutineQueueController.Instance.AddCoroutine(IFigureFillProcess((CellFigure)s, false));
                     else StartCoroutine(IFigureFillProcess((CellFigure)s, false));
                 }
                 break;
@@ -172,7 +173,7 @@ public class Cell : MonoBehaviour
     {
         if (_subState == cellSubState && _subImage.sprite == sprite) return;
         _subState = cellSubState;
-        if (isQueue) CoroutineManager.Instance.AddCoroutine(ISubStateFillProcess(sprite, color, false));
+        if (isQueue) CoroutineQueueController.Instance.AddCoroutine(ISubStateFillProcess(sprite, color, false));
         else StartCoroutine(ISubStateFillProcess(sprite, color, false));
     }
 
@@ -181,7 +182,7 @@ public class Cell : MonoBehaviour
         _subState = CellSubState.none;
         Color color = Color.white;
         color.a = 0;
-        if (isQueue) CoroutineManager.Instance.AddCoroutine(ISubStateFillProcess(null, color, true));
+        if (isQueue) CoroutineQueueController.Instance.AddCoroutine(ISubStateFillProcess(null, color, true));
         else StartCoroutine(ISubStateFillProcess(null, color, true));
     }
 
