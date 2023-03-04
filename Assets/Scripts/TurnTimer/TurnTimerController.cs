@@ -1,23 +1,24 @@
 using System.Collections;
 using GameState;
 using Network;
+using TurnTimer.Interfaces;
 using UnityEngine;
 
-namespace Managers
+namespace TurnTimer
 {
 
-    public class TurnTimerManager : Singleton<TurnTimerManager>
+    public class TurnTimerController : MonoBehaviour, ITurnTimerService
     {
-        public const float PlayerTurnTime = 30f;
-        public const float BotTurnTime = 10f;
+        private const float PLAYER_TURN_TIMssE = 30f;
+        private const float BOT_TURN_TIME = 10f;
 
         private float _timeLeft = 0f;
 
         private IEnumerator _timerCoroutine;
 
-        public float TimeLeft
+        public float GetTimeLeft()
         {
-            get { return _timeLeft; }
+            return _timeLeft;
         }
 
         public void StartNewTurnTimer(float TurnTime)
@@ -37,10 +38,10 @@ namespace Managers
             switch (player)
             {
                 case PlayerType.AI:
-                    _timeLeft = BotTurnTime;
+                    _timeLeft = BOT_TURN_TIME;
                     break;
                 case PlayerType.Human:
-                    _timeLeft = PlayerTurnTime;
+                    _timeLeft = PLAYER_TURN_TIME;
                     break;
             }
             _timerCoroutine = ITurnTimer(isNeedAddToQueue);

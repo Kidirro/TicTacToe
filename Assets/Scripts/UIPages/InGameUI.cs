@@ -14,6 +14,7 @@ using Network;
 using Players;
 using Score;
 using Theme;
+using TurnTimer;
 using Zenject;
 
 public class InGameUI : Singleton<InGameUI>
@@ -266,16 +267,16 @@ public class InGameUI : Singleton<InGameUI>
     {
         _timerPanel.SetActive(false);
 
-        while (_timerEnableTime < TurnTimerManager.Instance.TimeLeft) yield return null;
+        while (_timerEnableTime < TurnTimerController.Instance.TimeLeft) yield return null;
 
         _timerFilledImg.fillAmount = 1;
         _timerPanel.SetActive(true);
 
-        while (_timerStartAnimationTime < TurnTimerManager.Instance.TimeLeft) yield return null;
+        while (_timerStartAnimationTime < TurnTimerController.Instance.TimeLeft) yield return null;
 
-        while (TurnTimerManager.Instance.TimeLeft >= 0)
+        while (TurnTimerController.Instance.TimeLeft >= 0)
         {
-            _timerFilledImg.fillAmount = TurnTimerManager.Instance.TimeLeft / _timerStartAnimationTime;
+            _timerFilledImg.fillAmount = TurnTimerController.Instance.TimeLeft / _timerStartAnimationTime;
             yield return new WaitForSecondsRealtime(0.1f);
         }
     }

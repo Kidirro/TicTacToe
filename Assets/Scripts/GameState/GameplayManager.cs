@@ -16,6 +16,7 @@ using Network;
 using Players;
 using Score;
 using Theme;
+using TurnTimer;
 using UnityEngine;
 using Zenject;
 
@@ -123,7 +124,7 @@ namespace GameState
                         CoroutineQueueController.Instance.AddCoroutine(EffectManager.Instance.UpdateEffectTurn());
                     }
 
-                    TurnTimerManager.Instance.StartNewTurnTimer(PlayerManager.Instance.GetCurrentPlayer().EntityType,
+                    TurnTimerController.Instance.StartNewTurnTimer(PlayerManager.Instance.GetCurrentPlayer().EntityType,
                         !IsOnline || PlayerManager.Instance.GetCurrentPlayer().SideId ==
                         Photon.Pun.PhotonNetwork.LocalPlayer.ActorNumber);
 
@@ -189,7 +190,7 @@ namespace GameState
 
                     break;
                 case GameplayState.RoundOver:
-                    TurnTimerManager.Instance.StopTimer();
+                    TurnTimerController.Instance.StopTimer();
                     InGameUI.Instance.StopTimer();
                     CoroutineQueueController.Instance.ClearQueue();
                     ScoreManager.Instance.AddRoundWinner(ScoreManager.Instance.GetRoundWinner());
@@ -230,7 +231,7 @@ namespace GameState
                     ScoreManager.Instance.ClearAllScore();
                     CardPoolController.Instance.UpdateCardPosition(false);
 
-                    TurnTimerManager.Instance.StartNewTurnTimer(PlayerManager.Instance.GetCurrentPlayer().EntityType,
+                    TurnTimerController.Instance.StartNewTurnTimer(PlayerManager.Instance.GetCurrentPlayer().EntityType,
                         !IsOnline || PlayerManager.Instance.GetCurrentPlayer().SideId ==
                         Photon.Pun.PhotonNetwork.LocalPlayer.ActorNumber);
 

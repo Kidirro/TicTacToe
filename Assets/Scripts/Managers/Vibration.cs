@@ -157,7 +157,7 @@ public static class Vibration
             }
 #elif UNITY_IOS
         Handheld.Vibrate();
-#else
+#elif !UNITY_WEBGL
         Handheld.Vibrate ();
 #endif
         }
@@ -203,9 +203,11 @@ public static class Vibration
 
     public static void Vibrate ()
     {
+        #if !UNITY_WEBGL
         if ( Application.isMobilePlatform ) {
             Handheld.Vibrate ();
         }
+#endif
     }
 
     public static int AndroidVersion {
