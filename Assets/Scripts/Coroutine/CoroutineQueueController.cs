@@ -11,8 +11,8 @@ namespace Coroutine
 
         private readonly Queue<IEnumerator> _coroutineQueue = new();
 
-        public static bool isQueueEmpty = true;
-
+        private bool _isQueueEmpty = true;
+        
         void Start()
         {
             StartCoroutine(CoroutineCoordinator());
@@ -24,21 +24,20 @@ namespace Coroutine
             {
                 while (_coroutineQueue.Count > 0)
                 {
-                    isQueueEmpty = false;
-                    Debug.Log("BegunAnim");
+                    _isQueueEmpty = false;
                     yield return StartCoroutine(_coroutineQueue.Dequeue());
 
                 }
                 yield return new WaitForEndOfFrame();
-                isQueueEmpty = true;
+                _isQueueEmpty = true;
             }
         }
 
         public void AddCoroutine(IEnumerator coroutine)
         {
-            isQueueEmpty = false;
+            Debug.Log("add coroutine");
+            _isQueueEmpty = false;
             _coroutineQueue.Enqueue(coroutine);
-            Debug.Log($"BegunAnim {_coroutineQueue.Count}");
         }
 
         public void AddAwaitTime(float time)
@@ -59,6 +58,11 @@ namespace Coroutine
         public void ClearQueue()
         {
             _coroutineQueue.Clear();
+        }
+
+        public bool GetIsQueueEmpty()
+        {
+            return _isQueueEmpty;
         }
     }
 }

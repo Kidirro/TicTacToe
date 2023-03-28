@@ -1,51 +1,66 @@
-using System;
 using System.Collections;
-using System.Collections.Generic;
-using Coroutine;
-using Managers;
+using Coroutine.Interfaces;
 using UnityEngine;
+using Zenject;
 
-[RequireComponent(typeof(Animator))]
-public class AnimationFading : MonoBehaviour
+namespace UIElements
 {
-    private Animator _animator;
+    [RequireComponent(typeof(Animator))]
+    public class AnimationFading : MonoBehaviour
+    {
+        private Animator _animator;
 
-    [SerializeField] private float _frameCount = 1;
+        [SerializeField] private float _frameCount= 1;
 
-    public float FrameCount 
+        #region Dependency
+
+        private ICoroutineAwaitService _coroutineAwaitService;
+        private static readonly int fadeIn = Animator.StringToHash("FadeIn");
+        private static readonly int fadeOut = Animator.StringToHash("FadeOut");
+
+        [Inject]
+        private void Construct(ICoroutineAwaitService coroutineAwaitService)
+        {
+            _coroutineAwaitService = coroutineAwaitService;
+        }
+
+        #endregion
+ 
+
+        public float FrameCount 
         
-    {
-        get => _frameCount;
-    }
+        {
+            get => _frameCount;
+        }
 
-    private void Awake()
-    {
-        _animator = GetComponent<Animator>();
-    }
+        private void Awake()
+        {
+            _animator = GetComponent<Animator>();
+        }
 
-    private void OnEnable()
-    {
-        FadeIn();
-    }
+        private void OnEnable()
+        {
+            FadeIn();
+        }
 
-    public void FadeIn()
-    {
-        this.gameObject.SetActive(true);
-        _animator.SetTrigger("FadeIn");
-        StopAllCoroutines();
-    }
+        public void FadeIn()
+        {
+            this.gameObject.SetActive(true);
+            _animator.SetTrigger(fadeIn);
+            StopAllCoroutines();
+        }
 
-    public void FadeOut()
-    {
-        _animator.SetTrigger("FadeOut");
-        Debug.Log("StartFadeOut");
-        StartCoroutine(IDisable());
-    }
+        public void FadeOut()
+        {
+            _animator.SetTrigger(fadeOut);
+            Debug.Log("StartFadeOut");
+            StartCoroutine(IDisable());
+        }
 
-    IEnumerator IDisable()
-    {
-        yield return CoroutineQueueController.Instance.IAwaitProcess(FrameCount);
-        this.gameObject.SetActive(false);
+        IEnumerator IDisable()
+        {
+            yield return _coroutineAwaitService.AwaitTime(FrameCount);
+            this.gameObject.SetActive(false);
+        }
     }
-
 }

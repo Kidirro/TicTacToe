@@ -1,36 +1,26 @@
-using GameState;
-using Managers;
+using System;
+using GameState.Interfaces;
+using Network.Interfaces;
 using Photon.Pun;
 using Photon.Realtime;
 using Players.Interfaces;
-using Score;
+using Score.Interfaces;
 using UnityEngine;
 using Zenject;
 using Hashtable = ExitGames.Client.Photon.Hashtable;
 
 namespace Network
 {
-    public class RoomManager : MonoBehaviourPunCallbacks
+    public class RoomManager : MonoBehaviourPunCallbacks, IRoomService
     {
-
-        #region Interfaces
-
-        private IPlayerService _playerService;
-
-        #endregion
-    
-        [Inject]
-        private void Construct(IPlayerService playerService)
+        private Action<bool,int> _onPlayerLeaveAction;
+        
+        public bool GetIsOwnRoom()
         {
-            _playerService = playerService;
-        }
-    
-        public static bool IsOwnRoom
-        {
-            get => PhotonNetwork.IsMasterClient;
+            return PhotonNetwork.IsMasterClient;
         }
 
-        public static int GetCurrentPlayerSide()
+        public int GetCurrentPlayerSide()
         {
             Debug.Log("Current Player side" + PhotonNetwork.LocalPlayer.ActorNumber);
             return PhotonNetwork.LocalPlayer.ActorNumber;
@@ -39,9 +29,7 @@ namespace Network
         public override void OnPlayerLeftRoom(Player otherPlayer)
         {
             base.OnPlayerLeftRoom(otherPlayer);
-            if (GameplayManager.CurrentGameplayState == GameplayManager.GameplayState.GameOver) return;
-            if (otherPlayer.CustomProperties["isPreExit"] == null || (bool)otherPlayer.CustomProperties["isPreExit"]) ScoreManager.Instance.RemovePlayer(otherPlayer.ActorNumber);
-            GameplayManager.Instance.SetGamePlayStateQueue(GameplayManager.GameplayState.GameOver);
+            _onPlayerLeaveAction?.Invoke(otherPlayer.CustomProperties["isPreExit"] == null || (bool) otherPlayer.CustomProperties["isPreExit"],otherPlayer.ActorNumber);
         }
 
         public void LeaveRoom(bool isPreExit)
@@ -55,10 +43,9 @@ namespace Network
             PhotonNetwork.LeaveRoom();
         }
 
-        public string GetPlayerInfo()
+        public void SetPlayerLeaveAction(Action<bool,int> action)
         {
-            return
-                $"ActorNumber:{Photon.Pun.PhotonNetwork.LocalPlayer.ActorNumber}, PlayerSide:{_playerService.GetPlayers()[Photon.Pun.PhotonNetwork.LocalPlayer.ActorNumber - 1].SideId}";
+            _onPlayerLeaveAction = action;
         }
     }
 }

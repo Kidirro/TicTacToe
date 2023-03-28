@@ -24,19 +24,19 @@ namespace Theme
         [SerializeField]
         private Sprite _freezeSprite;
 
-        private void Start()
+        private void Awake()
         {
             Initialization();
         }
 
         private void Initialization()
         {
-            _cellSprites.Add(CellFigure.none, _blankSprite);
-            _cellSprites.Add(CellFigure.p1, _p1Sprite);
-            _cellSprites.Add(CellFigure.p2, _p2Sprite);
+            _cellSprites.Add(CellFigure.None, _blankSprite);
+            _cellSprites.Add(CellFigure.P1, _p1Sprite);
+            _cellSprites.Add(CellFigure.P2, _p2Sprite);
 
-            _subStateSprites.Add(CellSubState.freeze, _freezeSprite);
-            _subStateSprites.Add(CellSubState.none, _blankSprite);
+            _subStateSprites.Add(CellSubState.Freeze, _freezeSprite);
+            _subStateSprites.Add(CellSubState.None, _blankSprite);
         }
 
         public Sprite GetSprite(CellFigure i)

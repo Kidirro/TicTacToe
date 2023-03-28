@@ -1,4 +1,5 @@
 using Cards;
+using Cards.CustomType;
 using History;
 using History.Interfaces;
 using UnityEngine;
@@ -11,6 +12,7 @@ public class HistoryCell : MonoBehaviour
 
     public CardInfo Card;
 
+    [SerializeField]
     private Image _cardImage;
 
     #region Interfaces
@@ -30,6 +32,7 @@ public class HistoryCell : MonoBehaviour
         _player = player;
         Card = info;
 
+        Debug.Log($"Current player : {player}, Current image {info.CardImageP2}");
         _cardImage.sprite = (player.SideId == 1) ? info.CardImageP1 : info.CardImageP2;
     }
 

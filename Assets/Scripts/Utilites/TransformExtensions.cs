@@ -42,11 +42,11 @@ public static class TransformExtensions
         Vector3 finalPosition,
         int countFrame, Action callBack = null)
     {
-        float percentage = 0;
         int frame = 0;
         while (frame <= countFrame)
         {
-            percentage = (float) frame / (float) countFrame;
+            var percentage = (float) frame / (float) countFrame;
+            Debug.Log($"Movement. Per: {percentage}, Lerp: {Vector2.Lerp(initalPosition, finalPosition, percentage)}");
             transform.localPosition = Vector2.Lerp(initalPosition, finalPosition, percentage);
             frame += 1;
             yield return null;

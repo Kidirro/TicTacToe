@@ -6,6 +6,7 @@ namespace Coroutine.Interfaces
     {
         public void AddCoroutine(IEnumerator coroutine);
         public void ClearQueue();
+        public bool GetIsQueueEmpty();
 
     }
 }

@@ -1,3 +1,4 @@
+using ScreenScaler.Interfaces;
 using UnityEngine;
 
 namespace ScreenScaler

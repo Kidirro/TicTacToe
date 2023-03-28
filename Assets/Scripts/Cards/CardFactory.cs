@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using Cards.CustomType;
 using Cards.Interfaces;
-using Mana;
 using UnityEngine;
 using Zenject;
 
@@ -10,7 +9,6 @@ namespace Cards
     public class CardFactory : ICardFactory
     {
         private CardModel _cardModelPrefab;
-        private readonly ICardList _cardList;
         private const string CARD_PREFAB_PATH = "Card";
 
         private readonly DiContainer _diContainer;
@@ -20,6 +18,10 @@ namespace Cards
             _cardModelPrefab = Resources.Load<CardModel>(CARD_PREFAB_PATH);
         }
 
+        #region Dependecy
+
+        private readonly ICardList _cardList;
+
         public CardFactory(DiContainer diContainer, ICardList cardList)
         {
             _diContainer = diContainer;
@@ -27,7 +29,9 @@ namespace Cards
             Load();
         }
 
-        public List<CardModel> CreateDeck()
+        #endregion
+
+        public List<CardModel> CreateDeck(int side)
         {
             List<CardModel> newDeck = new List<CardModel>();
             foreach (CardInfo cardInfo in _cardList.GetCardList())
@@ -37,7 +41,7 @@ namespace Cards
                     CardModel cardModel = _diContainer.InstantiatePrefabForComponent<CardModel>(_cardModelPrefab);
                     //card.name = card.Info.CardName;
                     Debug.Log(cardModel);
-                    cardModel.SetCardInfo(cardInfo);
+                    cardModel.SetCardInfo(cardInfo, side);
                     cardModel.Info.CardBonusManacost = 0;
                     cardModel.gameObject.SetActive(false);
                     //card.SetTransformParent(transform);

@@ -1,16 +1,20 @@
 using System;
 using System.Collections.Generic;
+using Analytic.Interfaces;
 using Cards;
-using GameState;
-using Managers;
+using Cards.CustomType;
+using GameTypeService.Enums;
 using UnityEngine;
 using Object = System.Object;
 
 namespace Analytic
 {
-    public static class AnalyticController
+    public class AnalyticController : IMatchEventsAnalyticService, ICollectionEventsAnalyticService,
+        IStoreEventsAnalyticService, IAdEventsAnalyticService, ITutorialEventsEventsAnalyticService
     {
-        public static void Player_Start_Match(GameplayManager.GameType gameType, List<CardInfo> cardList)
+        #region MatchEvents
+
+        public void Player_Start_Match(GameType gameType, List<CardInfo> cardList)
         {
             try
             {
@@ -35,7 +39,7 @@ namespace Analytic
             }
         }
 
-        public static void Player_Win_Match(GameplayManager.GameType gameType, List<CardInfo> cardList)
+        public void Player_Win_Match(GameType gameType, List<CardInfo> cardList)
         {
             try
             {
@@ -60,7 +64,7 @@ namespace Analytic
             }
         }
 
-        public static void Player_Lose_Match(GameplayManager.GameType gameType, List<CardInfo> cardList)
+        public void Player_Lose_Match(GameType gameType, List<CardInfo> cardList)
         {
             try
             {
@@ -85,7 +89,7 @@ namespace Analytic
             }
         }
 
-        public static void Player_Leave_Match(GameplayManager.GameType gameType, List<CardInfo> cardList)
+        public void Player_Leave_Match(GameType gameType, List<CardInfo> cardList)
         {
             try
             {
@@ -110,7 +114,7 @@ namespace Analytic
             }
         }
 
-        public static void Player_Draw_Match(GameplayManager.GameType gameType, List<CardInfo> cardList)
+        public void Player_Draw_Match(GameType gameType, List<CardInfo> cardList)
         {
             try
             {
@@ -135,165 +139,7 @@ namespace Analytic
             }
         }
 
-        public static void Player_Open_Collection()
-        {
-            try
-            {
-                Debug.Log(
-                    $"Player_Open_Collection");
-            }
-            catch (Exception e)
-            {
-                Debug.Log(e);
-            }
-
-            try
-            {
-                AppMetrica.Instance.ReportEvent("Player_Open_Collection");
-            }
-            catch (Exception e)
-            {
-                Debug.Log(e);
-            }
-        }
-
-        public static void Player_Open_Deckbuild()
-        {
-            try
-            {
-                Debug.Log(
-                    $"Player_Open_Deckbuild");
-            }
-            catch (Exception e)
-            {
-                Debug.Log(e);
-            }
-
-            try
-            {
-                AppMetrica.Instance.ReportEvent("Player_Open_Deckbuild");
-            }
-            catch (Exception e)
-            {
-                Debug.Log(e);
-            }
-        }
-
-        public static void Player_Open_Store()
-        {
-            try
-            {
-                Debug.Log(
-                    $"Player_Open_Store");
-            }
-            catch (Exception e)
-            {
-                Debug.Log(e);
-            }
-
-            try
-            {
-                AppMetrica.Instance.ReportEvent("Player_Open_Store");
-            }
-            catch (Exception e)
-            {
-                Debug.Log(e);
-            }
-        }
-
-        public static void Player_Try_Purchase(string budleId)
-        {
-            try
-            {
-                Debug.Log(
-                    $"Player_Try_Purchase. Bundle {budleId}");
-            }
-            catch (Exception e)
-            {
-                Debug.Log(e);
-            }
-
-            try
-            {
-                var dict = new Dictionary<string, object>();
-                dict["Bundle"] = budleId;
-                AppMetrica.Instance.ReportEvent("Player_Try_Purchase", dict);
-            }
-            catch (Exception e)
-            {
-                Debug.Log(e);
-            }
-        }
-
-        public static void Player_Bought_Bundle(string budleId)
-        {
-            try
-            {
-                Debug.Log(
-                    $"Player_Bought_Bundle. Bundle {budleId}");
-            }
-            catch (Exception e)
-            {
-                Debug.Log(e);
-            }
-
-            try
-            {
-                var dict = new Dictionary<string, object>();
-                dict["Bundle"] = budleId;
-                AppMetrica.Instance.ReportEvent("Player_Bought_Bundle", dict);
-            }
-            catch (Exception e)
-            {
-                Debug.Log(e);
-            }
-        }
-
-        public static void Player_Try_Watch_Add()
-        {
-            try
-            {
-                Debug.Log(
-                    $"Player_Try_Watch_Add");
-            }
-            catch (Exception e)
-            {
-                Debug.Log(e);
-            }
-
-            try
-            {
-                AppMetrica.Instance.ReportEvent("Player_Try_Watch_Add");
-            }
-            catch (Exception e)
-            {
-                Debug.Log(e);
-            }
-        }
-
-        public static void Player_Watched_Add()
-        {
-            try
-            {
-                Debug.Log(
-                    $"Player_Watched_Add");
-            }
-            catch (Exception e)
-            {
-                Debug.Log(e);
-            }
-
-            try
-            {
-                AppMetrica.Instance.ReportEvent("Player_Watched_Add");
-            }
-            catch (Exception e)
-            {
-                Debug.Log(e);
-            }
-        }
-
-        public static void Player_Try_Find_Match()
+        public void Player_Try_Find_Match()
         {
             try
             {
@@ -315,7 +161,7 @@ namespace Analytic
             }
         }
 
-        public static void Player_Found_Match(float time)
+        public void Player_Found_Match(float time)
         {
             try
             {
@@ -339,7 +185,7 @@ namespace Analytic
             }
         }
 
-        public static void Player_Cancel_Find_Match(float time)
+        public void Player_Cancel_Find_Match(float time)
         {
             try
             {
@@ -363,7 +209,129 @@ namespace Analytic
             }
         }
 
-        public static void Player_Bought_Random_Card()
+        #endregion
+
+        #region CollectionEvents
+
+        public void Player_Open_Collection()
+        {
+            try
+            {
+                Debug.Log(
+                    $"Player_Open_Collection");
+            }
+            catch (Exception e)
+            {
+                Debug.Log(e);
+            }
+
+            try
+            {
+                AppMetrica.Instance.ReportEvent("Player_Open_Collection");
+            }
+            catch (Exception e)
+            {
+                Debug.Log(e);
+            }
+        }
+
+        public void Player_Open_Deckbuild()
+        {
+            try
+            {
+                Debug.Log(
+                    $"Player_Open_Deckbuild");
+            }
+            catch (Exception e)
+            {
+                Debug.Log(e);
+            }
+
+            try
+            {
+                AppMetrica.Instance.ReportEvent("Player_Open_Deckbuild");
+            }
+            catch (Exception e)
+            {
+                Debug.Log(e);
+            }
+        }
+
+        #endregion
+
+        #region SoreEvents
+
+        public void Player_Open_Store()
+        {
+            try
+            {
+                Debug.Log(
+                    $"Player_Open_Store");
+            }
+            catch (Exception e)
+            {
+                Debug.Log(e);
+            }
+
+            try
+            {
+                AppMetrica.Instance.ReportEvent("Player_Open_Store");
+            }
+            catch (Exception e)
+            {
+                Debug.Log(e);
+            }
+        }
+
+        public void Player_Try_Purchase(string bundleId)
+        {
+            try
+            {
+                Debug.Log(
+                    $"Player_Try_Purchase. Bundle {bundleId}");
+            }
+            catch (Exception e)
+            {
+                Debug.Log(e);
+            }
+
+            try
+            {
+                var dict = new Dictionary<string, object>();
+                dict["Bundle"] = bundleId;
+                AppMetrica.Instance.ReportEvent("Player_Try_Purchase", dict);
+            }
+            catch (Exception e)
+            {
+                Debug.Log(e);
+            }
+        }
+
+        public void Player_Bought_Bundle(string bundleId)
+        {
+            try
+            {
+                Debug.Log(
+                    $"Player_Bought_Bundle. Bundle {bundleId}");
+            }
+            catch (Exception e)
+            {
+                Debug.Log(e);
+            }
+
+            try
+            {
+                var dict = new Dictionary<string, object>();
+                dict["Bundle"] = bundleId;
+                AppMetrica.Instance.ReportEvent("Player_Bought_Bundle", dict);
+            }
+            catch (Exception e)
+            {
+                Debug.Log(e);
+            }
+        }
+
+        public void Player_Bought_Random_Card()
         {
             try
             {
@@ -385,7 +353,59 @@ namespace Analytic
             }
         }
 
-        public static void Player_Start_Tutorial()
+        #endregion
+
+        #region AdEvents
+
+        public void Player_Try_Watch_Add()
+        {
+            try
+            {
+                Debug.Log(
+                    $"Player_Try_Watch_Add");
+            }
+            catch (Exception e)
+            {
+                Debug.Log(e);
+            }
+
+            try
+            {
+                AppMetrica.Instance.ReportEvent("Player_Try_Watch_Add");
+            }
+            catch (Exception e)
+            {
+                Debug.Log(e);
+            }
+        }
+
+        public void Player_Watched_Add()
+        {
+            try
+            {
+                Debug.Log(
+                    $"Player_Watched_Add");
+            }
+            catch (Exception e)
+            {
+                Debug.Log(e);
+            }
+
+            try
+            {
+                AppMetrica.Instance.ReportEvent("Player_Watched_Add");
+            }
+            catch (Exception e)
+            {
+                Debug.Log(e);
+            }
+        }
+
+        #endregion
+
+        #region TutorialEvents
+
+        public void Player_Start_Tutorial()
         {
             try
             {
@@ -407,7 +427,7 @@ namespace Analytic
             }
         }
 
-        public static void Player_Complete_Tutorial()
+        public void Player_Complete_Tutorial()
         {
             try
             {
@@ -429,7 +449,8 @@ namespace Analytic
             }
         }
 
-
+        #endregion
+        
         private static Dictionary<string, object> GenerateCardParams(List<CardInfo> cardList)
         {
             var dict = new Dictionary<string, object>();

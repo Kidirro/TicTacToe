@@ -1,6 +1,5 @@
+using System;
 using System.Collections;
-using GameState;
-using Network;
 using TurnTimer.Interfaces;
 using UnityEngine;
 
@@ -9,10 +8,10 @@ namespace TurnTimer
 
     public class TurnTimerController : MonoBehaviour, ITurnTimerService
     {
-        private const float PLAYER_TURN_TIMssE = 30f;
+        private const float PLAYER_TURN_TIME = 30f;
         private const float BOT_TURN_TIME = 10f;
 
-        private float _timeLeft = 0f;
+        private float _timeLeft;
 
         private IEnumerator _timerCoroutine;
 
@@ -21,16 +20,15 @@ namespace TurnTimer
             return _timeLeft;
         }
 
-        public void StartNewTurnTimer(float TurnTime)
+        public void StartNewTurnTimer(float turnTime)
         {
-
-
             StopCoroutine(_timerCoroutine);
-            _timeLeft = TurnTime;
+            _timeLeft = turnTime;
             StartCoroutine(_timerCoroutine);
 
         }
-        public void StartNewTurnTimer(PlayerType player, bool isNeedAddToQueue = true)
+        
+        public void StartNewTurnTimer(PlayerType player, Action action=null)
         {
 
             Debug.Log("Started timer");
@@ -44,25 +42,19 @@ namespace TurnTimer
                     _timeLeft = PLAYER_TURN_TIME;
                     break;
             }
-            _timerCoroutine = ITurnTimer(isNeedAddToQueue);
+            _timerCoroutine = ITurnTimer(action);
             StartCoroutine(_timerCoroutine);
 
         }
 
-        private IEnumerator ITurnTimer(bool isNeedAddtoQueue)
+        private IEnumerator ITurnTimer(Action action)
         {
             while (_timeLeft > 0)
             {
                 yield return null;
                 _timeLeft -= Time.deltaTime;
             }
-            /*GameplayManager.Instance.SetGameplayState(GameplayState.NewTurn);*/
-            if (isNeedAddtoQueue)
-            {
-                GameplayManager.Instance.SetGamePlayStateQueue(GameplayManager.GameplayState.NewTurn);
-                NetworkEventManager.RaiseEventEndTurn();
-
-            }
+            action?.Invoke();
         }
 
         public void StopTimer()

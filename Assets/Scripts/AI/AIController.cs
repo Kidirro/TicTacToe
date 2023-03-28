@@ -1,52 +1,66 @@
+using System;
 using System.Collections;
 using AI.Interfaces;
-using Cards;
-using Coroutine;
-using GameState;
+using Cards.CustomType;
+using Coroutine.Interfaces;
+using Field.Interfaces;
+using FinishLine.Interfaces;
 using History.Interfaces;
-using Managers;
 using Players.Interfaces;
-using Score;
 using UnityEngine;
 using Zenject;
+using Random = UnityEngine.Random;
 
 namespace AI
 {
     public class AIController : MonoBehaviour, IAIService
     {
         private BotGameType _botAggression;
+        [SerializeField]
         private CardInfo _botCardDefault;
-        
+
         #region Dependency
 
         private IPlayerService _playerService;
         private IHistoryService _historyService;
+        private IFinishLineService _finishLineService;
+        private IFieldService _fieldService;
+        private IFieldFigureService _fieldFigureService;
+        private ICoroutineService _coroutineService;
 
 
         [Inject]
-        private void Construct(IPlayerService playerService, IHistoryService historyService)
+        private void Construct(
+            IPlayerService playerService,
+            IHistoryService historyService,
+            IFinishLineService finishLineService,
+            IFieldService fieldService,
+            IFieldFigureService fieldFigureService,
+            ICoroutineService coroutineService)
         {
             _playerService = playerService;
             _historyService = historyService;
+            _finishLineService = finishLineService;
+            _fieldService = fieldService;
+            _fieldFigureService = fieldFigureService;
+            _coroutineService = coroutineService;
         }
 
         #endregion
-        
-        private Vector2Int GenerateNewTurn(int sideId)
+
+        private Vector2Int GenerateNewTurn(int sideId,int playerScore, int botScore)
         {
-            if (ScoreManager.Instance.GetScore(_playerService.GetCurrentPlayer().SideId) > ScoreManager.Instance.GetScore(_playerService.GetNextPlayer().SideId))
-                _botAggression = BotGameType.Attack;
-            else _botAggression = BotGameType.Defense;
+            _botAggression = botScore >playerScore ? BotGameType.Attack : BotGameType.Defense;
 
             Vector2Int maxId = new Vector2Int(-1, -1);
             int maxValue = -1;
 
-            for (int x = 0; x < Field.Instance.FieldSize.x; x++)
+            for (int x = 0; x < _fieldService.GetFieldSize().x; x++)
             {
-                for (int y = 0; y < Field.Instance.FieldSize.y; y++)
+                for (int y = 0; y < _fieldService.GetFieldSize().y; y++)
                 {
                     Vector2Int currentId = new Vector2Int(x, y);
-                    if (!Field.Instance.IsCellEnableToPlace(currentId)) continue;
+                    if (!_fieldFigureService.IsCellEnableToPlace(currentId)) continue;
 
                     int currentValue = GetCellValue(currentId, sideId);
                     if (currentValue == maxValue)
@@ -55,26 +69,27 @@ namespace AI
                         maxId = (randomId == 0) ? maxId : currentId;
                         continue;
                     }
+
                     if (currentValue > maxValue)
                     {
                         maxValue = currentValue;
                         maxId = currentId;
                     }
-
                 }
             }
 
             return maxId;
         }
-        
+
         public Vector2Int GenerateRandomPosition(Vector2Int size)
         {
-            if (!Field.Instance.IsExistEmptyCell()) return new Vector2Int(-1, -1);
+            if (!_fieldService.IsExistEmptyCell()) return new Vector2Int(-1, -1);
             Vector2Int result = new Vector2Int(Random.Range(0, size.x), Random.Range(0, size.y));
-            while (!Field.Instance.IsCellEnableToPlace(result))
+            while (!_fieldFigureService.IsCellEnableToPlace(result))
             {
                 result = new Vector2Int(Random.Range(0, size.x), Random.Range(0, size.y));
             }
+
             return result;
         }
 
@@ -89,18 +104,18 @@ namespace AI
             {
                 for (int y = -1; y <= 1; y++)
                 {
-                    Cell nextCell = Field.Instance.GetNextCell(currentId, new Vector2Int(x, y));
+                    Cell nextCell = _fieldService.GetNextCell(currentId, new Vector2Int(x, y));
                     //���������� �� ��������� ������
                     if (nextCell == null) continue;
 
-                    resultValue = resultValue + ((sideId == (int)nextCell.Figure) ? allyValue : enemyValue);
+                    resultValue = resultValue + ((sideId == (int) nextCell.Figure) ? allyValue : enemyValue);
 
                     //���� ����������� =0, �� ���������������
                     if (Mathf.Abs(nextCell.Id.x) + Mathf.Abs(nextCell.Id.y) == 0) continue;
 
 
                     //��������� ������������� ������
-                    Cell postNextCell = Field.Instance.GetNextCell(nextCell.Id, new Vector2Int(x, y));
+                    Cell postNextCell = _fieldService.GetNextCell(nextCell.Id, new Vector2Int(x, y));
 
 
                     //���������� �� ������������� ������
@@ -108,40 +123,41 @@ namespace AI
                     //������������ �� ������ 
                     if (postNextCell.Figure != nextCell.Figure) continue;
 
-                    resultValue += (sideId == (int)nextCell.Figure) ? allyValue * 2 : enemyValue * 2;
+                    resultValue += (sideId == (int) nextCell.Figure) ? allyValue * 2 : enemyValue * 2;
                 }
             }
 
             return resultValue;
         }
 
-        public void StartBotTurn(int countFigure)
+        public void StartBotTurn(int countFigure, int playerScore, int botScore, Action callback)
         {
-            StartCoroutine(IBotTurnProcess(countFigure));
+            StartCoroutine(IBotTurnProcess(countFigure,playerScore, botScore,callback));
         }
 
-        private IEnumerator IBotTurnProcess(int countFigure)
+        private IEnumerator IBotTurnProcess(int countFigure, int playerScore, int botScore, Action callback)
         {
             for (int i = 0; i < countFigure; i++)
             {
-                Vector2Int position = GenerateNewTurn(_playerService.GetCurrentPlayer().SideId);
+                Vector2Int position = GenerateNewTurn(_playerService.GetCurrentPlayer().SideId, playerScore,botScore);
                 if (position != new Vector2Int(-1, -1))
                 {
-                    Field.Instance.PlaceInCell(position);
+                    _fieldFigureService.PlaceInCell(position);
+                    Debug.Log($"Cell placing on {position}");
 
-                    FinishLineManager.Instance.MasterChecker(_playerService.GetCurrentPlayer().SideId);
+                    Debug.LogFormat("Current tactic : {0}. Is Empty: {1}", _botAggression,
+                        _coroutineService.GetIsQueueEmpty());
                     _historyService.AddHistoryCard(_playerService.GetCurrentPlayer(), _botCardDefault);
-                    Debug.LogFormat("Current tactic : {0}. Is Empty: {1}", _botAggression, CoroutineQueueController.isQueueEmpty);
-                    while (!CoroutineQueueController.isQueueEmpty) yield return null;
+                    _finishLineService.MasterChecker(_playerService.GetCurrentPlayer().SideId);
+                    while (!_coroutineService.GetIsQueueEmpty()) yield return null;
+                    
                 }
                 else
                 {
                     yield break;
                 }
-
             }
-            GameplayManager.Instance.SetGamePlayStateQueue(GameplayManager.GameplayState.NewTurn);
-
+            callback?.Invoke();
         }
 
         public void StopBotTurnForce()

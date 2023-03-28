@@ -1,134 +1,121 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using Analytic;
-using Cards;
+using Analytic.Interfaces;
 using Cards.Interfaces;
-using Coin;
+using Coin.Interfaces;
 using GameScene;
-using GameState;
+using GameScene.Interfaces;
+using GameTypeService.Enums;
+using GameTypeService.Interfaces;
+using TMPro;
+using Tutorial.Interfaces;
+using UIPages.Interfaces;
 using UnityEngine;
 using UnityEngine.UI;
-using TMPro;
-using Managers;
-using Network;
 using Zenject;
 
-public class MainMenuUI : Singleton<MainMenuUI>
+namespace UIPages
 {
-    [SerializeField]
-    private TextMeshProUGUI _moneyValue;
-
-    private int _growTurnDEV = 3;
-    private int _growManaDEV = 1;
-
-    [Header("Pages"), SerializeField]
-    private GameObject _mainMenu;
-
-    [Header("Multiplayer button properties"), SerializeField]
-    private Button _multiplayerButton;
-
-    [SerializeField]
-    private GameObject _multiplayerNotAvaibleObject;
-
-    [Header("Tutorial area properties"), SerializeField]
-    private GameObject _tutorialShowedArea;
-    [SerializeField]
-    private GameObject _tutorialNotShowedArea;
-
-    private bool _showPre = false;
-
-
-    private ICardList _cardList;
-
-    [Inject]
-    private void Construct(ICardList cardList)
+    public class MainMenuUI : MonoBehaviour,IMainMenuUIService
     {
-        _cardList = cardList;
-    }
-    
-    private void Start()
-    {
-        QualitySettings.vSyncCount = 0;
-        Application.targetFrameRate = 60;
-        Vibration.Init();
-        UpdateNetworkUI(MasterConectorManager.isConnected);
-        Debug.Log($"TutorialManager.IsTutorialShowed {TutorialManager.IsTutorialShowed}" );
-        _tutorialShowedArea.SetActive(TutorialManager.IsTutorialShowed);
-        _tutorialNotShowedArea.SetActive(!TutorialManager.IsTutorialShowed);
-    }
+        [SerializeField]
+        private TextMeshProUGUI _moneyValue;
 
-    private void OnEnable()
-    {
-        UpdateTexts();
-    }
+        [Header("Multiplayer button properties"), SerializeField]
+        private Button _multiplayerButton;
 
-    public void UpdateTexts()
-    {
-        _moneyValue.text = CoinController.AllCoins.ToString();
-    }
+        [SerializeField]
+        private GameObject _multiplayerNotAvailableObject;
 
-    public void OnAIButtonStart()
-    {
-        AnalyticController.Player_Start_Match(GameplayManager.GameType.SingleAI, _cardList.GetCardList());
-        GameplayManager.TypeGame = GameplayManager.GameType.SingleAI;
-        GameSceneManager.Instance.BeginLoadGameScene(GameSceneManager.GameScene.Game);
-        GameSceneManager.Instance.BeginTransaction();
-    }
+        [Header("Tutorial area properties"), SerializeField]
+        private GameObject _tutorialShowedArea;
+
+        [SerializeField]
+        private GameObject _tutorialNotShowedArea;
+
+        #region Dependency
+
+        private ICardList _cardList;
+        private ICoinService _coinService;
+        private IMatchEventsAnalyticService _matchEventsAnalyticService;
+        private IGameSceneService _gameSceneService;
+        private IGameTypeService _gameTypeService;
+        private ITutorialCompleteService _tutorialCompleteService;
+
+        [Inject]
+        private void Construct(ICardList cardList, ICoinService coinService,
+            IMatchEventsAnalyticService matchEventsAnalyticService, IGameSceneService gameSceneService,
+            IGameTypeService gameTypeService, 
+            ITutorialCompleteService tutorialCompleteService)
+        {
+            _cardList = cardList;
+            _coinService = coinService;
+            _matchEventsAnalyticService = matchEventsAnalyticService;
+            _gameSceneService = gameSceneService;
+            _gameTypeService = gameTypeService;
+            _tutorialCompleteService = tutorialCompleteService;
+        }
+
+        #endregion
+
+        private void Start()
+        {
+            UpdateNetworkUI(false);
+            Debug.Log($"TutorialManager.IsTutorialShowed {_tutorialCompleteService.GetIsTutorialComplete()}");
+            _tutorialShowedArea.SetActive(_tutorialCompleteService.GetIsTutorialComplete());
+            _tutorialNotShowedArea.SetActive(!_tutorialCompleteService.GetIsTutorialComplete());
+        }
+
+        private void OnEnable()
+        {
+            UpdateTexts();
+        }
+
+        public void UpdateTexts()
+        {
+            _moneyValue.text = _coinService.GetCurrentMoney().ToString();
+        }
+
+        public void OnAIButtonStart()
+        {
+            _matchEventsAnalyticService.Player_Start_Match(GameType.SingleAI, _cardList.GetCardList());
+            _gameTypeService.SetGameType(GameType.SingleAI);
+            _gameSceneService.BeginLoadGameScene(GameSceneManager.GameScene.Game);
+            _gameSceneService.BeginTransaction();
+        }
 
 
-    public void OnHumanButtonStart()
-    {
-        AnalyticController.Player_Start_Match(GameplayManager.GameType.SingleHuman, _cardList.GetCardList());
-        GameplayManager.TypeGame = GameplayManager.GameType.SingleHuman;
-        GameSceneManager.Instance.BeginLoadGameScene(GameSceneManager.GameScene.Game);
-        GameSceneManager.Instance.BeginTransaction();
-    }
+        public void OnHumanButtonStart()
+        {
+            _matchEventsAnalyticService.Player_Start_Match(GameType.SingleHuman, _cardList.GetCardList());
+            _gameTypeService.SetGameType(GameType.SingleHuman);
+            _gameSceneService.BeginLoadGameScene(GameSceneManager.GameScene.Game);
+            _gameSceneService.BeginTransaction();
+        }
 
-    public void OnTutorialButtonClick()
-    {
-        GameSceneManager.Instance.BeginLoadGameScene(GameSceneManager.GameScene.Tutorial);
-        GameSceneManager.Instance.BeginTransaction();
-    }
+        public void OnTutorialButtonClick()
+        {
+            _gameSceneService.BeginLoadGameScene(GameSceneManager.GameScene.Tutorial);
+            _gameSceneService.BeginTransaction();
+        }
 
-    public void DEV_ChangeFieldSize(int i)
-    {
-        Field.SetStartSize(new Vector2Int(i, i));
-    }
+        private void ChangeMultiplayerButtonState(bool state)
+        {
+            _multiplayerButton.interactable = state;
+            _multiplayerNotAvailableObject.SetActive(!state);
+        }
 
-    private void ChangeMultiplayerButtonState(bool state)
-    {
-        _multiplayerButton.interactable = state;
-        _multiplayerNotAvaibleObject.SetActive(!state);
-    }
+        public void UpdateNetworkUI(bool isConnected)
+        {
+            ChangeMultiplayerButtonState(isConnected);
+        }
 
-    public void UpdateNetworkUI(bool isConnected)
-    {
-        ChangeMultiplayerButtonState(isConnected);
-    }
+        public void PlayButtonClick()
+        {
+            OnAIButtonStart();
+        }
 
-    public void DEV_ChangePreShow()
-    {
-        _showPre = !_showPre;
-    }
-
-    public void DEV_SetCoinPerWin(string text)
-    {
-        CoinController.coinPerWin = int.Parse(text);
-    }
-
-    public void DEV_SetCoinPerCard(string text)
-    {
-        CoinController.coinPerUnlock = int.Parse(text);
-    }
-
-    public void PlayButtonClick()
-    {
-        OnAIButtonStart();
-    }
-
-    public void OnDiscordClick()
-    {
-        Application.OpenURL("https://discord.gg/4PJbjRZtkU");
+        public void OnDiscordClick()
+        {
+            Application.OpenURL("https://discord.gg/4PJbjRZtkU");
+        }
     }
 }

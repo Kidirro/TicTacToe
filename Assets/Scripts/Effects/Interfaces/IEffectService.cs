@@ -11,5 +11,7 @@ namespace Effects.Interfaces
         public void ClearEffect(int id);
         public void UpdateEffectState(int id, int value);
         public IEnumerator UpdateEffectTurn(List<Effect> effects = null);
+
+        public List<Effect> GetEffectList();
     }
 }

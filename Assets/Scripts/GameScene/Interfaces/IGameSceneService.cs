@@ -1,6 +1,4 @@
-﻿using Managers;
-
-namespace GameScene.Interfaces
+﻿namespace GameScene.Interfaces
 {
     public interface IGameSceneService
     {

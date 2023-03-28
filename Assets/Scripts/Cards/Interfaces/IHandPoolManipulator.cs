@@ -11,7 +11,7 @@ namespace Cards.Interfaces
 
         public void ResetHandPool(PlayerInfo player);
 
-        public List<CardModel> CreateCardPull();
-        public bool IsCurrentPlayerOnSlot();
+        public List<CardModel> CreateCardPull(int side);
+
     }
 }

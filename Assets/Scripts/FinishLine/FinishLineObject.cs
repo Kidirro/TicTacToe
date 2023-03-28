@@ -1,54 +1,99 @@
 using System.Collections;
 using System.Collections.Generic;
-using GameState;
-using Managers;
-using Players;
+using Field.Interfaces;
+using FinishLine.Interfaces;
+using GameState.Interfaces;
+using Players.Interfaces;
+using Score.Interfaces;
+using UIPages.Interfaces;
 using UnityEngine;
+using Zenject;
 
 namespace FinishLine
 {
     public class FinishLineObject : Line
     {
-        private static float _finishCountFrame = 25;
+        #region Dependency
 
-        public static float AnimationTime
+        private IPlayerService _playerService;
+        private IScoreService _scoreService;
+        private IScoreWinnerService _scoreWinnerService;
+        private IGameStateService _gameStateService;
+        private IFieldService _fieldService;
+        private IFieldFigureService _fieldFigureService;
+        private IFinishLineControllerService _finishLineControllerService;
+        private IInGameUIService _inGameUIService;
+
+        [Inject]
+        private void Construct(IPlayerService playerService,
+            IScoreService scoreService,
+            IFieldService fieldService,
+            IFieldFigureService fieldFigureService,
+            IFinishLineControllerService finishLineControllerService,
+            IScoreWinnerService scoreWinnerService,
+            IGameStateService gameStateService,
+            IInGameUIService inGameUIService)
         {
-
-            get => _finishCountFrame*2;
+            _playerService = playerService;
+            _scoreService = scoreService;
+            _fieldService = fieldService;
+            _fieldFigureService = fieldFigureService;
+            _finishLineControllerService = finishLineControllerService;
+            _gameStateService = gameStateService;
+            _scoreWinnerService = scoreWinnerService;
+            _inGameUIService = inGameUIService;
         }
+
+        #endregion
+
+
+        public const float FINISH_COUNT_FRAME = 25;
+
+        // public static float AnimationTime
+        // {
+        //     get => FINISH_COUNT_FRAME * 2;
+        // }
 
 
         public IEnumerator FinishLineCleaning(List<Vector2Int> ids, int score)
         {
-            int current_player = PlayerManager.Instance.GetCurrentPlayer().SideId;
+            int currentPlayer = _playerService.GetCurrentPlayer().SideId;
+            Debug.Log($"_playerService.GetCurrentPlayer().SideId {_playerService.GetCurrentPlayer().SideId}");
             Vector2Int id1 = new Vector2Int(ids[0].x, ids[0].y);
-            Vector2Int id2 = new Vector2Int(ids[ids.Count - 1].x, ids[ids.Count - 1].y);
+            Vector2Int id2 = new Vector2Int(ids[^1].x, ids[^1].y);
 
             SetAlphaFinishLine(0);
-            //SetWidthScreenCord(Field.Instance.CellList[0][0].CellSize * Field.Instance.LineWidthPercent);
-            SetPositions(Field.Instance.CellList[id1.x][id1.y].Position, Field.Instance.CellList[id2.x][id2.y].Position);
+            SetPositions(_fieldService.GetCellPosition(id1), _fieldService.GetCellPosition(id2));
             float j = 0;
-            while (j < _finishCountFrame)
+            while (j < FINISH_COUNT_FRAME)
             {
                 j++;
-                SetAlphaFinishLine(j / _finishCountFrame);
+                SetAlphaFinishLine(j / FINISH_COUNT_FRAME);
                 yield return null;
             }
 
-            GameplayManager.Instance.AddScore(score, current_player);
+            _scoreService.AddScore(currentPlayer,score);
+            _inGameUIService.UpdateScore(_scoreService.GetScore(1), _scoreService.GetScore(2));
+
+            if (_scoreWinnerService.IsExistRoundWinner() &&
+                _gameStateService.GetCurrentGameplayState() != GameplayState.GameOver)
+            {
+                _gameStateService.SetGamePlayStateQueue(GameplayState.RoundOver);
+            }
 
             foreach (Vector2Int id in ids)
             {
-                Field.Instance.CellList[id.x][id.y].SetFigure(CellFigure.none,isQueue:false);
+                _fieldFigureService.SetFigure(id, CellFigure.None, isQueue: false);
             }
 
             while (j > 0)
             {
                 j--;
-                SetAlphaFinishLine(j / _finishCountFrame);
+                SetAlphaFinishLine(j / FINISH_COUNT_FRAME);
                 yield return null;
             }
-            Field.Instance.AddToFinishLineList(this);
+
+            _finishLineControllerService.AddToFinishLineList(this);
         }
     }
 }

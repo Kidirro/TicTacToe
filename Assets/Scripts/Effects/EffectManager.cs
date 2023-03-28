@@ -3,22 +3,20 @@ using System.Collections;
 using System.Collections.Generic;
 using AI.Interfaces;
 using Cards.Interfaces;
-using Coroutine;
 using Coroutine.Interfaces;
 using Effects.Interfaces;
-using Mana;
-using Managers;
-using Network;
+using Field.Interfaces;
+using FinishLine.Interfaces;
+using Mana.Interfaces;
+using Network.Interfaces;
 using Players.Interfaces;
 using UnityEngine;
 using Zenject;
 
 namespace Effects
 {
-
-    public class EffectManager : MonoBehaviour,IEffectService, ISerializableEffects
+    public class EffectManager : MonoBehaviour, IEffectService, ISerializableEffects
     {
-
         #region Dependency
 
         private IHandPoolView _handPoolView;
@@ -26,24 +24,44 @@ namespace Effects
         private IAIService _aiService;
         private ICoroutineAwaitService _coroutineAwaitService;
         private ICoroutineService _coroutineService;
+        private IEffectEventNetworkService _effectEventNetworkService;
+        private IFinishLineService _finishLineService;
+        private IManaEventNetworkService _manaEventNetworkService;
+        private IFieldService _fieldService;
+        private IFieldFigureService _fieldFigureService;
+        private IManaService _manaService;
+        private IManaUIService _manaUIService;
 
         [Inject]
         private void Construct(
-            IHandPoolView handPool, 
-            IPlayerService playerService, 
-            ICoroutineService coroutineService, 
-            ICoroutineAwaitService coroutineAwaitService)
+            IHandPoolView handPool,
+            IPlayerService playerService,
+            ICoroutineService coroutineService,
+            ICoroutineAwaitService coroutineAwaitService,
+            IEffectEventNetworkService effectEventNetworkService,
+            IFinishLineService finishLineService,
+            IManaEventNetworkService manaEventNetworkService,
+            IFieldService fieldService,
+            IFieldFigureService fieldFigureService,
+            IManaService manaService,
+            IManaUIService manaUIService)
         {
             _handPoolView = handPool;
             _playerService = playerService;
             _coroutineService = coroutineService;
             _coroutineAwaitService = coroutineAwaitService;
+            _effectEventNetworkService = effectEventNetworkService;
+            _finishLineService = finishLineService;
+            _manaEventNetworkService = manaEventNetworkService;
+            _fieldService = fieldService;
+            _fieldFigureService = fieldFigureService;
+            _manaService = manaService;
+            _manaUIService = manaUIService;
         }
-        
+
         #endregion
-        
-        
-        private List<Effect> _effectList = new();
+
+        private readonly List<Effect> _effectList = new();
 
         private readonly List<Action> _serializedActions = new();
 
@@ -53,20 +71,22 @@ namespace Effects
             _serializedActions.Add(AddFigure_Effect);
             _serializedActions.Add(Decrease2MaxMana_Effect);
             _serializedActions.Add(DecreaseIncrease2Mana_Effect);
-            //actions.Add(FreezeCell_Effect);
+            //_serializedActions.Add(FreezeCell_Effect);
             _serializedActions.Add(Increase2MaxMana_Effect);
             _serializedActions.Add(Random2Mana_Effect);
             _serializedActions.Add(Freeze3Cell_Effected);
-            
         }
 
-        public List<Effect> EffectList => _effectList;
+        public List<Effect> GetEffectList()
+        {
+            return _effectList;
+        }
 
         public void AddEffect(Effect effect)
         {
             _effectList.Add(effect);
-        }  
-        
+        }
+
         public void AddEffect(int effect)
         {
             _serializedActions[effect].Invoke();
@@ -106,11 +126,12 @@ namespace Effects
                 effectList = _effectList.FindAll(x => x.EffectSideId == _playerService.GetCurrentPlayer().SideId);
                 Debug.Log(_playerService.GetCurrentPlayer().EntityType);
                 Debug.Log("Effect: list count" + effectList.Count);
-                effectList.Sort(delegate (Effect effect1, Effect effect2)
+                effectList.Sort(delegate(Effect effect1, Effect effect2)
                 {
                     return (effect1.EffectPriority >= effect2.EffectPriority) ? 1 : -1;
                 });
             }
+
             float maxTime = 0;
             if (effectList.Count != 0)
             {
@@ -126,53 +147,53 @@ namespace Effects
                         StartCoroutine(IEffectAwaitAsync(effectList, maxTime));
                         yield break;
                     }
+
                     Effect effect = effectList[0];
                     ActivateEffect(effect);
                     effectList.Remove(effect);
                     if (effect.EffectType == Effect.EffectTypes.Parallel)
                     {
-                        maxTime = Mathf.Max(maxTime, effect.EffectTimeAction, (effect.EffectTurnCount == 0) ? effect.EffectTimeDisable : 0);
+                        maxTime = Mathf.Max(maxTime, effect.EffectTimeAction,
+                            (effect.EffectTurnCount == 0) ? effect.EffectTimeDisable : 0);
                     }
                     else
                     {
                         StartCoroutine(IEffectAwaitAsync(effectList));
                         yield break;
                     }
-
-
-
                 }
             }
+
             int i = 0;
             while (i < _effectList.Count)
             {
                 if (_effectList[i].EffectTurnCount == 0)
                 {
                     _effectList.RemoveAt(i);
-                    NetworkEventManager.RaiseEventClearEffect(i);
+                    _effectEventNetworkService.RaiseEventClearEffect(i);
                 }
                 else
                 {
-                    i+=1;
+                    i += 1;
                 }
             }
+
             yield return _coroutineAwaitService.AwaitTime(maxTime);
-            FinishLineManager.Instance.MasterChecker(_playerService.GetCurrentPlayer().SideId);
+            _finishLineService.MasterChecker(_playerService.GetCurrentPlayer().SideId);
             _handPoolView.UpdateCardUI();
         }
 
         private IEnumerator IEffectAwaitAsync(List<Effect> effects, float startAwait = 0)
         {
-            yield return StartCoroutine(_coroutineAwaitService.IAwaitProcess(startAwait));
-            while (!CoroutineQueueController.isQueueEmpty) yield return null;
+            yield return _coroutineAwaitService.AwaitTime(startAwait);
+            while (!_coroutineService.GetIsQueueEmpty()) yield return null;
             _coroutineService.AddCoroutine(UpdateEffectTurn(effects));
         }
 
         private void ActivateEffect(Effect effect)
         {
-
             effect.EffectTurnCount -= 1;
-            NetworkEventManager.RaiseEventUpdateEffect(_effectList.IndexOf(effect), effect.EffectTurnCount);
+            _effectEventNetworkService.RaiseEventUpdateEffect(_effectList.IndexOf(effect), effect.EffectTurnCount);
             Debug.Log("Effect turn delete");
 
 
@@ -180,20 +201,19 @@ namespace Effects
             if (effect.EffectTurnCount == 0) effect.OnEffectDisable.Invoke();
 
             Debug.Log("Effect Invoke");
-
         }
 
         public void AddFigure_Effect()
         {
             Action f = delegate
             {
-                Vector2Int position = _aiService.GenerateRandomPosition(Field.Instance.FieldSize);
+                Vector2Int position = _aiService.GenerateRandomPosition(_fieldService.GetFieldSize());
                 if (position == new Vector2Int(-1, -1)) return;
 
-                Field.Instance.PlaceInCell(position);
-
+                _fieldFigureService.PlaceInCell(position);
             };
-            Effect effect = new Effect(f, 3, _playerService.GetCurrentPlayer().SideId, Effect.EffectTypes.Consistently, 1);
+            Effect effect = new Effect(f, 3, _playerService.GetCurrentPlayer().SideId, Effect.EffectTypes.Consistently,
+                1);
             AddEffect(effect);
         }
 
@@ -201,11 +221,11 @@ namespace Effects
         {
             Action f = delegate
             {
-                ManaManager.Instance.AddBonusMana(1);
-                NetworkEventManager.RaiseEventAddBonusMana(1);
+                _manaService.AddBonusMana(1);
+                _manaEventNetworkService.RaiseEventAddBonusMana(1);
 
-                ManaManager.Instance.RestoreAllMana();
-                ManaManager.Instance.UpdateManaUI();
+                _manaService.RestoreAllMana();
+                _manaUIService.UpdateManaUI();
             };
             Effect effect = new Effect(f, 1, _playerService.GetCurrentPlayer().SideId, Effect.EffectTypes.Parallel, 0);
             AddEffect(effect);
@@ -215,26 +235,29 @@ namespace Effects
         {
             Action d = delegate
             {
-                ManaManager.Instance.IncreaseMaxMana(2);
-                NetworkEventManager.RaiseEventIncreaseMaxMana(2);
+                _manaService.IncreaseMaxMana(2);
+                _manaEventNetworkService.RaiseEventIncreaseMaxMana(2);
 
-                ManaManager.Instance.RestoreAllMana();
-                ManaManager.Instance.UpdateManaUI();
+                _manaService.RestoreAllMana();
+                _manaUIService.UpdateManaUI();
             };
-            Effect effect = new Effect(delegate { }, 3, _playerService.GetCurrentPlayer().SideId, Effect.EffectTypes.Parallel, 0, d);
+            Effect effect = new Effect(delegate { }, 3, _playerService.GetCurrentPlayer().SideId,
+                Effect.EffectTypes.Parallel, 0, d);
             AddEffect(effect);
         }
+
         public void Increase2MaxMana_Effect()
         {
             Action d = delegate
             {
-                ManaManager.Instance.IncreaseMaxMana(-2);
-                NetworkEventManager.RaiseEventIncreaseMaxMana(-2);
+                _manaService.IncreaseMaxMana(-2);
+                _manaEventNetworkService.RaiseEventIncreaseMaxMana(-2);
 
-                ManaManager.Instance.RestoreAllMana();
-                ManaManager.Instance.UpdateManaUI();
+                _manaService.RestoreAllMana();
+                _manaUIService.UpdateManaUI();
             };
-            Effect effect = new Effect(delegate { }, 3, _playerService.GetCurrentPlayer().SideId, Effect.EffectTypes.Parallel, 0, d);
+            Effect effect = new Effect(delegate { }, 3, _playerService.GetCurrentPlayer().SideId,
+                Effect.EffectTypes.Parallel, 0, d);
             AddEffect(effect);
         }
 
@@ -243,11 +266,11 @@ namespace Effects
             Action f = delegate
             {
                 int randValue = UnityEngine.Random.Range(0, 2) == 0 ? -2 : 2;
-                ManaManager.Instance.AddBonusMana(randValue);
-                NetworkEventManager.RaiseEventAddBonusMana(randValue);
+                _manaService.AddBonusMana(randValue);
+                _manaEventNetworkService.RaiseEventAddBonusMana(randValue);
 
-                ManaManager.Instance.RestoreAllMana();
-                ManaManager.Instance.UpdateManaUI();
+                _manaService.RestoreAllMana();
+                _manaUIService.UpdateManaUI();
             };
             Effect effect = new Effect(f, 1, _playerService.GetCurrentPlayer().SideId, Effect.EffectTypes.Parallel, 0);
             AddEffect(effect);
@@ -257,40 +280,35 @@ namespace Effects
         {
             Action f = delegate
             {
-                ManaManager.Instance.AddBonusMana(-2);
-                NetworkEventManager.RaiseEventAddBonusMana(-2);
+                _manaService.AddBonusMana(-2);
+                _manaEventNetworkService.RaiseEventAddBonusMana(-2);
 
-                ManaManager.Instance.RestoreAllMana();
-                ManaManager.Instance.UpdateManaUI();
+                _manaService.RestoreAllMana();
+                _manaUIService.UpdateManaUI();
             };
             Action d = delegate
             {
+                _manaService.AddBonusMana(4);
+                _manaEventNetworkService.RaiseEventAddBonusMana(4);
 
-
-                ManaManager.Instance.AddBonusMana(4);
-                NetworkEventManager.RaiseEventAddBonusMana(4);
-
-                ManaManager.Instance.RestoreAllMana();
-                ManaManager.Instance.UpdateManaUI();
+                _manaService.RestoreAllMana();
+                _manaUIService.UpdateManaUI();
             };
 
 
-            Effect effect = new Effect(f, 2, _playerService.GetCurrentPlayer().SideId, Effect.EffectTypes.Parallel, 0, d);
+            Effect effect = new Effect(f, 2, _playerService.GetCurrentPlayer().SideId, Effect.EffectTypes.Parallel, 0,
+                d);
             AddEffect(effect);
         }
 
         public void FreezeCell_Effect(Vector2Int id)
         {
-            Cell cell = Field.Instance.CellList[id.x][id.y];
-            Action f = delegate
-            {
-            };
-            Action d = delegate
-            {
-                Field.Instance.ResetSubStateWithPlaceFigure(cell.Id);
-            };
+            Cell cell = _fieldService.GetCellLink(id);
+            Action f = delegate { };
+            Action d = delegate { _fieldFigureService.ResetSubStateWithPlaceFigure(cell.Id); };
             f.Invoke();
-            Effect effect = new Effect(f, 2, _playerService.GetCurrentPlayer().SideId, Effect.EffectTypes.Parallel, 2, d, Cell.AnimationTime, Cell.AnimationTime * 2);
+            Effect effect = new Effect(f, 2, _playerService.GetCurrentPlayer().SideId, Effect.EffectTypes.Parallel, 2,
+                d, Cell.AnimationTime, Cell.AnimationTime * 2);
             AddEffect(effect);
         }
 
@@ -298,21 +316,22 @@ namespace Effects
         {
             Action f = delegate
             {
-                Vector2Int position = _aiService.GenerateRandomPosition(Field.Instance.FieldSize);
+                Vector2Int position = _aiService.GenerateRandomPosition(_fieldService.GetFieldSize());
                 if (position == new Vector2Int(-1, -1)) return;
 
-                Field.Instance.FreezeCell(position);
+                _fieldFigureService.FreezeCell(position);
 
                 FreezeCell_Effect(position);
-                NetworkEventManager.RaiseEventAddFreezeEffect(position);
+                _effectEventNetworkService.RaiseEventAddFreezeEffect(position);
                 /**/
             };
 
-            Effect effect = new Effect(f, 3, _playerService.GetCurrentPlayer().SideId, Effect.EffectTypes.Parallel, 3, null, Cell.AnimationTime);
+            Effect effect = new Effect(f, 3, _playerService.GetCurrentPlayer().SideId, Effect.EffectTypes.Parallel, 3,
+                null, Cell.AnimationTime);
             AddEffect(effect);
         }
     }
- 
+
     public class Effect
     {
         public Action EffectAction;
@@ -331,14 +350,15 @@ namespace Effects
             Consistently
         }
 
-        public Effect(Action action, int turnCount, int SideId, EffectTypes effectType, int priority, Action onDisable = null, float effectTime = 0, float effectTimeDisable = 0)
+        public Effect(Action action, int turnCount, int sideId, EffectTypes effectType, int priority,
+            Action onDisable = null, float effectTime = 0, float effectTimeDisable = 0)
         {
-            if (onDisable == null) onDisable = delegate () { };
+            if (onDisable == null) onDisable = delegate() { };
 
             EffectAction = action;
             OnEffectDisable = onDisable;
             EffectTurnCount = turnCount;
-            EffectSideId = SideId;
+            EffectSideId = sideId;
 
             EffectTimeAction = effectTime;
             EffectTimeDisable = effectTimeDisable;

@@ -5,6 +5,6 @@ namespace Cards.Interfaces
 {
     public interface ICardFactory
     {
-        public List<CardModel> CreateDeck();
+        public List<CardModel> CreateDeck(int side);
     }
 }

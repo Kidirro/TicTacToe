@@ -1,10 +1,9 @@
 using System;
 using System.Collections;
-using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
-using Managers;
 using ScreenScaler;
+using ScreenScaler.Interfaces;
 using Zenject;
 
 public class CardTips : MonoBehaviour
@@ -25,7 +24,7 @@ public class CardTips : MonoBehaviour
     private float _awaitTime;
 
     private bool _isAlphaCoroutineWork;
-    private Coroutine _alphaCoroutine;
+    private UnityEngine.Coroutine _alphaCoroutine;
 
     private const int ALPHA_COUNT_FRAME = 25;
 

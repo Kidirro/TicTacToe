@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using Cards.CustomType;
 using Cards.Interfaces;
 
 namespace Cards

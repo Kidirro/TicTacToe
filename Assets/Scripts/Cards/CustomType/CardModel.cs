@@ -1,12 +1,10 @@
 using System.Diagnostics;
-using Coroutine;
-using History;
-using Mana;
-using Managers;
-using Network;
-using Players;
-using UnityEditor.Localization.Plugins.XLIFF.V12;
+using Cards.Enum;
+using Cards.Interfaces;
+using Field.Interfaces;
+using Players.Interfaces;
 using UnityEngine;
+using Zenject;
 using Debug = UnityEngine.Debug;
 
 
@@ -19,8 +17,40 @@ namespace Cards.CustomType
 
         private CardView _cardView;
 
-        private readonly Stopwatch stopWatch = new();
+        private readonly Stopwatch _stopWatch = new();
 
+        private Vector2Int _chosenCell;
+        private Vector2Int _prevChosenCell;
+
+        public Stopwatch Stopwatch => _stopWatch;
+
+        private bool _lastAlphaState = true;
+        private bool _isSlotsReUpdatePositions;
+
+        #region Dependency
+
+        private IPlayerService _playerService;
+        private IHandPoolView _handPoolView;
+        private IFieldService _fieldService;
+        private IFieldZoneService _fieldZoneService;
+        private ICardActionService _cardActionService;
+
+        [Inject]
+        private void Construct(
+            IPlayerService playerService,
+            IHandPoolView handPoolView,
+            IFieldService fieldService,
+            IFieldZoneService fieldZoneService,
+            ICardActionService cardActionService)
+        {
+            _playerService = playerService;
+            _handPoolView = handPoolView;
+            _fieldService = fieldService;
+            _fieldZoneService = fieldZoneService;
+            _cardActionService = cardActionService;
+        }
+
+        #endregion
 
         private void Awake()
         {
@@ -30,7 +60,13 @@ namespace Cards.CustomType
         public void SetCardInfo(CardInfo ci)
         {
             Info = ci;
-            _cardView.UpdateUI();
+            _cardView.UpdateUI(ci, _playerService.GetCurrentPlayerOnDevice(), false);
+        }
+
+        public void SetCardInfo(CardInfo ci, int playerSide)
+        {
+            Info = ci;
+            _cardView.UpdateUI(ci, playerSide, false);
         }
 
         /// <summary>
@@ -40,20 +76,20 @@ namespace Cards.CustomType
         {
             _cardView.SetCanvasOverrideSorting(true);
             _cardView.SetTransformScale(1, false);
-            _cardView.SetTransformPositionWithFingerDistance(Input.mousePosition,false);
-            chosedCell = new Vector2Int(-1, -1);
+            _cardView.SetTransformPositionWithFingerDistance(Input.mousePosition, false);
+            _chosenCell = new Vector2Int(-1, -1);
             SetTransformRotation(0);
             _isSlotsReUpdatePositions = false;
-            stopWatch.Reset();
-            stopWatch.Start();
+            _stopWatch.Reset();
+            _stopWatch.Start();
             if (Info.IsNeedShowTip)
             {
-                string textTip = Info.TipText;
+                string textTip;
                 textTip = I2.Loc.LocalizationManager.TryGetTranslation(Info.TipText, out textTip)
                     ? I2.Loc.LocalizationManager.GetTranslation(Info.TipText)
                     : Info.TipText;
                 Debug.Log(textTip);
-                _cardTip.ShowTip(textTip, false);
+                _cardView.ShowTip(textTip, false);
             }
             //if (SlotManager.Instance.IsCurrentPlayerOnSlot) SlotManager.Instance.ShowRechanger();
         }
@@ -63,152 +99,104 @@ namespace Cards.CustomType
         /// </summary>
         public void OnDrag()
         {
-            if (!CardPoolController.Instance.IsCurrentPlayerOnSlot) return;
-       
-            SetTransformPositionWithFingerDistance(Input.mousePosition,false);
+            if (!_handPoolView.IsCurrentPlayerOnSlot()) return;
 
-            if (Field.Instance.IsInFieldHeight(vectorFigure.y) && !_isSlotsReUpdatePositions)
+            Vector2 vectorFigure = _cardView.GetPositionWithDistance(Input.mousePosition);
+
+            SetTransformPositionWithFingerDistance(Input.mousePosition);
+
+            if (_fieldService.IsInFieldHeight(vectorFigure.y) && !_isSlotsReUpdatePositions)
             {
                 _isSlotsReUpdatePositions = true;
-                CardPoolController.Instance.UpdateCardPosition(false, this);
+                _handPoolView.UpdateCardPosition(false, this);
                 transform.SetAsLastSibling();
                 Debug.Log("Entered");
             }
-            /*
-                    if (_magnitudePosition != Vector2.zero && (_magnitudePosition - vector).magnitude > _magnitudeCard)
-                    {
-                        _cardTip.HideTip(Field.Instance.IsInFieldHeight(vectorFigure.y));
-                        _magnitudePosition = Vector2.zero;
-                    }*/
 
             if (Info.CardType == CardTypeImpact.OnField) return;
 
-            if (Field.Instance.IsInFieldHeight(vectorFigure.y))
+            if (_fieldService.IsInFieldHeight(vectorFigure.y))
             {
-                _cardTip.HideTip(true);
-            }
-            else
-            {
-                if (Info.IsNeedShowTip)
-                {
-                    string textTip = Info.TipText;
-                    textTip = I2.Loc.LocalizationManager.TryGetTranslation(Info.TipText, out textTip)
-                        ? I2.Loc.LocalizationManager.GetTranslation(Info.TipText)
-                        : Info.TipText;
-
-
-                    _cardTip.ShowTip(textTip);
-                }
+                _cardView.HideTip(true);
             }
 
-            if (_lastAlphaState != !Field.Instance.IsInFieldHeight(vectorFigure.y))
+            if (_lastAlphaState == _fieldService.IsInFieldHeight(vectorFigure.y))
             {
                 _lastAlphaState = !_lastAlphaState;
-                SetGroupAlpha(_cardCanvasGroup.alpha, _lastAlphaState ? 1 : 0, false);
+                SetGroupAlpha(_lastAlphaState ? 1 : 0, false);
             }
 
-            chosedCell = Field.Instance.GetIdFromPosition(vectorFigure, false);
-            if (_prevChosedCell != chosedCell)
+            _chosenCell = _fieldService.GetIdFromPosition(vectorFigure, false);
+            if (_prevChosenCell != _chosenCell)
             {
-                if (_prevChosedCell != new Vector2Int(-1, -1))
+                if (_prevChosenCell != new Vector2Int(-1, -1))
                 {
-                    Field.Instance.UnhighlightZone(_prevChosedCell, Info.CardAreaSize);
+                    _fieldZoneService.UnhighlightZone(_prevChosenCell, Info.CardAreaSize);
                 }
 
-                if (chosedCell != new Vector2Int(-1, -1))
+                if (_chosenCell != new Vector2Int(-1, -1))
                 {
-                    Field.Instance.HighlightZone(chosedCell,
+                    _fieldZoneService.HighlightZone(_chosenCell,
                         Info.CardAreaSize,
-                        (PlayerManager.Instance.GetCurrentPlayer().SideId == 1)
+                        (_playerService.GetCurrentPlayer().SideId == 1)
                             ? Info.CardHighlightP1
                             : Info.CardHighlightP2,
                         Info.CardHighlightColor
                     );
                 }
 
-                _prevChosedCell = chosedCell;
+                _prevChosenCell = _chosenCell;
             }
         }
 
         /// <summary>
         /// Конец движения карты от пальца
         /// </summary>
-        public void EndDraged()
+        public void EndDragged()
         {
-            if (chosedCell != new Vector2Int(-1, -1))
+            if (_chosenCell != new Vector2Int(-1, -1))
             {
-                Field.Instance.UnhighlightZone(chosedCell, Info.CardAreaSize);
+                _fieldZoneService.UnhighlightZone(_chosenCell, Info.CardAreaSize);
             }
 
-            stopWatch.Stop();
-            _cardCanvas.overrideSorting = false;
+            _stopWatch.Stop();
+            _cardView.SetCanvasOverrideSorting(false);
 
-            bool timeFlag = stopWatch.ElapsedMilliseconds > 80;
-            bool typeFlag = false;
-            bool manaFlag = _enoughMana.IsEnoughMana(Info.CardManacost + Info.CardBonusManacost);
-            bool animFlag = CoroutineQueueController.isQueueEmpty;
-            bool playerFlag = CardPoolController.Instance.IsCurrentPlayerOnSlot;
-            bool positionFlag =
-                Field.Instance.IsInFieldHeight(_cardTransformRect.localPosition.y -
-                                               ScreenScaler.ScreenScalerService.Instance.GetHeight(_fingerToCardDistance
-                                                   .y));
-
-            switch (Info.CardType)
+            bool invokeState = _cardActionService.InvokeActionWithCheck(this, _chosenCell);
+            if (invokeState)
             {
-                case CardTypeImpact.OnField:
-                    typeFlag = true;
-                    break;
-                case CardTypeImpact.OnArea:
-                    typeFlag = chosedCell != new Vector2(-1, -1);
-                    break;
-                case CardTypeImpact.OnAreaWithCheck:
-                    typeFlag = chosedCell != new Vector2(-1, -1) &&
-                               Field.Instance.IsZoneEnableToPlace(chosedCell, Info.CardAreaSize);
-                    break;
-            }
-
-
-            if (typeFlag && timeFlag && manaFlag && animFlag && playerFlag && positionFlag)
-            {
-                CardPoolController.Instance.RemoveCard(PlayerManager.Instance.GetCurrentPlayer(), this);
-                _increaseMana.IncreaseMana(-Info.CardManacost - Info.CardBonusManacost);
-                NetworkEventManager.RaiseEventIncreaseMana(-Info.CardManacost - Info.CardBonusManacost);
-                ManaManager.Instance.UpdateManaUI();
-
-                Info.СardAction.Invoke();
-                NetworkEventManager.RaiseEventCardInvoke(Info);
-                HistoryFactory.Instance.AddHistoryCard(PlayerManager.Instance.GetCurrentPlayer(), Info);
-
                 Info.CardBonusManacost += 1;
-                CardPoolController.Instance.UpdateCardUI();
+                //SetTransformParent(null);
             }
             else
             {
                 _lastAlphaState = true;
-                SetGroupAlpha(_cardCanvasGroup.alpha, 1, false);
+                SetGroupAlpha(1, false);
             }
 
-            if (Info.IsNeedShowTip) _cardTip.HideTip(typeFlag && timeFlag && manaFlag);
-            CardPoolController.Instance.UpdateCardPosition(false);
+            if (Info.IsNeedShowTip) _cardView.HideTip(invokeState);
+            _handPoolView.UpdateCardPosition(false);
+            _handPoolView.UpdateCardUI();
+            _isSlotsReUpdatePositions = false;
         }
 
         public void CancelDragging()
         {
-            if (FindObjectOfType<Field>() != null)
+            if (FindObjectOfType<Field.FieldController>() != null)
             {
-                if (chosedCell != new Vector2Int(-1, -1))
+                if (_chosenCell != new Vector2Int(-1, -1))
                 {
-                    Field.Instance.UnhighlightZone(chosedCell, Info.CardAreaSize);
+                    _fieldZoneService.UnhighlightZone(_chosenCell, Info.CardAreaSize);
                 }
             }
 
-            if (Info.IsNeedShowTip) _cardTip.HideTip(true);
-            stopWatch.Stop();
-            _cardCanvas.overrideSorting = false;
+            if (Info.IsNeedShowTip) _cardView.HideTip(true);
+            _stopWatch.Stop();
+            _cardView.SetCanvasOverrideSorting(false);
 
 
             _lastAlphaState = true;
-            CardPoolController.Instance.UpdateCardUI();
+            _handPoolView.UpdateCardUI();
             //SlotManager.Instance.UpdateCardPosition(!gameObject.activeInHierarchy);
         }
 
@@ -229,7 +217,13 @@ namespace Cards.CustomType
 
         public void SetTransformParent(Transform parent)
         {
-            _cardView.SetTransformParent(parent);
+            _cardView.SetTransformParent(parent, Vector2.zero);
+        }
+
+        public void SetTransformParent(Transform parent, Vector2 position)
+        {
+            Debug.Log($"SetParent {position}. {parent}");
+            _cardView.SetTransformParent(parent, position);
         }
 
         public void SetSibling(int id)
@@ -240,6 +234,11 @@ namespace Cards.CustomType
         public void SetGroupAlpha(float init, float final, bool instantly = true)
         {
             _cardView.SetGroupAlpha(init, final, instantly);
+        }
+
+        private void SetGroupAlpha(float final, bool instantly = true)
+        {
+            _cardView.SetGroupAlpha(final, instantly);
         }
 
         public void SetTransformPosition(Vector2 position, bool instantly = true)
@@ -257,9 +256,14 @@ namespace Cards.CustomType
             _cardView.SetCanvasOverrideSorting(state);
         }
 
-        public void SetTransformPositionWithFingerDistance(Vector2 position, bool instantly = true)
+        private void SetTransformPositionWithFingerDistance(Vector2 position, bool instantly = true)
         {
             _cardView.SetTransformPositionWithFingerDistance(position, instantly);
+        }
+
+        public Vector2 GetClearPosition()
+        {
+            return _cardView.GetClearPosition();
         }
     }
 }

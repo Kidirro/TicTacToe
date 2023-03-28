@@ -29,18 +29,4 @@ MonoBehaviour:
   TipText: 
   CardManacost: 0
   CardBonusManacost: 0
-  "\u0421ardAction":
-    m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 11400000}
-        m_TargetAssemblyTypeName: CardInfo, Assembly-CSharp
-        m_MethodName: PlaceFigure
-        m_Mode: 1
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
+  "\u0421ardActionId": Decrease2MaxMana

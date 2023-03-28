@@ -13,5 +13,6 @@ namespace Effects.Interfaces
         public void Random2Mana_Effect();
         public void DecreaseIncrease2Mana_Effect();
         public void FreezeCell_Effect(Vector2Int id);
+        public void Freeze3Cell_Effected();
     }
 }

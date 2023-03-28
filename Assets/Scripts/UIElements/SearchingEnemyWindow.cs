@@ -4,7 +4,8 @@ using UnityEngine;
 using TMPro;
 using System;
 using Analytic;
-using Managers;
+using Analytic.Interfaces;
+using Zenject;
 
 public class SearchingEnemyWindow : MonoBehaviour
 {
@@ -15,17 +16,30 @@ public class SearchingEnemyWindow : MonoBehaviour
     private Transform _loadingBar;
 
     public static float TimePass;
+
+    #region Dependency
+
+    private IMatchEventsAnalyticService _matchEventsAnalyticService;
+    
+    [Inject]
+    private void Construct(IMatchEventsAnalyticService matchEventsAnalyticService)
+    {
+        _matchEventsAnalyticService = matchEventsAnalyticService;
+    }
+
+    #endregion
+ 
     
     public void StartLoadingProcess()
     {
-        AnalyticController.Player_Try_Find_Match();
+        _matchEventsAnalyticService.Player_Try_Find_Match();
         StartCoroutine(ILoadingProcess());
     }
 
     public void StopLoadingProcess()
     {
         StopAllCoroutines();
-        AnalyticController.Player_Cancel_Find_Match(TimePass);
+        _matchEventsAnalyticService.Player_Cancel_Find_Match(TimePass);
     }
 
     public IEnumerator ILoadingProcess()

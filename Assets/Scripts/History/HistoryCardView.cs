@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using Cards;
+using Cards.CustomType;
 using History.Interfaces;
 using TMPro;
 using UnityEngine;
@@ -30,7 +31,7 @@ namespace History
         private Image _viewCardImage;
 
         [SerializeField]
-        private List<GameObject> _viewBonusImageList = new();
+        private List<CardView.BonusImageType> _viewBonusImageList = new();
 
 
         public void StartTap(CardInfo cardCollection, PlayerInfo player)
@@ -58,9 +59,9 @@ namespace History
             _viewCardDescription.text = desc;
             _viewCardImage.sprite = (player.SideId == 1) ? info.CardImageP1 : info.CardImageP2;
             _viewManapoints.text = info.CardManacost.ToString();
-            for (int i = 0; i < _viewBonusImageList.Count; i++)
+            foreach (CardView.BonusImageType bonus in _viewBonusImageList)
             {
-                _viewBonusImageList[i].SetActive(i == (int) info.CardBonus);
+                bonus.BonusImage.SetActive(bonus.BonusType == info.CardBonus);
             }
         }
 

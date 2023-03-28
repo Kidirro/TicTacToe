@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using Cards;
+using Cards.CustomType;
 using History.Interfaces;
 using UnityEngine;
 using Zenject;
@@ -28,17 +29,17 @@ namespace History
 
         private bool _isNewTurn = true;
 
-        #region Interfaces
+        #region Dependecy
 
         private DiContainer _diContainer;
-
-        #endregion
 
         [Inject]
         private void Construct(DiContainer diContainer)
         {
             _diContainer = diContainer;
         }
+
+        #endregion
 
         public void AddHistoryNewTurn(PlayerInfo player)
         {

@@ -1,66 +1,126 @@
 using System.Collections;
 using AI.Interfaces;
-using Analytic;
-using Cards;
+using Analytic.Interfaces;
 using Cards.CustomType;
 using Cards.Interfaces;
-using Coin;
-using Coroutine;
-using Effects;
+using Coin.Interfaces;
+using Coroutine.Interfaces;
+using Effects.Interfaces;
+using Field.Interfaces;
 using GameScene;
+using GameScene.Interfaces;
 using GameState.Interfaces;
-using History;
-using Mana;
-using Managers;
-using Network;
-using Players;
-using Score;
-using Theme;
-using TurnTimer;
+using GameTypeService.Enums;
+using GameTypeService.Interfaces;
+using History.Interfaces;
+using Mana.Interfaces;
+using Network.Interfaces;
+using Players.Interfaces;
+using Score.Interfaces;
+using TurnTimer.Interfaces;
+using UIPages.Interfaces;
 using UnityEngine;
 using Zenject;
 
 namespace GameState
 {
-    public class GameplayManager : IGameStateService
+    public class GameplayManager : IGameStateService, IInitializable
     {
-        private static GameplayState _gameplayState = GameplayState.NewGame;
-        
+        private GameplayState _gameplayState = GameplayState.NewGame;
+
         public GameplayState GetCurrentGameplayState()
         {
-            throw new System.NotImplementedException();
+            return _gameplayState;
         }
 
-        public static GameType TypeGame = 0;
+        private bool _isNewStateInQueue;
 
-        private static bool _isNewStateInQueue = false;
+        private bool _isOnline;
 
-        public static bool IsOnline;
+        private int _figureCount;
 
-        private int _figureCount = 0;
+        private const int MAX_FIGURE_COUNT = 3;
 
-        public int _maxFigureCount = 3;
+        #region Dependecy
 
-        #region Interfaces
+        private readonly IAIService _aiService;
+        private readonly IPlayerService _playerService;
+        private readonly IScoreService _scoreService;
+        private readonly ICoroutineService _coroutineService;
+        private readonly IHandPoolView _handPoolView;
+        private readonly IHandPoolManipulator _handPoolManipulator;
+        private readonly IHistoryService _historyService;
+        private readonly IEffectService _effectService;
+        private readonly ITurnTimerService _turnTimerService;
+        private readonly ICheckEventNetworkService _checkEventNetworkService;
+        private readonly IRoomService _roomService;
+        private readonly IScoreWinnerService _scoreWinnerService;
+        private readonly ICoinService _coinService;
+        private readonly IInGameUIService _inGameUIService;
+        private readonly IMatchEventsAnalyticService _matchEventsAnalyticService;
+        private readonly ICardList _cardList;
+        private readonly IGameTypeService _gameTypeService;
+        private readonly IManaService _manaService;
+        private readonly IManaUIService _manaUIService;
+        private readonly IFieldService _fieldService;
+        private readonly IGameSceneService _gameSceneService;
+        private readonly INetworkEventService _networkEventService;
+        private readonly IRechangerService _rechangerService;
 
-        private ICardList _cardList;
-        private IAIService _aiService;
+        public GameplayManager
+        (
+            IAIService aiService,
+             IGameSceneService gameSceneService,
+             IPlayerService playerService, 
+             IScoreService scoreService,
+             ICoroutineService coroutineService,
+             IHandPoolManipulator handPoolManipulator,
+             IHistoryService historyService,
+             IHandPoolView handPoolView,
+             IEffectService effectService,
+             ITurnTimerService turnTimerService,
+             ICheckEventNetworkService checkEventNetworkService,
+             IRoomService roomService,
+             IScoreWinnerService scoreWinnerService,
+             ICoinService coinService,
+             IInGameUIService inGameUIService,
+             IMatchEventsAnalyticService matchEventsAnalyticService,
+             ICardList cardList,
+             IGameTypeService gameTypeService,
+             IManaService manaService,
+             IManaUIService manaUIService,
+             IFieldService fieldService,
+            INetworkEventService networkEventService,
+            IRechangerService rechangerService
+            )
+        {
+            _aiService = aiService;
+            _playerService = playerService;
+            _scoreService = scoreService;
+            _coroutineService = coroutineService;
+            _historyService = historyService;
+            _handPoolView = handPoolView;
+            _effectService = effectService;
+            _turnTimerService = turnTimerService;
+            _checkEventNetworkService = checkEventNetworkService;
+            _roomService = roomService;
+            _scoreWinnerService = scoreWinnerService;
+            _coinService = coinService;
+            _inGameUIService = inGameUIService;
+            _matchEventsAnalyticService = matchEventsAnalyticService;
+            _cardList = cardList;
+            _handPoolManipulator = handPoolManipulator;
+            _gameTypeService = gameTypeService;
+            _manaService = manaService;
+            _manaUIService = manaUIService;
+            _fieldService = fieldService;
+            _gameSceneService = gameSceneService;
+            _networkEventService = networkEventService;
+            _rechangerService = rechangerService;
+        }
 
         #endregion
 
-        [Inject]
-        private void Construct(ICardList cardList,IAIService aiService)
-        {
-            _cardList = cardList;
-            _aiService = aiService;
-        }
-        
-        private void Start()
-        {
-            SetGameplayState(GameplayState.NewGame);
-            GameSceneManager.Instance.BeginLoadGameScene(GameSceneManager.GameScene.MainMenu);
-        }
-        
         private void CheckGameplayState()
         {
             switch (_gameplayState)
@@ -69,78 +129,94 @@ namespace GameState
                     break;
 
                 case GameplayState.NewGame:
-                    CardPoolController.chosedCell = new Vector2Int(-1, -1);
-                    switch (TypeGame)
+                    switch (_gameTypeService.GetGameType())
                     {
                         case GameType.SingleAI:
-                            IsOnline = false;
-                            PlayerManager.Instance.AddPlayer(PlayerType.Human);
-                            ScoreManager.Instance.AddPlayer(1);
-                            PlayerManager.Instance.AddPlayer(PlayerType.AI);
-                            ScoreManager.Instance.AddPlayer(2);
+                            _isOnline = false;
+                            _playerService.AddPlayer(PlayerType.Human, _handPoolManipulator.CreateCardPull(1));
+                            _scoreService.AddPlayer(1);
+                            _playerService.AddPlayer(PlayerType.AI, _handPoolManipulator.CreateCardPull(2));
+                            _scoreService.AddPlayer(2);
                             break;
                         case GameType.SingleHuman:
-                            IsOnline = false;
-                            PlayerManager.Instance.AddPlayer(PlayerType.Human);
-                            ScoreManager.Instance.AddPlayer(1);
-                            PlayerManager.Instance.AddPlayer(PlayerType.Human);
-                            ScoreManager.Instance.AddPlayer(2);
+                            _isOnline = false;
+                            _playerService.AddPlayer(PlayerType.Human, _handPoolManipulator.CreateCardPull(1));
+                            _scoreService.AddPlayer(1);
+                            _playerService.AddPlayer(PlayerType.Human, _handPoolManipulator.CreateCardPull(2));
+                            _scoreService.AddPlayer(2);
                             break;
                         case GameType.MultiplayerHuman:
-                            IsOnline = true;
-                            PlayerManager.Instance.AddPlayer(PlayerType.Human);
-                            ScoreManager.Instance.AddPlayer(1);
-                            PlayerManager.Instance.AddPlayer(PlayerType.Human);
-                            ScoreManager.Instance.AddPlayer(2);
+                            _isOnline = true;
+                            _playerService.AddPlayer(PlayerType.Human, _handPoolManipulator.CreateCardPull(1));
+                            _scoreService.AddPlayer(1);
+                            _playerService.AddPlayer(PlayerType.Human, _handPoolManipulator.CreateCardPull(2));
+                            _scoreService.AddPlayer(2);
+                            _playerService.SetOnlineId(_roomService.GetCurrentPlayerSide());
                             break;
                     }
 
-                    ThemeManager.Instance.Initialization();
+                    _inGameUIService.SetIsOnlineGame(_isOnline);
+                    _networkEventService.SetIsOnline(_isOnline);
+                    
+                    _playerService.SetGameType(_gameTypeService.GetGameType());
+
                     SetGameplayState(GameplayState.NewRound);
-                    CoroutineQueueController.Instance.AddCoroutine(
-                        InGameUI.Instance.IShowNewTurnAnimation((CellFigure) PlayerManager.Instance.GetCurrentSideOnDevice()));
+                    _coroutineService.AddCoroutine(
+                        _inGameUIService.IShowNewTurnAnimation(
+                            (CellFigure) _playerService.GetCurrentSideOnDevice()));
+                    
                     break;
 
                 case GameplayState.NewTurn:
                     _isNewStateInQueue = false;
-                    HistoryFactory.Instance.AddHistoryNewTurn(PlayerManager.Instance.GetCurrentPlayer());
-                    foreach (CardModel card in PlayerManager.Instance.GetCurrentPlayer().FullDeckPool)
+                    _historyService.AddHistoryNewTurn(_playerService.GetCurrentPlayer());
+                    foreach (CardModel card in _playerService.GetCurrentPlayer().FullDeckPool)
                     {
                         card.Info.CardBonusManacost = 0;
                     }
 
-                    PlayerManager.Instance.NextPlayer();
-                    ManaManager.Instance.SetBonusMana(0);
+                    _playerService.NextPlayer();
+                    _manaService.SetBonusMana(0);
 
-                    CoroutineQueueController.Instance.AddCoroutine(
-                        InGameUI.Instance.IShowNewTurnAnimation((CellFigure) PlayerManager.Instance.GetCurrentPlayer()
+                    _coroutineService.AddCoroutine(
+                        _inGameUIService.IShowNewTurnAnimation((CellFigure) _playerService.GetCurrentPlayer()
                             .SideId));
 
 
-                    if (!IsOnline || PlayerManager.Instance.GetCurrentPlayer().SideId ==
-                        RoomManager.GetCurrentPlayerSide())
+                    if (!_isOnline || _playerService.GetCurrentPlayer().SideId ==
+                        _roomService.GetCurrentPlayerSide())
                     {
-                        CardPoolController.Instance.ChangeCurrentPlayerView(PlayerManager.Instance.GetCurrentPlayer());
-                        CoroutineQueueController.Instance.AddCoroutine(EffectManager.Instance.UpdateEffectTurn());
+                        _handPoolView.ChangeCurrentPlayerView(_playerService.GetCurrentPlayer());
+                        _coroutineService.AddCoroutine(_effectService.UpdateEffectTurn());
                     }
 
-                    TurnTimerController.Instance.StartNewTurnTimer(PlayerManager.Instance.GetCurrentPlayer().EntityType,
-                        !IsOnline || PlayerManager.Instance.GetCurrentPlayer().SideId ==
-                        Photon.Pun.PhotonNetwork.LocalPlayer.ActorNumber);
+                    _turnTimerService.StartNewTurnTimer(_playerService.GetCurrentPlayer().EntityType,
+                        (!_isOnline || _playerService.GetCurrentPlayer().SideId ==
+                            Photon.Pun.PhotonNetwork.LocalPlayer.ActorNumber)
+                            ? () =>
+                            {
+                                SetGamePlayStateQueue(GameplayState.NewTurn);
+                                _checkEventNetworkService.RaiseEventEndTurn();
+                            }
+                            : null);
 
-                    ManaManager.Instance.RestoreAllMana();
-                    ManaManager.Instance.UpdateManaUI();
+                    _manaService.RestoreAllMana();
+                    _manaUIService.UpdateManaUI();
 
-                    CardPoolController.Instance.UpdateCardPosition(false);
-                    CardPoolController.Instance.UpdateCardUI();
+                    _handPoolView.UpdateCardPosition(false);
+                    _handPoolView.UpdateCardUI();
+                    _rechangerService.ResetRechanger();
 
-                    InGameUI.Instance.NewTurn();
+                    _inGameUIService.NewTurn();
 
-                    if (PlayerManager.Instance.GetCurrentPlayer().EntityType.Equals(PlayerType.AI))
+                    if (_playerService.GetCurrentPlayer().EntityType.Equals(PlayerType.AI))
                     {
                         Debug.Log("AI TURN START");
-                        _figureCount = Mathf.Min(_figureCount + 1, _maxFigureCount);
-                        _aiService.StartBotTurn(_figureCount);
+                        _figureCount = Mathf.Min(_figureCount + 1, MAX_FIGURE_COUNT);
+                        _aiService.StartBotTurn(_figureCount,
+                            _scoreService.GetScore(_playerService.GetPlayers()[0].SideId),
+                            _scoreService.GetScore(_playerService.GetPlayers()[1].SideId),
+                            () => { SetGameplayState(GameplayState.NewTurn); });
                     }
                     else
                     {
@@ -149,105 +225,117 @@ namespace GameState
 
                     break;
                 case GameplayState.GameOver:
-                    if (InGameUI.Instance.IsGameOverShowed) return;
-                    if (IsOnline) RoomManager.LeaveRoom(false);
+                    if (_inGameUIService.GetIsGameOverShowed()) return;
+                    if (_isOnline) _roomService.LeaveRoom(false);
                     int valueMoney = 0;
-                    if (TypeGame != GameType.SingleHuman &&
-                        ScoreManager.Instance.GetRoundWinner() != -1 &&
-                        PlayerManager.Instance.GetCurrentSideOnDevice()==ScoreManager.Instance.GetRoundWinner()) valueMoney = CoinController.coinPerWin;
-                    else if (TypeGame != GameType.SingleHuman &&
-                             ScoreManager.Instance.GetRoundWinner() == -1) valueMoney = CoinController.coinPerWin / 2;
-                    CoinController.AllCoins += valueMoney;
-                    CoinController.AllCoins += valueMoney;
-                    InGameUI.Instance.StateGameOverPanel(true, valueMoney);
-                    CoroutineQueueController.Instance.ClearQueue();
-                    
-                    int currentWinner = ScoreManager.Instance.GetGameWinner();
+                    if (_gameTypeService.GetGameType() != GameType.SingleHuman &&
+                        _scoreWinnerService.GetRoundWinner() != -1 &&
+                        _playerService.GetCurrentSideOnDevice() == _scoreWinnerService.GetRoundWinner())
+                        valueMoney = _coinService.GetCoinPerWin();
+                    else if (_gameTypeService.GetGameType() != GameType.SingleHuman &&
+                             _scoreWinnerService.GetRoundWinner() == -1) valueMoney = _coinService.GetCoinPerWin() / 2;
+                    _coinService.SetCurrentMoney(_coinService.GetCurrentMoney() + valueMoney);
+                    _inGameUIService.StateGameOverPanel(true, valueMoney);
+                    _coroutineService.ClearQueue();
+
+                    int currentWinner = _scoreWinnerService.GetGameWinner();
                     if (currentWinner == -1)
                     {
-                        AnalyticController.Player_Draw_Match(TypeGame,_cardList.GetCardList());
+                        _matchEventsAnalyticService.Player_Draw_Match(_gameTypeService.GetGameType(),
+                            _cardList.GetCardList());
                     }
                     else
                     {
                         bool isWin = false;
-                        switch (TypeGame)
+                        switch (_gameTypeService.GetGameType())
                         {
                             case GameType.MultiplayerHuman:
-                                isWin = currentWinner == RoomManager.GetCurrentPlayerSide();
+                                isWin = currentWinner == _roomService.GetCurrentPlayerSide();
                                 break;
                             case GameType.SingleAI:
-                                isWin = PlayerManager.Instance.Players[currentWinner - 1].EntityType == PlayerType.Human;
+                                isWin = _playerService.GetPlayers()[currentWinner - 1].EntityType ==
+                                        PlayerType.Human;
                                 break;
                         }
-                        if (isWin) AnalyticController.Player_Win_Match(TypeGame,_cardList.GetCardList());
-                        else AnalyticController.Player_Lose_Match(TypeGame,_cardList.GetCardList());
+
+                        if (isWin)
+                            _matchEventsAnalyticService.Player_Win_Match(_gameTypeService.GetGameType(),
+                                _cardList.GetCardList());
+                        else
+                            _matchEventsAnalyticService.Player_Lose_Match(_gameTypeService.GetGameType(),
+                                _cardList.GetCardList());
                     }
 
                     break;
                 case GameplayState.RestartGame:
-                    ScoreManager.Instance.ClearRoundWinners();
+                    _scoreWinnerService.ClearRoundWinners();
                     SetGameplayState(GameplayState.NewRound);
 
                     break;
                 case GameplayState.RoundOver:
-                    TurnTimerController.Instance.StopTimer();
-                    InGameUI.Instance.StopTimer();
-                    CoroutineQueueController.Instance.ClearQueue();
-                    ScoreManager.Instance.AddRoundWinner(ScoreManager.Instance.GetRoundWinner());
-                    if (ScoreManager.Instance.IsExistGameWinner())
+                    _turnTimerService.StopTimer();
+                    _inGameUIService.StopTimer();
+                    _coroutineService.ClearQueue();
+                    _scoreWinnerService.AddRoundWinner(_scoreWinnerService.GetRoundWinner());
+                    if (_scoreWinnerService.IsExistGameWinner())
                     {
                         SetGameplayState(GameplayState.GameOver);
                     }
                     else
                     {
-                        CoroutineQueueController.Instance.AddCoroutine(InGameUI.Instance.ShowRoundOverAnimation());
-                        CoroutineQueueController.Instance.AddCoroutine(ISetStateQueueProcess(GameplayState.NewRound));
+                        _coroutineService.AddCoroutine(_inGameUIService.ShowRoundOverAnimation());
+                        _coroutineService.AddCoroutine(SetStateQueueProcess(GameplayState.NewRound));
                     }
 
                     break;
                 case GameplayState.NewRound:
                     _figureCount = 0;
                     _aiService.StopBotTurnForce();
-                    PlayerManager.Instance.ResetCurrentPlayer();
-                    Field.Instance.Initialization(ScoreManager.Instance.GetRoundCount());
-                    CoroutineQueueController.Instance.ClearQueue();
-                    HistoryFactory.Instance.RestartGame();
-                    EffectManager.Instance.ClearEffect();
-                    foreach (var t in PlayerManager.Instance.Players)
+                    _playerService.ResetCurrentPlayer();
+                    _fieldService.Initialization(_scoreWinnerService.GetRoundCount());
+                    _coroutineService.ClearQueue();
+                    _historyService.ClearHistory();
+                    _effectService.ClearEffect();
+                    foreach (var t in _playerService.GetPlayers())
                     {
-                        CardPoolController.Instance.ResetHandPool(t);
+                        _handPoolManipulator.ResetHandPool(t);
                         foreach (CardModel card in t.FullDeckPool)
                         {
                             card.Info.CardBonusManacost = 0;
                         }
                     }
 
-                    ManaManager.Instance.SetBonusMana(0);
-                    ManaManager.Instance.ResetMana(ScoreManager.Instance.GetRoundCount());
-                    ManaManager.Instance.RestoreAllMana();
-                    ManaManager.Instance.UpdateManaUI();
+                    _manaService.SetBonusMana(0);
+                    _manaService.ResetMana(_scoreWinnerService.GetRoundCount());
+                    _manaService.RestoreAllMana();
+                    _manaUIService.UpdateManaUI();
 
-                    CardPoolController.Instance.ChangeCurrentPlayerView(PlayerManager.Instance.GetCurrentPlayerOnDevice());
-                    ScoreManager.Instance.ClearAllScore();
-                    CardPoolController.Instance.UpdateCardPosition(false);
+                    _handPoolView.ChangeCurrentPlayerView(_playerService.GetCurrentPlayerOnDevice());
+                    _scoreService.ClearAllScore();
+                    _handPoolView.UpdateCardPosition(false);
 
-                    TurnTimerController.Instance.StartNewTurnTimer(PlayerManager.Instance.GetCurrentPlayer().EntityType,
-                        !IsOnline || PlayerManager.Instance.GetCurrentPlayer().SideId ==
-                        Photon.Pun.PhotonNetwork.LocalPlayer.ActorNumber);
+                    _turnTimerService.StartNewTurnTimer(_playerService.GetCurrentPlayer().EntityType,
+                        (!_isOnline || _playerService.GetCurrentPlayer().SideId ==
+                            Photon.Pun.PhotonNetwork.LocalPlayer.ActorNumber)
+                            ? () =>
+                            {
+                                SetGamePlayStateQueue(GameplayState.NewTurn);
+                                _checkEventNetworkService.RaiseEventEndTurn();
+                            }
+                            : null);
 
 
-                    InGameUI.Instance.NewTurn();
-                    InGameUI.Instance.SetSideBannerTurn(1);
-                    InGameUI.Instance.UpdateScore();
+                    _inGameUIService.NewTurn();
+                    _inGameUIService.SetSideBannerTurn(1);
+                    _inGameUIService.UpdateScore(0, 0);
+                    _inGameUIService.UpdatePlayerRP(
+                        _scoreWinnerService.GetCountRoundWin(1),
+                        _scoreWinnerService.GetCountRoundWin(2));
                     break;
             }
         }
 
-        private void Update()
-        {
-            if (Input.GetKeyDown(KeyCode.I)) Debug.Log(RoomManager.GetPlayerInfo());
-            if (Input.GetKeyDown(KeyCode.K)) NetworkEventManager.RaiseEventEndTurn();
-        }
+        
 
         public void SetGameplayState(GameplayState state)
         {
@@ -261,11 +349,11 @@ namespace GameState
             if (!_isNewStateInQueue)
             {
                 _isNewStateInQueue = true;
-                CoroutineQueueController.Instance.AddCoroutine(ISetStateQueueProcess(state));
+                _coroutineService.AddCoroutine(SetStateQueueProcess(state));
             }
         }
 
-        private IEnumerator ISetStateQueueProcess(GameplayState state)
+        private IEnumerator SetStateQueueProcess(GameplayState state)
         {
             SetGameplayState(state);
             _isNewStateInQueue = false;
@@ -275,6 +363,17 @@ namespace GameState
         public bool IsCurrentGameplayState(GameplayState state)
         {
             return _gameplayState == state;
+        }
+
+        public bool GetIsOnline()
+        {
+            return _isOnline;
+        }
+
+        public void Initialize()
+        {
+            SetGameplayState(GameplayState.NewGame);
+            _gameSceneService.BeginLoadGameScene(GameSceneManager.GameScene.MainMenu);
         }
     }
 }

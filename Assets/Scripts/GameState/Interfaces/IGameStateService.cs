@@ -6,6 +6,6 @@
         public void SetGameplayState(GameplayState state);
         public void SetGamePlayStateQueue(GameplayState state);
         public bool IsCurrentGameplayState(GameplayState state);
-        public void AddScore(int value, int sideId);
+        public bool GetIsOnline();
     }
 }

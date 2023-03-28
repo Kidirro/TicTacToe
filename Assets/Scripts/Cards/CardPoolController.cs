@@ -2,17 +2,18 @@ using System.Collections;
 using System.Collections.Generic;
 using Cards.CustomType;
 using Cards.Interfaces;
-using Coroutine;
 using Coroutine.Interfaces;
+using Mana.Interfaces;
 using Players.Interfaces;
-using ScreenScaler;
+using ScreenScaler.Interfaces;
+using UIElements;
 using UnityEngine;
 using Zenject;
 using Button = UnityEngine.UI.Button;
 
 namespace Cards
 {
-    public class CardPoolController : MonoBehaviour, IHandPoolManipulator, IHandPoolView
+    public class CardPoolController : MonoBehaviour, IHandPoolManipulator, IHandPoolView, IRechangerService
     {
         #region Field
 
@@ -28,6 +29,9 @@ namespace Cards
         [SerializeField]
         private float _heightLift;
 
+        [SerializeField]
+        private Vector2 _startPointDelta;
+
         [Header("Card properties"), SerializeField]
         private float _widthCard;
 
@@ -40,14 +44,18 @@ namespace Cards
         private const int SLOTS_COUNT = 5;
         private const int CARD_PER_TURN = 2;
 
+        private Vector2 _startPoint;
+        
+        [SerializeField]
+        private AnimationFading _cardRechanger;
+
+        [SerializeField]
+        private Button _cardRechangerBTN;
+
 
         private PlayerInfo _currentPlayerView;
 
-        public PlayerInfo CurrentPlayerView => _currentPlayerView;
-
         #endregion
-
-        public static Vector2Int chosedCell = new(-1, -1);
 
         #region Dependency
 
@@ -56,6 +64,7 @@ namespace Cards
         private IPlayerService _playerService;
         private ICoroutineService _coroutineService;
         private ICoroutineAwaitService _coroutineAwaitService;
+        private IManaService _manaService;
 
         [Inject]
         private void Construct(
@@ -63,13 +72,16 @@ namespace Cards
             ICardFactory cardFactory,
             IPlayerService playerService,
             ICoroutineService coroutineService,
-            ICoroutineAwaitService coroutineAwaitService)
+            ICoroutineAwaitService coroutineAwaitService,
+            IManaService manaService
+        )
         {
             _screenScaler = screenScaler;
             _cardFactory = cardFactory;
             _playerService = playerService;
             _coroutineService = coroutineService;
             _coroutineAwaitService = coroutineAwaitService;
+            _manaService = manaService;
         }
 
         #endregion
@@ -87,6 +99,7 @@ namespace Cards
             player.DeckPool.RemoveRange(card, 1);
             card = player.HandPool.Count - 1;
             player.HandPool[card].gameObject.SetActive(true);
+            player.HandPool[card].SetTransformPosition(_startPoint);
         }
 
         public void RemoveCard(PlayerInfo player, int id)
@@ -137,10 +150,11 @@ namespace Cards
                     new Vector2(
                         (_widthBorder + stepPos * (i + 1) - _widthCard * currentCount / 2) *
                         _screenScaler.GetWidthRatio(), posY);
+                // if (_currentPlayerView.HandPool[i].transform.parent != _cardTransformParent)
+                //     _currentPlayerView.HandPool[i].SetTransformParent(_cardTransformParent, _startPoint);
                 _currentPlayerView.HandPool[i].SetTransformScale(0.7f, instantly);
                 _currentPlayerView.HandPool[i].SetSibling(i);
                 _currentPlayerView.HandPool[i].SetTransformPosition(finPosition, instantly);
-                _currentPlayerView.HandPool[i].SetTransformParent(_cardTransformParent);
                 _currentPlayerView.HandPool[i].SetTransformRotation(_angleDelta - stepRot * (i + 1), instantly);
                 _currentPlayerView.HandPool[i]
                     .SetSideCard(_currentPlayerView.HandPool[i].Info, _currentPlayerView.SideId);
@@ -151,7 +165,8 @@ namespace Cards
         {
             foreach (CardModel card in _currentPlayerView.HandPool)
             {
-                card.UpdateUI(card.Info, _currentPlayerView, true);
+                card.UpdateUI(card.Info, _currentPlayerView,
+                    _manaService.IsEnoughMana(card.Info.CardManacost + card.Info.CardBonusManacost));
             }
         }
 
@@ -201,16 +216,10 @@ namespace Cards
                 RemoveCard(player, player.HandPool[0]);
             }
         }
-
-        [SerializeField]
-        private AnimationFading _cardRechanger;
-
-        [SerializeField]
-        private Button _cardRechangerBTN;
-
-
+        
         public void UseRechanger()
         {
+            if (_playerService.GetCurrentPlayer() != _currentPlayerView) return;
             CardModel cardModel = _currentPlayerView.HandPool[Random.Range(0, _currentPlayerView.HandPool.Count)];
             _cardRechanger.FadeOut();
             _cardRechangerBTN.interactable = false;
@@ -221,21 +230,29 @@ namespace Cards
         private IEnumerator IRechanherProcess(CardModel cardModel)
         {
             cardModel.SetGroupAlpha(1, 0, false);
-            yield return StartCoroutine(
-                _coroutineAwaitService.IAwaitProcess(5f));
+            yield return _coroutineAwaitService.AwaitTime(5f);
             RemoveCard(_playerService.GetCurrentPlayer(), cardModel);
             AddCard(_playerService.GetCurrentPlayer());
             UpdateCardPosition(false);
         }
 
-        public List<CardModel> CreateCardPull()
+        public List<CardModel> CreateCardPull(int side)
         {
-            List<CardModel> list = _cardFactory.CreateDeck();
-            foreach (CardModel card in list) card.SetTransformParent(_cardTransformParent);
+            List<CardModel> list = _cardFactory.CreateDeck(side);
+            _startPoint = _screenScaler.GetVector(new Vector2(_widthBorder, _buttonBorder) + _startPointDelta);
+            foreach (CardModel card in list)
+                card.SetTransformParent(_cardTransformParent,_startPoint);
             return list;
         }
 
-        public bool IsCurrentPlayerOnSlot()=>
+        public void ResetRechanger()
+        {
+            if (_cardRechangerBTN.interactable) return;
+            _cardRechanger.FadeIn();
+            _cardRechangerBTN.interactable = true;
+        }
+
+        public bool IsCurrentPlayerOnSlot() =>
             _currentPlayerView.SideId == _playerService.GetCurrentPlayer().SideId;
     }
 }

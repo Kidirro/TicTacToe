@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using Cards.Enum;
 using ScreenScaler;
+using ScreenScaler.Interfaces;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -85,17 +87,17 @@ namespace Cards.CustomType
         #endregion
 
 
-        #region Interfaces
+        #region Dependecy
 
         private IScreenScaler _screenScaler;
-
-        #endregion
 
         [Inject]
         private void Construct(IScreenScaler screenScaler)
         {
             _screenScaler = screenScaler;
         }
+
+        #endregion
 
         void Awake()
         {
@@ -147,6 +149,28 @@ namespace Cards.CustomType
                 bonus.BonusImage.SetActive(bonus.BonusType == info.CardBonus);
             }
         }
+        
+        public void UpdateUI(CardInfo info, int playerSide, bool isNeedLight)
+        {
+            _manapointsText.text = (info.CardManacost + info.CardBonusManacost).ToString();
+            SetSideCard(info, playerSide);
+
+            string desc;
+            desc = I2.Loc.LocalizationManager.TryGetTranslation(info.CardDescription, out desc)
+                ? I2.Loc.LocalizationManager.GetTranslation(info.CardDescription)
+                : info.CardDescription;
+
+            StartCoroutine(_cardBacklight.AlphaWithLerp(
+                _cardBacklight.color.a,
+                (isNeedLight) ? 1 : 0,
+                LIGHT_COUNT_FRAME));
+            _cardDescription.text = desc;
+
+            foreach (BonusImageType bonus in _bonusImageList)
+            {
+                bonus.BonusImage.SetActive(bonus.BonusType == info.CardBonus);
+            }
+        }
 
         public void SetTransformScale(float reals, bool instantly = true)
         {
@@ -167,10 +191,10 @@ namespace Cards.CustomType
         }
 
 
-        public void SetTransformParent(Transform parent)
+        public void SetTransformParent(Transform parent, Vector2 position)
         {
             _cardTransformRect.SetParent(parent);
-            SetTransformPosition(Vector2.zero);
+            SetTransformPosition(position);
             _cardTransformRect.localScale = Vector3.one;
         }
 
@@ -222,6 +246,7 @@ namespace Cards.CustomType
             {
                 if (_isPositionCoroutineWork) StopCoroutine(_positionCoroutine);
                 _isPositionCoroutineWork = true;
+                Debug.Log($"Set new position init {_cardTransformRect.localPosition} fin {position}");
                 _positionCoroutine = StartCoroutine(_cardTransformRect.LocalPositionWithLerp
                     (
                         _cardTransformRect.localPosition,
@@ -258,7 +283,32 @@ namespace Cards.CustomType
 
         public void SetTransformPositionWithFingerDistance(Vector2 position, bool instantly = true)
         {
-            SetTransformPosition(position + _fingerToCardDistance, instantly);
+            SetTransformPosition(GetPositionWithDistance(position), instantly);
+        }
+
+        public void ShowTip(string text, bool instantly)
+        {
+            _cardTip.ShowTip(text, instantly);
+        }
+        
+        public void HideTip(bool instantly)
+        {
+            _cardTip.HideTip(instantly);
+        }
+
+        public Vector2 GetFingerDistance()
+        {
+            return _fingerToCardDistance;
+        }
+
+        public Vector2 GetPositionWithDistance(Vector2 position)
+        {
+            return position + _screenScaler.GetVector(_fingerToCardDistance);
+        }
+
+        public Vector2 GetClearPosition()
+        {
+            return (Vector2)_cardTransformRect.localPosition - _screenScaler.GetVector(_fingerToCardDistance);
         }
     }
 }

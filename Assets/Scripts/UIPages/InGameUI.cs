@@ -1,368 +1,413 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
-using Analytic;
-using Cards;
+using Analytic.Interfaces;
 using Cards.Interfaces;
-using Coroutine;
-using GameScene;
-using GameState;
+using Coroutine.Interfaces;
+using GameScene.Interfaces;
+using GameState.Interfaces;
+using GameTypeService.Enums;
+using GameTypeService.Interfaces;
+using Network.Interfaces;
+using Players.Interfaces;
+using Score.Interfaces;
+using Theme.Interfaces;
+using TMPro;
+using TurnTimer.Interfaces;
+using UIElements;
+using UIPages.Interfaces;
 using UnityEngine;
 using UnityEngine.UI;
-using TMPro;
-using Managers;
-using Network;
-using Players;
-using Score;
-using Theme;
-using TurnTimer;
 using Zenject;
 
-public class InGameUI : Singleton<InGameUI>
+namespace UIPages
 {
-    public bool IsGameOverShowed
+    public class InGameUI : MonoBehaviour, IInGameUIService
     {
-        get => _gameOverPanel.gameObject.activeSelf;
-    }
+        [SerializeField]
+        private TextMeshProUGUI _playerOneScoreText;
 
-    [SerializeField]
-    private TextMeshProUGUI _playerOneScoreText;
+        [SerializeField]
+        private List<GameObject> _playerOneRPList;
 
-    [SerializeField]
-    private List<GameObject> _playerOneRPList;
+        [SerializeField]
+        private TextMeshProUGUI _playerTwoScorText;
 
-    [SerializeField]
-    private TextMeshProUGUI _playerTwoScorText;
+        [SerializeField]
+        private List<GameObject> _playerTwoRPList;
 
-    [SerializeField]
-    private List<GameObject> _playerTwoRPList;
-
-    [SerializeField]
-    private GameObject _newTurnBTN;
+        [SerializeField]
+        private GameObject _newTurnBTN;
 
 
-    [Space, Header("GameOver Properties"), SerializeField]
-    private AnimationFading _gameOverPanel;
+        [Space, Header("GameOver Properties"), SerializeField]
+        private AnimationFading _gameOverPanel;
 
-    [SerializeField]
-    private Image _gameOverLogo;
+        [SerializeField]
+        private Image _gameOverLogo;
 
-    [SerializeField]
-    private GameObject _windrawBG;
+        [SerializeField]
+        private GameObject _windrawBG;
 
-    [SerializeField]
-    private GameObject _loseBG;
+        [SerializeField]
+        private GameObject _loseBG;
 
-    [SerializeField]
-    private List<GameObject> _bgList;
+        [SerializeField]
+        private List<GameObject> _bgList;
 
-    [SerializeField]
-    private GameObject _gameOverReplyBTN;
+        [SerializeField]
+        private GameObject _gameOverReplyBTN;
 
-    [SerializeField]
-    private TextMeshProUGUI _moneyValue;
+        [SerializeField]
+        private TextMeshProUGUI _moneyValue;
 
-    [SerializeField]
-    private TextMeshProUGUI _winnerText;
+        [SerializeField]
+        private TextMeshProUGUI _winnerText;
 
-    [SerializeField]
-    private GameObject _winnerArea;
+        [SerializeField]
+        private GameObject _winnerArea;
 
-    [SerializeField]
-    private GameObject _drawArea;
+        [SerializeField]
+        private GameObject _drawArea;
 
-    [Space, Header("RoundOver Properties"), SerializeField]
-    private AnimationFading _roundOverPanel;
+        [Space, Header("RoundOver Properties"), SerializeField]
+        private AnimationFading _roundOverPanel;
 
-    [SerializeField]
-    private Image _roundOverLogo;
+        [SerializeField]
+        private Image _roundOverLogo;
 
-    [SerializeField]
-    private GameObject _windrawRoundOverBG;
+        [SerializeField]
+        private GameObject _windrawRoundOverBG;
 
-    [SerializeField]
-    private GameObject _loseRoundOverBG;
+        [SerializeField]
+        private GameObject _loseRoundOverBG;
 
-    [SerializeField]
-    private TextMeshProUGUI _winnerRoundOverText;
+        [SerializeField]
+        private TextMeshProUGUI _winnerRoundOverText;
 
-    [SerializeField]
-    private GameObject _winnerRoundOverArea;
+        [SerializeField]
+        private GameObject _winnerRoundOverArea;
 
-    [SerializeField]
-    private GameObject _drawRoundOverArea;
+        [SerializeField]
+        private GameObject _drawRoundOverArea;
 
-    [SerializeField]
-    private List<GameObject> _p1RoundOverPoints;
+        [SerializeField]
+        private List<GameObject> _p1RoundOverPoints;
 
-    [SerializeField]
-    private List<GameObject> _p2RoundOverPoints;
+        [SerializeField]
+        private List<GameObject> _p2RoundOverPoints;
 
-    [Space, Header("Timer Properties"), SerializeField]
-    private GameObject _timerPanel;
+        [Space, Header("Timer Properties"), SerializeField]
+        private GameObject _timerPanel;
 
-    [SerializeField]
-    private Image _timerFilledImg;
+        [SerializeField]
+        private Image _timerFilledImg;
 
-    [SerializeField]
-    private float _timerEnableTime;
+        [SerializeField]
+        private float _timerEnableTime;
 
-    [SerializeField]
-    private float _timerStartAnimationTime;
+        [SerializeField]
+        private float _timerStartAnimationTime;
 
-    private Coroutine _timerCoroutine;
+        private UnityEngine.Coroutine _timerCoroutine;
 
-    [Header("New turn banner properties"), SerializeField]
-    private Animator _animatorNewTurn;
+        [Header("New turn banner properties"), SerializeField]
+        private Animator _animatorNewTurn;
 
-    [Header("Pause menu Properties"), SerializeField]
-    private GameObject _pauseMenuReplyBTN;
+        [Header("Pause menu Properties"), SerializeField]
+        private GameObject _pauseMenuReplyBTN;
 
-    [Header("Paper new turn properties"), SerializeField]
-    private AnimationFading _paperNewTurnAnimation;
+        [Header("Paper new turn properties"), SerializeField]
+        private AnimationFading _paperNewTurnAnimation;
 
-    [SerializeField]
-    private Image _paperNewTurnPlayerImage;
+        [SerializeField]
+        private Image _paperNewTurnPlayerImage;
 
 
+        private static readonly int newTurn = Animator.StringToHash("NewTurn");
+        private static readonly int xTurn = Animator.StringToHash("XTurn");
+        private static readonly int oTurn = Animator.StringToHash("OTurn");
 
-    private ICardList _cardList;
-    
-    [Inject]
-    private void Construct(ICardList cardList)
-    {
-        _cardList = cardList;
-    }
-    
-    private void UpdateReplyState()
-    {
-        _pauseMenuReplyBTN.SetActive(!GameplayManager.IsOnline);
-        _gameOverReplyBTN.SetActive(!GameplayManager.IsOnline);
-    }
+        private Action _replyButtonAction;
+        private Action _returnMenuButtonAction;
+        private Action _newTurnButtonAction;
+        private bool _isOnlineGame;
 
-    public void NewTurn()
-    {
-        StopTimer();
-        ClearTriggers();
-        _animatorNewTurn.SetTrigger("NewTurn");
-        _timerCoroutine = StartCoroutine(ITimerProcess());
-        ;
-        _newTurnBTN.SetActive(CardPoolController.Instance.IsCurrentPlayerOnSlot);
-        Debug.Log($"Current side : {_newTurnBTN.activeSelf}");
-    }
+        #region Dependecy
 
-    public void SetSideBannerTurn(int side)
-    {
-        ClearTriggers();
-        _animatorNewTurn.SetTrigger((side == 1) ? "XTurn" : "OTurn");
-    }
+        private IHandPoolView _handPoolView;
+        private IScoreWinnerService _scoreWinnerService;
+        private IRoomService _roomService;
+        private IPlayerService _playerService;
+        private IThemeService _themeService;
+        private ITurnTimerService _turnTimerService;
+        private ICoroutineAwaitService _coroutineAwaitService;
+        private IGameTypeService _gameTypeService;
 
-    private void ClearTriggers()
-    {
-        _animatorNewTurn.ResetTrigger("NewTurn");
-        _animatorNewTurn.ResetTrigger("XTurn");
-        _animatorNewTurn.ResetTrigger("OTurn");
-    }
-
-    public void UpdateScore()
-    {
-        _playerOneScoreText.text = ScoreManager.Instance.GetScore(1).ToString();
-        _playerTwoScorText.text = ScoreManager.Instance.GetScore(2).ToString();
-
-        UpdatePlayerRP();
-    }
-
-    private void UpdatePlayerRP()
-    {
-        for (int i = 0; i < _playerOneRPList.Count; i++)
+        [Inject]
+        private void Construct(IHandPoolView handPoolView, IScoreService scoreService,
+            IScoreWinnerService scoreWinnerService, IRoomService roomService, IPlayerService playerService,
+            IThemeService themeService,
+            ITurnTimerService turnTimerService, ICoroutineAwaitService coroutineAwaitService,
+            IGameTypeService gameTypeService)
         {
-            _playerOneRPList[i].SetActive(i < ScoreManager.Instance.GetCountRoundWin(1));
+            _handPoolView = handPoolView;
+            _scoreWinnerService = scoreWinnerService;
+            _roomService = roomService;
+            _playerService = playerService;
+            _themeService = themeService;
+            _turnTimerService = turnTimerService;
+            _coroutineAwaitService = coroutineAwaitService;
+            _gameTypeService = gameTypeService;
         }
 
-        for (int i = 0; i < _playerTwoRPList.Count; i++)
-        {
-            _playerTwoRPList[i].SetActive(i < ScoreManager.Instance.GetCountRoundWin(2));
-        }
-    }
+        #endregion
 
-    public void ReturnHome()
-    {
-        if (!GameplayManager.IsCurrentGameplayState(GameplayManager.GameplayState.GameOver))
+        private void UpdateReplyState()
         {
-            AnalyticController.Player_Lose_Match(GameplayManager.TypeGame, _cardList.GetCardList());
-            AnalyticController.Player_Leave_Match(GameplayManager.TypeGame, _cardList.GetCardList());
+            _pauseMenuReplyBTN.SetActive(!_isOnlineGame);
+            _gameOverReplyBTN.SetActive(!_isOnlineGame);
         }
 
-        if (GameplayManager.IsOnline) RoomManager.LeaveRoom(true);
-        GameSceneManager.Instance.BeginTransaction();
-    }
-
-    public void EndButtonPressed()
-    {
-        if (GameplayManager.IsOnline && PlayerManager.Instance.GetCurrentPlayer().SideId !=
-            Photon.Pun.PhotonNetwork.LocalPlayer.ActorNumber) return;
-        GameplayManager.Instance.SetGamePlayStateQueue(GameplayManager.GameplayState.NewTurn);
-        NetworkEventManager.RaiseEventEndTurn();
-    }
-
-    public void StateGameOverPanel(bool state, int value = 0)
-    {
-        UpdateReplyState();
-        if (state) _gameOverPanel.FadeIn();
-        else _gameOverPanel.FadeOut();
-        if (state)
+        public void NewTurn()
         {
-            int currentWinner = ScoreManager.Instance.GetGameWinner();
+            StopTimer();
+            ClearTriggers();
+            _animatorNewTurn.SetTrigger(newTurn);
+            _timerCoroutine = StartCoroutine(ITimerProcess());
+
+            _newTurnBTN.SetActive(_handPoolView.IsCurrentPlayerOnSlot());
+            Debug.Log($"Current side : {_newTurnBTN.activeSelf}");
+        }
+
+        public void SetSideBannerTurn(int side)
+        {
+            ClearTriggers();
+            _animatorNewTurn.SetTrigger((side == 1) ? "XTurn" : "OTurn");
+        }
+
+        public void SetRestartGameAction(Action action)
+        {
+            _replyButtonAction = action;
+        }
+
+        public void SetReturnHomeAction(Action action)
+        {
+            _returnMenuButtonAction = action;
+        }
+
+        public void SetEndTurnAction(Action action)
+        {
+            _newTurnButtonAction = action;
+        }
+
+        public void SetIsOnlineGame(bool state)
+        {
+            _isOnlineGame = state;
+        }
+
+        private void ClearTriggers()
+        {
+            _animatorNewTurn.ResetTrigger(newTurn);
+            _animatorNewTurn.ResetTrigger(xTurn);
+            _animatorNewTurn.ResetTrigger(oTurn);
+        }
+
+        public void UpdateScore(int score1Player, int score2Player)
+        {
+            _playerOneScoreText.text = score1Player.ToString();
+            _playerTwoScorText.text = score2Player.ToString();
+        }
+
+        public void UpdatePlayerRP(int score1Player, int score2Player)
+        {
+            for (int i = 0; i < _playerOneRPList.Count; i++)
+            {
+                _playerOneRPList[i].SetActive(i < score1Player);
+            }
+
+            for (int i = 0; i < _playerTwoRPList.Count; i++)
+            {
+                _playerTwoRPList[i].SetActive(i < score2Player);
+            }
+        }
+
+        public void ReturnHome()
+        {
+            _returnMenuButtonAction?.Invoke();
+        }
+
+        public void EndButtonPressed()
+        {
+            _newTurnButtonAction?.Invoke();
+        }
+
+        public void StateGameOverPanel(bool state, int value = 0)
+        {
+            UpdateReplyState();
+            if (state)
+            {
+                _gameOverPanel.FadeIn();
+                int currentWinner = _scoreWinnerService.GetGameWinner();
+                bool isWin = false;
+                if (currentWinner != -1)
+                {
+                    switch (_gameTypeService.GetGameType())
+                    {
+                        case GameType.MultiplayerHuman:
+                            isWin = currentWinner == _roomService.GetCurrentPlayerSide();
+                            break;
+                        case GameType.SingleAI:
+                            isWin = _playerService.GetPlayers()[currentWinner - 1].EntityType == PlayerType.Human;
+                            break;
+                        case GameType.SingleHuman:
+                            isWin = true;
+                            break;
+                    }
+                }
+
+                _windrawBG.SetActive(isWin || currentWinner == -1);
+                _loseBG.SetActive(!(isWin || currentWinner == -1));
+                _moneyValue.text = "+" + value.ToString();
+
+                _winnerText.text = (currentWinner == -1) ? "Draw" :
+                    (isWin) ? "You\nwin" : "You\nlose";
+
+                _drawArea.SetActive(_scoreWinnerService.GetGameWinner() == -1);
+                _winnerArea.SetActive(_scoreWinnerService.GetGameWinner() != -1);
+                for (int i = 0; i < _bgList.Count; i++)
+                {
+                    _bgList[i].SetActive(i == Mathf.Max(0, currentWinner));
+                }
+
+                if (_scoreWinnerService.GetGameWinner() != -1)
+                    _gameOverLogo.sprite =
+                        _themeService.GetSprite((CellFigure) _scoreWinnerService.GetGameWinner());
+            }
+            else
+            {
+                _gameOverPanel.FadeOut();
+            }
+        }
+
+        public void RestartGame()
+        {
+            _replyButtonAction?.Invoke();
+        }
+
+
+        public void StopTimer()
+        {
+            if (_timerCoroutine != null) StopCoroutine(_timerCoroutine);
+            _timerCoroutine = null;
+        }
+
+        private IEnumerator ITimerProcess()
+        {
+            _timerPanel.SetActive(false);
+
+            while (_timerEnableTime < _turnTimerService.GetTimeLeft()) yield return null;
+
+            _timerFilledImg.fillAmount = 1;
+            _timerPanel.SetActive(true);
+
+            while (_timerStartAnimationTime < _turnTimerService.GetTimeLeft()) yield return null;
+
+            while (_turnTimerService.GetTimeLeft() >= 0)
+            {
+                _timerFilledImg.fillAmount = _turnTimerService.GetTimeLeft() / _timerStartAnimationTime;
+                yield return new WaitForSecondsRealtime(0.1f);
+            }
+        }
+
+        public IEnumerator ShowRoundOverAnimation()
+        {
+            _roundOverPanel.FadeIn();
+            int currentWinner = _scoreWinnerService.GetRoundWinner();
             bool isWin = false;
             if (currentWinner != -1)
             {
-                switch (GameplayManager.TypeGame)
+                switch (_gameTypeService.GetGameType())
                 {
-                    case GameplayManager.GameType.MultiplayerHuman:
-                        isWin = currentWinner == RoomManager.GetCurrentPlayerSide();
+                    case GameType.MultiplayerHuman:
+                        isWin = currentWinner == _roomService.GetCurrentPlayerSide();
                         break;
-                    case GameplayManager.GameType.SingleAI:
-                        isWin = PlayerManager.Instance.Players[currentWinner - 1].EntityType == PlayerType.Human;
+                    case GameType.SingleAI:
+                        isWin = _playerService.GetPlayers()[currentWinner - 1].EntityType == PlayerType.Human;
                         break;
-                    case GameplayManager.GameType.SingleHuman:
+                    case GameType.SingleHuman:
                         isWin = true;
                         break;
                 }
             }
 
-            _windrawBG.SetActive(isWin || currentWinner == -1);
-            _loseBG.SetActive(!(isWin || currentWinner == -1));
-            _moneyValue.text = "+" + value.ToString();
+            _windrawRoundOverBG.SetActive(isWin || currentWinner == -1);
+            _loseRoundOverBG.SetActive(!(isWin || currentWinner == -1));
 
-            _winnerText.text = (currentWinner == -1) ? "Draw" :
+            _winnerRoundOverText.text = (currentWinner == -1) ? "Draw" :
                 (isWin) ? "You\nwin" : "You\nlose";
 
-            _drawArea.SetActive(ScoreManager.Instance.GetGameWinner() == -1);
-            _winnerArea.SetActive(ScoreManager.Instance.GetGameWinner() != -1);
+            _drawRoundOverArea.SetActive(_scoreWinnerService.GetRoundWinner() == -1);
+            _winnerRoundOverArea.SetActive(_scoreWinnerService.GetRoundWinner() != -1);
             for (int i = 0; i < _bgList.Count; i++)
             {
                 _bgList[i].SetActive(i == Mathf.Max(0, currentWinner));
             }
 
-            if (ScoreManager.Instance.GetGameWinner() != -1)
-                _gameOverLogo.sprite =
-                    ThemeManager.Instance.GetSprite((CellFigure) ScoreManager.Instance.GetGameWinner());
-        }
-    }
+            if (_scoreWinnerService.GetRoundWinner() != -1)
+                _roundOverLogo.sprite =
+                    _themeService.GetSprite((CellFigure) _scoreWinnerService.GetRoundWinner());
 
-    public void RestartGame()
-    {
-        if (GameplayManager.IsOnline) return;
-        if (_gameOverPanel.gameObject.activeSelf) StateGameOverPanel(false);
-        GameplayManager.Instance.SetGamePlayStateQueue(GameplayManager.GameplayState.RestartGame);
-    }
+            int p1Count = _scoreWinnerService.GetCountRoundWin(1);
+            int p2Count = _scoreWinnerService.GetCountRoundWin(2);
 
-
-    public void StopTimer()
-    {
-        if (_timerCoroutine != null) StopCoroutine(_timerCoroutine);
-        _timerCoroutine = null;
-    }
-
-    private IEnumerator ITimerProcess()
-    {
-        _timerPanel.SetActive(false);
-
-        while (_timerEnableTime < TurnTimerController.Instance.TimeLeft) yield return null;
-
-        _timerFilledImg.fillAmount = 1;
-        _timerPanel.SetActive(true);
-
-        while (_timerStartAnimationTime < TurnTimerController.Instance.TimeLeft) yield return null;
-
-        while (TurnTimerController.Instance.TimeLeft >= 0)
-        {
-            _timerFilledImg.fillAmount = TurnTimerController.Instance.TimeLeft / _timerStartAnimationTime;
-            yield return new WaitForSecondsRealtime(0.1f);
-        }
-    }
-
-    public IEnumerator ShowRoundOverAnimation()
-    {
-        _roundOverPanel.FadeIn();
-        int currentWinner = ScoreManager.Instance.GetRoundWinner();
-        bool isWin = false;
-        if (currentWinner != -1)
-        {
-            switch (GameplayManager.TypeGame)
+            for (int i = 0; i < _p1RoundOverPoints.Count; i++)
             {
-                case GameplayManager.GameType.MultiplayerHuman:
-                    isWin = currentWinner == RoomManager.GetCurrentPlayerSide();
-                    break;
-                case GameplayManager.GameType.SingleAI:
-                    isWin = PlayerManager.Instance.Players[currentWinner - 1].EntityType == PlayerType.Human;
-                    break;
-                case GameplayManager.GameType.SingleHuman:
-                    isWin = true;
-                    break;
+                _p1RoundOverPoints[i].SetActive(i < p1Count);
             }
+
+            for (int i = 0; i < _p2RoundOverPoints.Count; i++)
+            {
+                _p2RoundOverPoints[i].SetActive(i < p2Count);
+            }
+
+            Transform currentPoint = null;
+
+            if (_scoreWinnerService.GetRoundWinner() == 1)
+            {
+                currentPoint = _p1RoundOverPoints[p1Count - 1].transform;
+                currentPoint.localScale = Vector2.zero;
+            }
+            else if (_scoreWinnerService.GetRoundWinner() == 2)
+            {
+                currentPoint = _p2RoundOverPoints[p2Count - 1].transform;
+                currentPoint.localScale = Vector2.zero;
+            }
+
+
+            yield return _coroutineAwaitService.AwaitTime((_roundOverPanel.FrameCount));
+            yield return new WaitForSeconds(0.5f);
+            if (currentPoint != null)
+                yield return StartCoroutine(currentPoint.ScaleWithLerp(Vector2.zero, Vector2.one, 20));
+            yield return new WaitForSeconds(1f);
+            _roundOverPanel.FadeOut();
+            yield return _coroutineAwaitService.AwaitTime((_roundOverPanel.FrameCount));
         }
 
-        _windrawRoundOverBG.SetActive(isWin || currentWinner == -1);
-        _loseRoundOverBG.SetActive(!(isWin || currentWinner == -1));
-
-        _winnerRoundOverText.text = (currentWinner == -1) ? "Draw" :
-            (isWin) ? "You\nwin" : "You\nlose";
-
-        _drawRoundOverArea.SetActive(ScoreManager.Instance.GetRoundWinner() == -1);
-        _winnerRoundOverArea.SetActive(ScoreManager.Instance.GetRoundWinner() != -1);
-        for (int i = 0; i < _bgList.Count; i++)
+        public IEnumerator IShowNewTurnAnimation(CellFigure cellFigure)
         {
-            _bgList[i].SetActive(i == Mathf.Max(0, currentWinner));
+            _paperNewTurnPlayerImage.sprite = _themeService.GetSprite(cellFigure);
+            _paperNewTurnAnimation.FadeIn();
+            Debug.Log("BegunAnim");
+            yield return _coroutineAwaitService.AwaitTime((_paperNewTurnAnimation.FrameCount));
+            yield return new WaitForSeconds(0.5f);
+            _paperNewTurnAnimation.FadeOut();
+            yield return _coroutineAwaitService.AwaitTime((_paperNewTurnAnimation.FrameCount));
         }
 
-        if (ScoreManager.Instance.GetRoundWinner() != -1)
-            _roundOverLogo.sprite =
-                ThemeManager.Instance.GetSprite((CellFigure) ScoreManager.Instance.GetRoundWinner());
-
-        int p1Count = ScoreManager.Instance.GetCountRoundWin(1);
-        int p2Count = ScoreManager.Instance.GetCountRoundWin(2);
-
-        for (int i = 0; i < _p1RoundOverPoints.Count; i++)
+        public bool GetIsGameOverShowed()
         {
-            _p1RoundOverPoints[i].SetActive(i < p1Count);
+            return _gameOverPanel.gameObject.activeSelf;
         }
-
-        for (int i = 0; i < _p2RoundOverPoints.Count; i++)
-        {
-            _p2RoundOverPoints[i].SetActive(i < p2Count);
-        }
-
-        Transform currentPoint = null;
-
-        if (ScoreManager.Instance.GetRoundWinner() == 1)
-        {
-            currentPoint = _p1RoundOverPoints[p1Count - 1].transform;
-            currentPoint.localScale = Vector2.zero;
-        }
-        else if (ScoreManager.Instance.GetRoundWinner() == 2)
-        {
-            currentPoint = _p2RoundOverPoints[p2Count - 1].transform;
-            currentPoint.localScale = Vector2.zero;
-        }
-
-
-        yield return StartCoroutine(CoroutineQueueController.Instance.IAwaitProcess((_roundOverPanel.FrameCount)));
-        yield return new WaitForSeconds(0.5f);
-        if (currentPoint != null)
-            yield return StartCoroutine(currentPoint.ScaleWithLerp(Vector2.zero, Vector2.one, 20));
-        yield return new WaitForSeconds(1f);
-        _roundOverPanel.FadeOut();
-        yield return StartCoroutine(CoroutineQueueController.Instance.IAwaitProcess((_roundOverPanel.FrameCount)));
-    }
-
-    public IEnumerator IShowNewTurnAnimation(CellFigure cellFigure)
-    {
-        _paperNewTurnPlayerImage.sprite = ThemeManager.Instance.GetSprite(cellFigure);
-        _paperNewTurnAnimation.FadeIn();
-        Debug.Log("BegunAnim");
-        yield return StartCoroutine(CoroutineQueueController.Instance.IAwaitProcess((_paperNewTurnAnimation.FrameCount)));
-        yield return new WaitForSeconds(0.5f);
-        _paperNewTurnAnimation.FadeOut();
-        yield return StartCoroutine(CoroutineQueueController.Instance.IAwaitProcess((_paperNewTurnAnimation.FrameCount)));
     }
 }

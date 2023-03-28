@@ -1,17 +1,32 @@
 using Area.Interfaces;
-using Managers;
+using Field.Interfaces;
 using UnityEngine;
+using Zenject;
 
 namespace Area
 {
     public class AreaController : IAreaService
     {
 
+        #region Dependency
+
+        private IFieldService _fieldService;
+        
+        [Inject]
+        private void Construct(IFieldService fieldService)
+        {
+            _fieldService = fieldService;
+        }
+
+        #endregion
+ 
+        
+
         public Vector4 GetArea(Vector2Int id, Vector2 areaSize)
         {
             Vector2Int leftDown = Vector2Int.zero;
             Vector2Int rightUp = Vector2Int.zero;
-            Vector2Int fieldSize = Field.Instance.FieldSize;
+            Vector2Int fieldSize = _fieldService.GetFieldSize();
 
             if (areaSize.x == -1)
             {

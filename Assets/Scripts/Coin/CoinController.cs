@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace Coin
 {
-    public class CoinController : MonoBehaviour, ICoinService
+    public class CoinController : ICoinService
     {
         private const int COIN_PER_WIN = 20;
         private const int COIN_PER_UNLOCK = 50;

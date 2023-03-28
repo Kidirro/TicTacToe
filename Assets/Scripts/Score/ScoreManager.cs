@@ -1,7 +1,6 @@
 using System.Collections.Generic;
-using GameState;
-using GameState.Interfaces;
 using Score.Interfaces;
+using UIPages.Interfaces;
 using UnityEngine;
 using Zenject;
 
@@ -9,19 +8,6 @@ namespace Score
 {
     public class ScoreManager : IScoreService, IScoreWinnerService
     {
-        #region Dependency
-
-        private IGameStateService _gameStateService;
-
-        [Inject]
-        private void Construct(IGameStateService gameStateService)
-        {
-            _gameStateService = gameStateService;
-        }
-
-        #endregion
-
-
         private readonly Dictionary<int, int> _currentScoreList = new Dictionary<int, int>();
 
         private List<int> _roundWinner = new List<int>();
@@ -43,12 +29,6 @@ namespace Score
         public void AddScore(int player, int value)
         {
             _currentScoreList[player] += value;
-            if (IsExistRoundWinner() && _gameStateService.GetCurrentGameplayState() != GameplayState.GameOver)
-            {
-                _gameStateService.SetGamePlayStateQueue(GameplayState.RoundOver);
-            }
-
-            InGameUI.Instance.UpdateScore();
         }
 
 
