@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using Cards.CustomType;
@@ -10,6 +11,7 @@ using UIElements;
 using UnityEngine;
 using Zenject;
 using Button = UnityEngine.UI.Button;
+using Random = UnityEngine.Random;
 
 namespace Cards
 {
@@ -45,9 +47,12 @@ namespace Cards
         private const int CARD_PER_TURN = 2;
 
         private Vector2 _startPoint;
-        
+
         [SerializeField]
         private AnimationFading _cardRechanger;
+
+        [SerializeField]
+        private RectTransform _rechangerRect;
 
         [SerializeField]
         private Button _cardRechangerBTN;
@@ -85,6 +90,13 @@ namespace Cards
         }
 
         #endregion
+
+        public int MaxCardHand => SLOTS_COUNT;
+
+        private void Start()
+        {
+            _rechangerRect.sizeDelta = _screenScaler.GetVector(_rechangerRect.sizeDelta);
+        }
 
         public void AddCard(PlayerInfo player)
         {
@@ -216,7 +228,7 @@ namespace Cards
                 RemoveCard(player, player.HandPool[0]);
             }
         }
-        
+
         public void UseRechanger()
         {
             if (_playerService.GetCurrentPlayer() != _currentPlayerView) return;
@@ -241,7 +253,7 @@ namespace Cards
             List<CardModel> list = _cardFactory.CreateDeck(side);
             _startPoint = _screenScaler.GetVector(new Vector2(_widthBorder, _buttonBorder) + _startPointDelta);
             foreach (CardModel card in list)
-                card.SetTransformParent(_cardTransformParent,_startPoint);
+                card.SetTransformParent(_cardTransformParent, _startPoint);
             return list;
         }
 

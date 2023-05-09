@@ -22,7 +22,7 @@ namespace Cards
 {
     public class CardActions : ICardActionService
     {
-        private readonly Dictionary<string, Action<Vector2Int, CardInfo>> _serializableActions;
+        private readonly Dictionary<CardActionType, Action<Vector2Int, CardInfo>> _serializableActions;
 
         #region Dependency
 
@@ -46,6 +46,7 @@ namespace Cards
         private IHandPoolView _handPoolView;
         private IFieldZoneService _fieldZoneService;
         private IHistoryService _historyService;
+        private IFreezeEffectService _freezeEffectService;
 
         [Inject]
         private void Construct(IAreaService areaService,
@@ -67,7 +68,8 @@ namespace Cards
             ICoroutineService coroutineService,
             IHandPoolView handPoolView,
             IFieldZoneService fieldZoneService,
-            IHistoryService historyService
+            IHistoryService historyService,
+            IFreezeEffectService freezeEffectService
         )
         {
             _areaService = areaService;
@@ -90,6 +92,7 @@ namespace Cards
             _fieldZoneService = fieldZoneService;
             _cardEventNetworkService = cardEventNetworkService;
             _historyService = historyService;
+            _freezeEffectService = freezeEffectService;
         }
 
         #endregion
@@ -110,7 +113,7 @@ namespace Cards
             _handPoolManipulator.AddCard(_playerService.GetCurrentPlayer());
         }
 
-        public void PlaceFigure(Vector2Int chosenCell, CardInfo info)
+        private void PlaceFigure(Vector2Int chosenCell, CardInfo info)
         {
             Vector4 currentArea = _areaService.GetArea(chosenCell, info.CardAreaSize);
             for (int x = (int) currentArea.x; x <= currentArea.z; x++)
@@ -126,7 +129,7 @@ namespace Cards
             }
         }
 
-        public void PlaceRandom5(Vector2Int chosenCell, CardInfo info)
+        private void PlaceRandom5(Vector2Int chosenCell, CardInfo info)
         {
             for (int i = 0; i < 5; i++)
             {
@@ -135,21 +138,53 @@ namespace Cards
             }
         }
 
-        public void AddFigure_Effected(Vector2Int chosenCell, CardInfo info)
+        private void PlaceFigureEffected(Vector2Int chosenCell, CardInfo info)
         {
             _serializableEffects.AddFigure_Effect();
             _effectEventNetworkService.RaiseEventAddEffect(_serializableEffects.AddFigure_Effect);
         }
 
+        private void PlaceMore(Vector2Int chosenCell, CardInfo info)
+        {
+            while (_manaService.IsEnoughMana(1))
+            {
+                _manaService.IncreaseMana(-1);
+                _manaEventNetworkService.RaiseEventIncreaseMana(-1);
+                for (int i = 0; i < 1; i++)
+                {
+                    _fieldFigureService.PlaceInRandomCell();
+                }
+            }
+
+            _manaUIService.UpdateManaUI();
+            //_coroutineAwaitService.AddAwaitTime(Cell.AnimationTime);
+            _finishLineService.MasterChecker(_playerService.GetCurrentPlayer().SideId);
+        }
+
+        private void Shortage(Vector2Int chosenCell, CardInfo info)
+        {
+            for (int i = 0; i < 2; i++) _handPoolManipulator.AddCard(_playerService.GetCurrentPlayer());
+            _handPoolView.UpdateCardUI();
+            _handPoolView.UpdateCardPosition();
+        }
+
+        private void FullHouse(Vector2Int chosenCell, CardInfo info)
+        {
+            for (int i = 0; i < _handPoolManipulator.MaxCardHand; i++)
+                _handPoolManipulator.AddCard(_playerService.GetCurrentPlayer());
+            _handPoolView.UpdateCardUI();
+            _handPoolView.UpdateCardPosition();
+        }
+
         #region Mana
 
-        public void AddBonusMana_Effected(Vector2Int chosenCell, CardInfo info)
+        private void AddBonusManaEffected(Vector2Int chosenCell, CardInfo info)
         {
             _serializableEffects.AddBonusMana_Effect();
             _effectEventNetworkService.RaiseEventAddEffect(_serializableEffects.AddBonusMana_Effect);
         }
 
-        public void Decrease2MaxMana(Vector2Int chosenCell, CardInfo info)
+        private void Decrease2MaxMana(Vector2Int chosenCell, CardInfo info)
         {
             _manaService.IncreaseMaxMana(-2);
             if (_manaService.GetCurrentMana() > _manaService.GetMaxMana())
@@ -161,7 +196,7 @@ namespace Cards
             _effectEventNetworkService.RaiseEventAddEffect(_serializableEffects.Decrease2MaxMana_Effect);
         }
 
-        public void Increase2MaxMana(Vector2Int chosenCell, CardInfo info)
+        private void Increase2MaxMana(Vector2Int chosenCell, CardInfo info)
         {
             _manaService.IncreaseMaxMana(2);
             _manaEventNetworkService.RaiseEventIncreaseMaxMana(2);
@@ -171,26 +206,33 @@ namespace Cards
             _effectEventNetworkService.RaiseEventAddEffect(_serializableEffects.Increase2MaxMana_Effect);
         }
 
-        public void Random2Mana(Vector2Int chosenCell, CardInfo info)
+        private void Random2Mana(Vector2Int chosenCell, CardInfo info)
         {
             _serializableEffects.Random2Mana_Effect();
             _effectEventNetworkService.RaiseEventAddEffect(_serializableEffects.Random2Mana_Effect);
         }
 
-        public void DecreaseIncrease2Mana(Vector2Int chosenCell, CardInfo info)
+        private void DecreaseIncrease2Mana(Vector2Int chosenCell, CardInfo info)
         {
             _serializableEffects.DecreaseIncrease2Mana_Effect();
             _effectEventNetworkService.RaiseEventAddEffect(_serializableEffects.DecreaseIncrease2Mana_Effect);
         }
 
-        public void Restore1Mana(Vector2Int chosenCell, CardInfo info)
+        private void Restore1Mana(Vector2Int chosenCell, CardInfo info)
         {
             _manaService.RestoreMana(1);
             _manaEventNetworkService.RaiseEventRestoreMana(1);
             _manaUIService.UpdateManaUI();
         }
 
-        public void RestoreAllMana(Vector2Int chosenCell, CardInfo info)
+        private void Restore3Mana(Vector2Int chosenCell, CardInfo info)
+        {
+            _manaService.RestoreMana(3);
+            _manaEventNetworkService.RaiseEventRestoreMana(3);
+            _manaUIService.UpdateManaUI();
+        }
+
+        private void RestoreAllMana(Vector2Int chosenCell, CardInfo info)
         {
             _manaService.RestoreAllMana();
             _manaEventNetworkService.RaiseEventRestoreMana(-1);
@@ -201,20 +243,14 @@ namespace Cards
 
         #region Freeze
 
-        public void FreezeCell(Vector2Int chosenCell, CardInfo info)
+        private void FreezeCell(Vector2Int chosenCell, CardInfo info)
         {
             _fieldFigureService.FreezeCell(chosenCell);
-
-
-            _serializableEffects.FreezeCell_Effect(chosenCell);
-            _effectEventNetworkService.RaiseEventAddFreezeEffect(chosenCell);
-
-
             _finishLineService.MasterChecker(_playerService.GetCurrentPlayer().SideId);
         }
 
 
-        public void FreezeCellGroup(Vector2Int chosenCell, CardInfo info)
+        private void FreezeCellGroup(Vector2Int chosenCell, CardInfo info)
         {
             List<Cell> posList = new List<Cell>();
             for (int i = 0; i < 3; i++)
@@ -225,10 +261,8 @@ namespace Cards
                 while (posList.IndexOf(_fieldService.GetCellLink(result)) != -1)
                     result = _aiService.GenerateRandomPosition(_fieldService.GetFieldSize());
 
-                _fieldFigureService.FreezeCell(result);
+                _fieldFigureService.FreezeCell(result, isQueue: false);
 
-                _serializableEffects.FreezeCell_Effect(result);
-                _effectEventNetworkService.RaiseEventAddFreezeEffect(result);
                 posList.Add(_fieldService.GetCellLink(result));
             }
 
@@ -236,18 +270,18 @@ namespace Cards
         }
 
 
-        public void Freeze3Cell_Effected(Vector2Int chosenCell, CardInfo info)
+        private void Freeze3CellEffected(Vector2Int chosenCell, CardInfo info)
         {
             _serializableEffects.Freeze3Cell_Effected();
             _effectEventNetworkService.RaiseEventAddEffect(_serializableEffects.Freeze3Cell_Effected);
         }
 
-        public void FreezeFigure(Vector2Int chosenCell, CardInfo info)
+        private void Freeze6Figure(Vector2Int chosenCell, CardInfo info)
         {
             List<Cell> allCells =
                 _fieldFigureService.GetAllCellWithFigure((CellFigure) _playerService.GetCurrentPlayer().SideId);
             List<Cell> resultCells = new List<Cell>();
-            while (allCells.Count > 0 && resultCells.Count < 5)
+            while (allCells.Count > 0 && resultCells.Count < 6)
             {
                 int randValue = Random.Range(0, allCells.Count);
                 resultCells.Add(allCells[randValue]);
@@ -257,41 +291,32 @@ namespace Cards
             for (int i = 0; i < resultCells.Count; i++)
             {
                 _fieldFigureService.FreezeCell(resultCells[i].Id);
-
-
-                _serializableEffects.FreezeCell_Effect(resultCells[i].Id);
-                _effectEventNetworkService.RaiseEventAddFreezeEffect(resultCells[i].Id);
                 /**/
             }
         }
 
-        public void BreakFreeze(Vector2Int chosenCell, CardInfo info)
+        private void DestroyFreeze(Vector2Int chosenCell, CardInfo info)
         {
-            List<Effect> effects = _effectService.GetEffectList().FindAll(x => x.EffectPriority == 2);
-            List<Effect> resultEffects = new List<Effect>();
-            while (effects.Count > 0 && resultEffects.Count < 6)
+            List<Cell> cells = new List<Cell>(_freezeEffectService.GetFreezeCell());
+            List<Cell> resultCells = new List<Cell>();
+            while (cells.Count > 0 && resultCells.Count < 6)
             {
-                int randValue = Random.Range(0, effects.Count);
-                resultEffects.Add(effects[randValue]);
-                effects.Remove(effects[randValue]);
+                int randValue = Random.Range(0, cells.Count);
+                resultCells.Add(cells[randValue]);
+                cells.Remove(cells[randValue]);
             }
 
-            if (resultEffects.Count == 0) return;
-            for (int i = 0; i < resultEffects.Count; i++)
-            {
-                resultEffects[i].OnEffectDisable.Invoke();
-                int effectIndex = _effectService.GetEffectList().IndexOf(resultEffects[i]);
+            if (resultCells.Count == 0) return;
+            Effect effect = _freezeEffectService.GetFreezeEffect()[0];
+            for (int i = 0; i < resultCells.Count; i++)
+                _freezeEffectService.ReleaseFreeze(resultCells[i]);
 
-                _effectService.ClearEffect(_effectService.GetEffectList().IndexOf(resultEffects[i]));
-                _effectEventNetworkService.RaiseEventClearEffect(effectIndex);
-            }
-
-            _coroutineAwaitService.AddAwaitTime(resultEffects[0].EffectTimeDisable);
-            _checkEventNetworkService.RaiseEventAwaitTime(resultEffects[0].EffectTimeDisable);
+            _coroutineAwaitService.AddAwaitTime(effect.EffectTimeDisable);
+            _checkEventNetworkService.RaiseEventAwaitTime(effect.EffectTimeDisable);
             _finishLineService.MasterChecker(_playerService.GetCurrentPlayer().SideId);
         }
 
-        public void PlaceAroundFreeze(Vector2Int chosenCell, CardInfo info)
+        private void PlaceAroundFreeze(Vector2Int chosenCell, CardInfo info)
         {
             List<Cell> allFreeze = _fieldFigureService.GetAllCellWithSubState(CellSubState.Freeze);
 
@@ -303,16 +328,13 @@ namespace Cards
                 {
                     int randValue = Random.Range(0, neighCell.Count);
                     _fieldFigureService.FreezeCell(neighCell[randValue].Id);
-
-                    _serializableEffects.FreezeCell_Effect(neighCell[randValue].Id);
-                    _effectEventNetworkService.RaiseEventAddFreezeEffect(neighCell[randValue].Id);
                 }
             }
 
             _finishLineService.MasterChecker(_playerService.GetCurrentPlayer().SideId);
         }
 
-        public void FreezeAllMana(Vector2Int chosenCell, CardInfo info)
+        private void FreezeAllMana(Vector2Int chosenCell, CardInfo info)
         {
             while (_manaService.IsEnoughMana(1))
             {
@@ -323,9 +345,6 @@ namespace Cards
                     Vector2Int result = _aiService.GenerateRandomPosition(_fieldService.GetFieldSize());
                     if (result == new Vector2Int(-1, -1)) break;
                     _fieldFigureService.FreezeCell(result);
-
-                    _serializableEffects.FreezeCell_Effect(result);
-                    _effectEventNetworkService.RaiseEventAddFreezeEffect(result);
                 }
             }
 
@@ -334,13 +353,37 @@ namespace Cards
             _finishLineService.MasterChecker(_playerService.GetCurrentPlayer().SideId);
         }
 
-        public void ManaPerIce(Vector2Int chosenCell, CardInfo info)
+        private void ManaPerIce(Vector2Int chosenCell, CardInfo info)
         {
             List<Effect> effects = _effectService.GetEffectList().FindAll(x => x.EffectPriority == 2);
-            int resultMana = effects.Count / 3;
+            int resultMana = effects.Count / 2;
             _manaService.IncreaseMana(resultMana, true);
             _manaEventNetworkService.RaiseEventIncreaseMana(resultMana, true);
             _manaUIService.UpdateManaUI();
+        }
+
+        private void SurroundedByIce(Vector2Int chosenCell, CardInfo info)
+        {
+            List<Cell> resultCells =
+                _freezeEffectService.GetFreezeCell().FindAll(x => (x.Id - chosenCell).magnitude <= 1);
+            if (resultCells.Count == 0) return;
+            foreach (var cell in resultCells)
+            {
+                _freezeEffectService.ReleaseFreeze(cell);
+            }
+
+            _finishLineService.MasterChecker(_playerService.GetCurrentPlayer().SideId);
+        }
+        
+        private void IceEncirclement(Vector2Int chosenCell, CardInfo info)
+        {
+            List<Cell> resultCells = _fieldService.GetAllEmptyNeighbours(_fieldService.GetCellLink(chosenCell));
+            foreach (var cell in resultCells)
+            {
+                _fieldFigureService.FreezeCell(cell.Id);
+            }
+            _coroutineAwaitService.AddAwaitTime(Cell.AnimationTime);
+            _finishLineService.MasterChecker(_playerService.GetCurrentPlayer().SideId);
         }
 
         #endregion
@@ -361,6 +404,10 @@ namespace Cards
                 CardTypeImpact.OnAreaWithCheck => chosenCell != new Vector2(-1, -1) &&
                                                   _fieldZoneService.IsZoneEnableToPlace(chosenCell,
                                                       cardModel.Info.CardAreaSize),
+                CardTypeImpact.OnAllyPiece => chosenCell != new Vector2(-1, -1) &&
+                                              _fieldZoneService.IsZoneFillFigure(chosenCell,
+                                                  cardModel.Info.CardAreaSize,
+                                                  (CellFigure) _playerService.GetCurrentPlayer().SideId),
                 _ => false
             };
 
@@ -387,27 +434,33 @@ namespace Cards
 
         private CardActions()
         {
-            _serializableActions = new Dictionary<string, Action<Vector2Int, CardInfo>>
+            _serializableActions = new Dictionary<CardActionType, Action<Vector2Int, CardInfo>>
             {
-                ["PlaceFigureWithAddCard"] = PlaceFigureWithAddCard,
-                ["PlaceFigure"] = PlaceFigure,
-                ["PlaceRandom5"] = PlaceRandom5,
-                ["AddFigure_Effected"] = AddFigure_Effected,
-                ["AddBonusMana_Effected"] = AddBonusMana_Effected,
-                ["Decrease2MaxMana"] = Decrease2MaxMana,
-                ["Increase2MaxMana"] = Increase2MaxMana,
-                ["Random2Mana"] = Random2Mana,
-                ["DecreaseIncrease2Mana"] = DecreaseIncrease2Mana,
-                ["Restore1Mana"] = Restore1Mana,
-                ["RestoreAllMana"] = RestoreAllMana,
-                ["FreezeCell"] = FreezeCell,
-                ["FreezeCellGroup"] = FreezeCellGroup,
-                ["Freeze3Cell_Effected"] = Freeze3Cell_Effected,
-                ["FreezeFigure"] = FreezeFigure,
-                ["BreakFreeze"] = BreakFreeze,
-                ["PlaceAroundFreeze"] = PlaceAroundFreeze,
-                ["FreezeAllMana"] = FreezeAllMana,
-                ["ManaPerIce"] = ManaPerIce
+                [CardActionType.PlaceFigureWithAddCard] = PlaceFigureWithAddCard,
+                [CardActionType.PlaceFigure] = PlaceFigure,
+                [CardActionType.PlaceRandom5] = PlaceRandom5,
+                [CardActionType.PlaceFigureEffected] = PlaceFigureEffected,
+                [CardActionType.AddBonusManaEffected] = AddBonusManaEffected,
+                [CardActionType.Decrease2MaxMana] = Decrease2MaxMana,
+                [CardActionType.Increase2MaxMana] = Increase2MaxMana,
+                [CardActionType.Random2Mana] = Random2Mana,
+                [CardActionType.DecreaseIncrease2Mana] = DecreaseIncrease2Mana,
+                [CardActionType.Restore1Mana] = Restore1Mana,
+                [CardActionType.RestoreAllMana] = RestoreAllMana,
+                [CardActionType.FreezeCell] = FreezeCell,
+                [CardActionType.FreezeCellGroup] = FreezeCellGroup,
+                [CardActionType.Freeze3CellEffected] = Freeze3CellEffected,
+                [CardActionType.Freeze6Figure] = Freeze6Figure,
+                [CardActionType.DestroyFreeze] = DestroyFreeze,
+                [CardActionType.PlaceAroundFreeze] = PlaceAroundFreeze,
+                [CardActionType.FreezeAllMana] = FreezeAllMana,
+                [CardActionType.ManaPerIce] = ManaPerIce,
+                [CardActionType.Restore3Mana] = Restore3Mana,
+                [CardActionType.PlaceMore] = PlaceMore,
+                [CardActionType.SurroundedByIce] = SurroundedByIce,
+                [CardActionType.Shortage] = Shortage,
+                [CardActionType.FullHouse] = FullHouse,
+                [CardActionType.IceEncirclement] = IceEncirclement
             };
         }
     }

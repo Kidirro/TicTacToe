@@ -15,7 +15,7 @@ using Zenject;
 
 namespace Effects
 {
-    public class EffectManager : MonoBehaviour, IEffectService, ISerializableEffects
+    public class EffectManager : MonoBehaviour, IEffectService, ISerializableEffects, IFreezeEffectService
     {
         #region Dependency
 
@@ -36,6 +36,7 @@ namespace Effects
         private void Construct(
             IHandPoolView handPool,
             IPlayerService playerService,
+            IAIService aiService,
             ICoroutineService coroutineService,
             ICoroutineAwaitService coroutineAwaitService,
             IEffectEventNetworkService effectEventNetworkService,
@@ -48,6 +49,7 @@ namespace Effects
         {
             _handPoolView = handPool;
             _playerService = playerService;
+            _aiService = aiService;
             _coroutineService = coroutineService;
             _coroutineAwaitService = coroutineAwaitService;
             _effectEventNetworkService = effectEventNetworkService;
@@ -64,6 +66,9 @@ namespace Effects
         private readonly List<Effect> _effectList = new();
 
         private readonly List<Action> _serializedActions = new();
+
+        private readonly List<Cell> _freezeCellList = new ();
+        private readonly List<Effect> _freezeEffectList = new ();
 
         private void Awake()
         {
@@ -138,7 +143,6 @@ namespace Effects
                 int lastPriority = effectList[0].EffectPriority;
                 while (effectList.Count > 0)
                 {
-                    Debug.Log("Effect: effect prior" + effectList[0].EffectPriority);
                     bool isAwaitNeed = lastPriority != effectList[0].EffectPriority;
                     lastPriority = effectList[0].EffectPriority;
                     if (isAwaitNeed)
@@ -149,6 +153,7 @@ namespace Effects
                     }
 
                     Effect effect = effectList[0];
+                    Debug.Log($"Effect {effect}. Priority {effect.EffectPriority}. Effect type {effect.EffectType}");
                     ActivateEffect(effect);
                     effectList.Remove(effect);
                     if (effect.EffectType == Effect.EffectTypes.Parallel)
@@ -158,7 +163,9 @@ namespace Effects
                     }
                     else
                     {
-                        StartCoroutine(IEffectAwaitAsync(effectList));
+                        StartCoroutine(IEffectAwaitAsync(effectList,
+                            Mathf.Max(effect.EffectTimeAction,
+                                (effect.EffectTurnCount == 0) ? effect.EffectTimeDisable : 0)));
                         yield break;
                     }
                 }
@@ -305,10 +312,20 @@ namespace Effects
         {
             Cell cell = _fieldService.GetCellLink(id);
             Action f = delegate { };
-            Action d = delegate { _fieldFigureService.ResetSubStateWithPlaceFigure(cell.Id); };
+            Action d = delegate
+            {
+                _fieldFigureService.ResetSubStateWithPlaceFigure(cell.Id);
+                _freezeEffectList.RemoveAt(_freezeCellList.IndexOf(cell));
+                _freezeCellList.Remove(cell);
+                
+            };
             f.Invoke();
-            Effect effect = new Effect(f, 2, _playerService.GetCurrentPlayer().SideId, Effect.EffectTypes.Parallel, 2,
+            Effect effect = new Effect(f, 2, _playerService.GetCurrentPlayer().SideId, Effect.EffectTypes.Consistently,
+                2,
                 d, Cell.AnimationTime, Cell.AnimationTime * 2);
+            _freezeCellList.Add(cell);
+            _freezeEffectList.Add(effect);
+            Debug.Log($"EFFECT FreezeList {_freezeEffectList.Count}. CellList {_freezeCellList.Count}");
             AddEffect(effect);
         }
 
@@ -320,15 +337,43 @@ namespace Effects
                 if (position == new Vector2Int(-1, -1)) return;
 
                 _fieldFigureService.FreezeCell(position);
-
-                FreezeCell_Effect(position);
-                _effectEventNetworkService.RaiseEventAddFreezeEffect(position);
                 /**/
             };
 
-            Effect effect = new Effect(f, 3, _playerService.GetCurrentPlayer().SideId, Effect.EffectTypes.Parallel, 3,
-                null, Cell.AnimationTime);
+            Effect effect = new Effect(f, 3, _playerService.GetCurrentPlayer().SideId, Effect.EffectTypes.Consistently,
+                3,
+                null, Cell.AnimationTime, Cell.AnimationTime);
             AddEffect(effect);
+        }
+
+        public List<Cell> GetFreezeCell()
+        {
+            return _freezeCellList;
+        }
+        
+        public List<Effect> GetFreezeEffect()
+        {
+            return _freezeEffectList;
+        }
+
+        public void ReleaseFreeze(Cell cell)
+        {
+            Debug.Log($"FreezeList {_freezeEffectList.Count}. CellList {_freezeCellList.Count}");
+            Effect effect = _freezeEffectList[_freezeCellList.IndexOf(cell)];
+            effect.OnEffectDisable?.Invoke();
+            _freezeEffectList.Remove(effect);
+            _freezeCellList.Remove(cell);
+            _effectEventNetworkService.RaiseEventClearEffect(_effectList.IndexOf(effect));
+            _effectList.Remove(effect);
+        }
+
+        public void ReleaseFreeze(Effect effect)
+        {
+            effect.OnEffectDisable?.Invoke();
+            _freezeCellList.RemoveAt(_freezeEffectList.IndexOf(effect));
+            _freezeEffectList.Remove(effect);
+            _effectEventNetworkService.RaiseEventClearEffect(_effectList.IndexOf(effect));
+            _effectList.Remove(effect);
         }
     }
 

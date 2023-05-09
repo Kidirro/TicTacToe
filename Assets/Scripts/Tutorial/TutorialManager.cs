@@ -25,19 +25,23 @@ namespace Tutorial
         private ITutorialCompleteService _tutorialCompleteService;
 
         [Inject]
-        private void Construct(IGameSceneService gameSceneService, ITutorialCompleteService tutorialCompleteService,
+        private void Construct(
+            IGameSceneService gameSceneService, 
+            ITutorialCompleteService tutorialCompleteService,
             ITutorialEventsEventsAnalyticService tutorialEventsEventsAnalyticService)
         {
+            Debug.Log($"Binding...");
             _gameSceneService = gameSceneService;
             _tutorialCompleteService = tutorialCompleteService;
             _tutorialEventsEventsAnalyticService = tutorialEventsEventsAnalyticService;
+            Debug.Log($"Binded! {gameSceneService}, {tutorialCompleteService}, {tutorialEventsEventsAnalyticService}");
         }
 
         #endregion
 
         private void Start()
         {
-            _tutorialEventsEventsAnalyticService.Player_Start_Tutorial();
+            //_tutorialEventsEventsAnalyticService.Player_Start_Tutorial();
             _gameSceneService.BeginLoadGameScene(GameSceneManager.GameScene.MainMenu);
             InvokePageAction(_currentPage);
         }

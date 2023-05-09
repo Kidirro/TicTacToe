@@ -65,6 +65,7 @@ namespace Cards.CustomType
         [SerializeField]
         private List<BonusImageType> _bonusImageList = new();
 
+        private Vector2 _initScale;
 
         #region Coroutines
 
@@ -104,6 +105,8 @@ namespace Cards.CustomType
             _cardTransformRect = GetComponent<RectTransform>();
             _cardCanvas = GetComponent<Canvas>();
             _cardCanvasGroup = GetComponent<CanvasGroup>();
+            _initScale = new Vector2(_screenScaler.GetWidthRatio(),
+                    _screenScaler.GetWidthRatio());
         }
 
         private void OnDisable()
@@ -118,8 +121,6 @@ namespace Cards.CustomType
             _cardCanvas.overrideSorting = false;
             SetGroupAlpha(_cardCanvasGroup.alpha, 1);
             _cardTip.HideTip(true);
-            _cardCanvasGroup.transform.localScale = new Vector3(_screenScaler.GetWidthRatio(),
-                _screenScaler.GetWidthRatio());
         }
 
         public void SetSideCard(CardInfo info, int side)
@@ -174,7 +175,8 @@ namespace Cards.CustomType
 
         public void SetTransformScale(float reals, bool instantly = true)
         {
-            if (instantly) transform.localScale = new Vector2(reals, reals);
+            Vector2 finScale = _initScale * reals;
+            if (instantly) transform.localScale = finScale;
             else
             {
                 if (_isScaleCoroutineWork) StopCoroutine(_scaleCoroutine);
@@ -182,7 +184,7 @@ namespace Cards.CustomType
                 _scaleCoroutine = StartCoroutine(_cardTransformRect.ScaleWithLerp
                     (
                         _cardTransformRect.localScale,
-                        new Vector2(reals, reals),
+                        finScale,
                         SCALE_COUNT_FRAME,
                         () => { _isScaleCoroutineWork = false; }
                     )
@@ -223,20 +225,20 @@ namespace Cards.CustomType
 
         public void SetTransformPosition(float x, float y, bool instantly = true)
         {
-            if (instantly) _cardTransformRect.localPosition = new Vector2(x, y);
-            else
-            {
-                if (_isPositionCoroutineWork) StopCoroutine(_positionCoroutine);
-                _isPositionCoroutineWork = true;
-                _positionCoroutine = StartCoroutine(_cardTransformRect.LocalPositionWithLerp
-                    (
-                        _cardTransformRect.localPosition,
-                        new Vector2(x, y),
-                        POSITION_COUNT_FRAME,
-                        () => { _isPositionCoroutineWork = false; }
-                    )
-                );
-            }
+         //   if (instantly) _cardTransformRect.localPosition = new Vector2(x, y);
+        //    else
+            // {
+            //     if (_isPositionCoroutineWork) StopCoroutine(_positionCoroutine);
+            //     _isPositionCoroutineWork = true;
+            //     _positionCoroutine = StartCoroutine(_cardTransformRect.LocalPositionWithLerp
+            //         (
+            //             _cardTransformRect.localPosition,
+            //             new Vector2(x, y),
+            //             POSITION_COUNT_FRAME,
+            //             () => { _isPositionCoroutineWork = false; }
+            //         )
+            //     );
+            // }
         }
 
         public void SetTransformPosition(Vector2 position, bool instantly = true)

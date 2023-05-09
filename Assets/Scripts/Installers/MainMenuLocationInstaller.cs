@@ -2,6 +2,7 @@
 using CardCollection;
 using Cards;
 using Network;
+using UIElements;
 using UIPages;
 using UnityEngine;
 using Zenject;
@@ -19,12 +20,21 @@ namespace Installers
         [SerializeField]
         private CollectionManager _collectionManager;
         
+        [SerializeField]
+        private BuyingAnimationController _buyingAnimationController;
+        
         public override void InstallBindings()
         {
             BindMasterConnector();
             BindMainMenuUI();
             BindCollectionManager();
             BindCollectionFactory();
+            BindBuyingAnimation();
+        }
+
+        private void BindBuyingAnimation()
+        {
+            Container.BindInterfacesTo<BuyingAnimationController>().FromInstance(_buyingAnimationController).AsSingle();
         }
 
         private void BindCollectionFactory()

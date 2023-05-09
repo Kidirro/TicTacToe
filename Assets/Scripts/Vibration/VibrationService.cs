@@ -60,7 +60,7 @@ public class VibrationService: IVibrationService
             vibrator = currentActivity.Call<AndroidJavaObject> ( "getSystemService", "vibrator" );
             context = currentActivity.Call<AndroidJavaObject> ( "getApplicationContext" );
 
-            if ( AndroidVersion >= 26 ) {
+            if ( GetAndroidVersion >= 26 ) {
                 vibrationEffect = new AndroidJavaClass ( "android.os.VibrationEffect" );
             }
 
@@ -123,7 +123,7 @@ public class VibrationService: IVibrationService
 #if !UNITY_WEBGL
 #if UNITY_ANDROID
 
-            if ( AndroidVersion >= 26 ) {
+            if ( GetAndroidVersion >= 26 ) {
                 AndroidJavaObject createOneShot = vibrationEffect.CallStatic<AndroidJavaObject> ( "createOneShot", milliseconds, -1 );
                 vibrator.Call ( "vibrate", createOneShot );
 
@@ -148,7 +148,7 @@ public class VibrationService: IVibrationService
         if ( Application.isMobilePlatform ) {
 #if UNITY_ANDROID
 
-            if ( AndroidVersion >= 26 ) {
+            if ( GetAndroidVersion >= 26 ) {
                 long[] amplitudes;
                 AndroidJavaObject createWaveform = vibrationEffect.CallStatic<AndroidJavaObject> ( "createWaveform", pattern, repeat );
                 vibrator.Call ( "vibrate", createWaveform );

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using AI.Interfaces;
 using Area.Interfaces;
 using Coroutine.Interfaces;
+using Effects.Interfaces;
 using Field.Interfaces;
 using Network.Interfaces;
 using Players.Interfaces;
@@ -76,16 +77,17 @@ namespace Field
         private IThemeService _themeService;
         private IAIService _aiService;
         private IFieldFactoryService _fieldFactoryService;
-        
+        private ISerializableEffects _serializableEffects;
+        private IEffectEventNetworkService _effectEventNetworkService;
+
         [Inject]
         public void Construct(IScreenScaler screenScaler, ICoroutineService coroutineService,
             ICoroutineAwaitService coroutineAwaitService, IAreaService areaService, IPlayerService playerService,
             IFigureEventNetworkService figureEventNetworkService, IFreezeEventNetworkService freezeEventNetworkService,
-            IThemeService themeService, IAIService aiService, IFieldFactoryService fieldFactoryService)
+            IThemeService themeService, IAIService aiService, IFieldFactoryService fieldFactoryService,
+            ISerializableEffects serializableEffects,  IEffectEventNetworkService effectEventNetworkService)
         {
             _screenScaler = screenScaler;
-            Debug.Log($"_screenScaler {screenScaler.GetScreenDefault()}");
-            Debug.Log($"_screenScaler {_screenScaler.GetScreenDefault()}");
             _coroutineService = coroutineService;
             _coroutineAwaitService = coroutineAwaitService;
             _areaService = areaService;
@@ -95,6 +97,8 @@ namespace Field
             _themeService = themeService;
             _aiService = aiService;
             _fieldFactoryService = fieldFactoryService;
+            _serializableEffects = serializableEffects;
+            _effectEventNetworkService = effectEventNetworkService;
         }
 
         #endregion
@@ -132,8 +136,8 @@ namespace Field
         /// </summary>
         public IEnumerator AddLineLeft()
         {
-            _fieldSize.x += 1; 
-            Line lr=_fieldFactoryService.InstantiateLine();
+            _fieldSize.x += 1;
+            Line lr = _fieldFactoryService.InstantiateLine();
             lr.transform.position = Vector2.zero;
             lr.SetTransformParent(_lineParent.transform);
             _lineListVertical.Insert(0, lr);
@@ -471,7 +475,7 @@ namespace Field
             Gizmos.DrawLine(new Vector2(startPositionX, endPositionY), new Vector2(startPositionX, startPositionY));
         }
 
-      
+
         public bool CheckIsInField(Vector2 pos)
         {
             return pos.x >= (_startPositionX + _remainX) & pos.x <= (_endPositionX - _remainX) &
@@ -491,13 +495,13 @@ namespace Field
 
         public List<Cell> GetAllCellWithSubState(CellSubState figureSubState)
         {
-                List<Cell> result = new List<Cell>();
-                for (int i = 0; i < _cellList.Count; i++)
-                {
-                    result.AddRange(_cellList[i].FindAll(x => x.SubState == figureSubState));
-                }
+            List<Cell> result = new List<Cell>();
+            for (int i = 0; i < _cellList.Count; i++)
+            {
+                result.AddRange(_cellList[i].FindAll(x => x.SubState == figureSubState));
+            }
 
-                return result;
+            return result;
         }
 
         public bool IsInFieldHeight(float h)
@@ -622,6 +626,20 @@ namespace Field
             return true;
         }
 
+        public bool IsZoneFillFigure(Vector2Int position, Vector2Int areaSize, CellFigure cellFigure)
+        {
+            Vector4 currentArea = _areaService.GetArea(position, areaSize);
+            for (int x = (int) currentArea.x; x <= currentArea.z; x++)
+            {
+                for (int y = (int) currentArea.y; y <= currentArea.w; y++)
+                {
+                    if (GetCellFigure(x, y) != cellFigure) return false;
+                }
+            }
+
+            return true;
+        }
+
         public Cell GetCellLink(Vector2Int id)
         {
             return _cellList[id.x][id.y];
@@ -630,8 +648,7 @@ namespace Field
         public Cell GetCellLink(int x, int y)
         {
             return _cellList[x][y];
-
-            }
+        }
 
         public CellFigure GetCellFigure(Vector2Int id)
         {
@@ -643,7 +660,6 @@ namespace Field
             return _cellList[x][y].Figure;
         }
 
- 
 
         public bool IsCellEmpty(Vector2Int id)
         {
@@ -705,7 +721,7 @@ namespace Field
                 nextId.y >= _fieldSize.y) return null;
             return _cellList[nextId.x][nextId.y];
         }
-        
+
         public bool IsExistEmptyCell()
         {
             for (int i = 0; i < _cellList.Count; i++)
@@ -743,35 +759,35 @@ namespace Field
         {
             if (IsCellEnableToPlace(id))
             {
-                SetFigure(id, (CellFigure)_playerService.GetCurrentPlayer().SideId, isQueue: isQueue);
+                SetFigure(id, (CellFigure) _playerService.GetCurrentPlayer().SideId, isQueue: isQueue);
                 if (isNeedEvent) _figureEventNetworkService.RaiseEventPlaceInCell(id);
             }
         }
 
-        public void SetFigure(Vector2Int id, CellFigure figure,bool  isQueue = true)
+        public void SetFigure(Vector2Int id, CellFigure figure, bool isQueue = true)
         {
-            if (IsCellEnableToPlace(id)^ figure ==CellFigure.None)
+            if (IsCellEnableToPlace(id) ^ figure == CellFigure.None)
             {
                 Debug.Log($"Current figure {figure}");
                 _cellList[id.x][id.y].SetFigure(figure, isQueue: isQueue);
             }
         }
-        
+
         public void SetFigure(int x, int y, CellFigure figure, bool isQueue = true)
-        {   
-            if (IsCellEnableToPlace(new Vector2Int(x,y))^ figure ==CellFigure.None)
+        {
+            if (IsCellEnableToPlace(new Vector2Int(x, y)) ^ figure == CellFigure.None)
             {
                 _cellList[x][y].SetFigure(figure, isQueue: isQueue);
             }
         }
-        
+
         public void PlaceInRandomCell(bool isNeedQueue = true)
         {
             if (isNeedQueue) _coroutineService.AddCoroutine(IPlaceInRandomCell());
             else StartCoroutine(IPlaceInRandomCell());
         }
 
-        public void FreezeCell(Vector2Int id, Sprite sprite, bool isNeedEvent = true)
+        public void FreezeCell(Vector2Int id, Sprite sprite, bool isNeedEvent = true, bool isQueue = true)
         {
             if (_cellList[id.x][id.y].Figure == CellFigure.None)
             {
@@ -779,7 +795,7 @@ namespace Field
                     Vector2Int.one,
                     sprite,
                     Color.black,
-                    CellSubState.Freeze, false);
+                    CellSubState.Freeze, isQueue);
             }
             else
             {
@@ -790,10 +806,15 @@ namespace Field
                     CellSubState.Freeze);
             }
 
-            if (isNeedEvent) _freezeEventNetworkService.RaiseEventFreezeCell(id);
+            if (isNeedEvent)
+            {
+                _serializableEffects.FreezeCell_Effect(id);
+                _freezeEventNetworkService.RaiseEventFreezeCell(id);
+                _effectEventNetworkService.RaiseEventAddFreezeEffect(id);
+            }
         }
 
-        public void FreezeCell(Vector2Int id, bool isNeedEvent = true)
+        public void FreezeCell(Vector2Int id, bool isNeedEvent = true, bool isQueue = true)
         {
             if (_cellList[id.x][id.y].Figure == CellFigure.None)
             {
@@ -801,7 +822,7 @@ namespace Field
                     Vector2Int.one,
                     _themeService.GetSprite(CellSubState.Freeze),
                     Color.black,
-                    CellSubState.Freeze, false);
+                    CellSubState.Freeze, isQueue);
             }
             else
             {
@@ -812,7 +833,12 @@ namespace Field
                     CellSubState.Freeze);
             }
 
-            if (isNeedEvent) _freezeEventNetworkService.RaiseEventFreezeCell(id);
+            _serializableEffects.FreezeCell_Effect(id);
+            if (isNeedEvent)
+            {
+                _freezeEventNetworkService.RaiseEventFreezeCell(id);
+                _effectEventNetworkService.RaiseEventAddFreezeEffect(id);
+            }
         }
 
         public void ResetSubStateWithPlaceFigure(Vector2Int position, bool isNeedEvent = true)

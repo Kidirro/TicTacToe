@@ -2344,9 +2344,9 @@ MonoBehaviour:
   _viewCardDescription: {fileID: 1196125730}
   _viewCardImage: {fileID: 1107862228}
   _viewBonusImageList:
-  - BonusImage: {fileID: 0}
-    BonusType: 0
-  - BonusImage: {fileID: 0}
+  - BonusImage: {fileID: 420187442}
+    BonusType: 1
+  - BonusImage: {fileID: 1847845142}
     BonusType: 0
 --- !u!1 &323264305
 GameObject:
@@ -5324,7 +5324,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0}
   m_AnchorMax: {x: 0.5, y: 0}
   m_AnchoredPosition: {x: 0, y: -196}
-  m_SizeDelta: {x: 66.75, y: 97.5}
+  m_SizeDelta: {x: 156.04, y: 227.93}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &740733326
 MonoBehaviour:
@@ -5537,6 +5537,7 @@ MonoBehaviour:
   _angleDelta: 10
   _heightDelta: 75
   _cardRechanger: {fileID: 740733329}
+  _rechangerRect: {fileID: 740733325}
   _cardRechangerBTN: {fileID: 740733326}
 --- !u!4 &744024356
 Transform:

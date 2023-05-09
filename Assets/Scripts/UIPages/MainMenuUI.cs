@@ -5,6 +5,7 @@ using GameScene;
 using GameScene.Interfaces;
 using GameTypeService.Enums;
 using GameTypeService.Interfaces;
+using Settings.Interfaces;
 using TMPro;
 using Tutorial.Interfaces;
 using UIPages.Interfaces;
@@ -14,7 +15,7 @@ using Zenject;
 
 namespace UIPages
 {
-    public class MainMenuUI : MonoBehaviour,IMainMenuUIService
+    public class MainMenuUI : MonoBehaviour, IMainMenuState
     {
         [SerializeField]
         private TextMeshProUGUI _moneyValue;
@@ -31,6 +32,8 @@ namespace UIPages
         [SerializeField]
         private GameObject _tutorialNotShowedArea;
 
+        private static bool _isConnectedToMasterState = false;
+
         #region Dependency
 
         private ICardList _cardList;
@@ -39,12 +42,14 @@ namespace UIPages
         private IGameSceneService _gameSceneService;
         private IGameTypeService _gameTypeService;
         private ITutorialCompleteService _tutorialCompleteService;
+        private ISettingsDataService _settingsDataService;
 
         [Inject]
         private void Construct(ICardList cardList, ICoinService coinService,
             IMatchEventsAnalyticService matchEventsAnalyticService, IGameSceneService gameSceneService,
-            IGameTypeService gameTypeService, 
-            ITutorialCompleteService tutorialCompleteService)
+            IGameTypeService gameTypeService,
+            ITutorialCompleteService tutorialCompleteService,
+            ISettingsDataService settingsDataService)
         {
             _cardList = cardList;
             _coinService = coinService;
@@ -52,13 +57,14 @@ namespace UIPages
             _gameSceneService = gameSceneService;
             _gameTypeService = gameTypeService;
             _tutorialCompleteService = tutorialCompleteService;
+            _settingsDataService = settingsDataService;
         }
 
         #endregion
 
         private void Start()
         {
-            UpdateNetworkUI(false);
+            UpdateNetworkUI(_isConnectedToMasterState);
             Debug.Log($"TutorialManager.IsTutorialShowed {_tutorialCompleteService.GetIsTutorialComplete()}");
             _tutorialShowedArea.SetActive(_tutorialCompleteService.GetIsTutorialComplete());
             _tutorialNotShowedArea.SetActive(!_tutorialCompleteService.GetIsTutorialComplete());
@@ -116,6 +122,25 @@ namespace UIPages
         public void OnDiscordClick()
         {
             Application.OpenURL("https://discord.gg/4PJbjRZtkU");
+        }
+
+        public void SetIsConnectedToMaster(bool state)
+        {
+            _isConnectedToMasterState = state;
+            UpdateNetworkUI(_isConnectedToMasterState);
+        }
+
+        public void ChangeLanguage(string language)
+        {
+            _settingsDataService.SetLanguage(language);
+        }
+
+        public void ChangeLanguage()
+        {
+            Debug.Log("We Are here!! " +_settingsDataService.GetLanguage());
+            _settingsDataService.SetLanguage((_settingsDataService.GetLanguage()) == "ru"
+                ? ISettingsDataService.Language.en
+                : ISettingsDataService.Language.ru);
         }
     }
 }

@@ -9,5 +9,6 @@ namespace Field.Interfaces
         public void HighlightZone(Vector2Int position, Vector2Int areaSize, Sprite sprite, Color color);
         public bool IsZoneEmpty(Vector2Int position, Vector2Int areaSize);
         public bool IsZoneEnableToPlace(Vector2Int position, Vector2Int areaSize);
+        public bool IsZoneFillFigure(Vector2Int position, Vector2Int areaSize, CellFigure cellFigure);
     }
 }

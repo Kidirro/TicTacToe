@@ -7,6 +7,7 @@ using Cards.CustomType;
 using Cards.Interfaces;
 using Coin.Interfaces;
 using TMPro;
+using UIElements.Interfaces;
 using UnityEngine;
 using UnityEngine.UI;
 using Zenject;
@@ -77,18 +78,21 @@ namespace CardCollection
         private ICollectionEventsAnalyticService _collectionEventsAnalyticService;
         private IStoreEventsAnalyticService _storeEventsAnalyticService;
         private ICardCollectionFactory _cardCollectionFactory;
+        private IBuyingAnimationController _buyingAnimationController;
 
         [Inject]
         private void Construct(ICardList cardList, ICoinService coinService,
             ICollectionEventsAnalyticService collectionEventsAnalyticService,
             IStoreEventsAnalyticService storeEventsAnalyticService,
-            ICardCollectionFactory cardCollectionFactory)
+            ICardCollectionFactory cardCollectionFactory,
+            IBuyingAnimationController buyingAnimationController)
         {
             _cardList = cardList;
             _coinService = coinService;
             _collectionEventsAnalyticService = collectionEventsAnalyticService;
             _storeEventsAnalyticService = storeEventsAnalyticService;
             _cardCollectionFactory = cardCollectionFactory;
+            _buyingAnimationController = buyingAnimationController;
         }
 
         #endregion
@@ -190,15 +194,17 @@ namespace CardCollection
                     _lockedList.Add(card);
             if (_lockedList.Count == 0) return;
             int valuerand = UnityEngine.Random.Range(0, _lockedList.Count);
-            _lockedList[valuerand].UnlockCard();
-            _lockedList[valuerand].UpdateUI();
+            CardCollectionUIObject currentCard = _lockedList[valuerand];
+            currentCard.UnlockCard();
+            currentCard.UpdateUI();
+            _buyingAnimationController.ShowBuyingAnimation(currentCard.Info);
             if (isNeedUsekCoin)
             {
                 _coinService.SetCurrentMoney(_coinService.GetCurrentMoney() - _coinService.GetCoinPerUnlock());
                 _moneyValue.text = _coinService.GetCurrentMoney().ToString();
             }
 
-            _currentDeck.Array[_cardsList.IndexOf(_lockedList[valuerand].Info)] = true;
+            _currentDeck.Array[_cardsList.IndexOf(currentCard.Info)] = true;
             SaveCurrentDeck();
             CreateCardPull();
         }
@@ -207,6 +213,7 @@ namespace CardCollection
         {
             for (int i = 0; i < _cardCollections.Count; i++)
             {
+                _buyingAnimationController.ShowBuyingAnimation(_cardCollections[i].Info);
                 _cardCollections[i].UnlockCard();
                 _cardCollections[i].UpdateUI();
             }
@@ -320,6 +327,7 @@ namespace CardCollection
         public void Player_Bought_Random_Card()
         {
             if (_coinService.GetCurrentMoney() < _coinService.GetCoinPerUnlock()) return;
+            
             _storeEventsAnalyticService.Player_Bought_Random_Card();
         }
 

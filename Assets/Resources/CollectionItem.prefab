@@ -51,16 +51,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b4d07254928d0b64ca7031307fc8f232, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _viewCardCanvas: {fileID: 1559053627604293001}
+  _viewManapoints: {fileID: 523472384952850915}
+  _viewCardDescription: {fileID: 523472384244550186}
+  _viewCardImage: {fileID: 523472384687225704}
+  _viewBonusImageList:
+  - BonusImage: {fileID: 523472384615691809}
+    BonusType: 1
+  - BonusImage: {fileID: 523472384685931111}
+    BonusType: 0
   Info: {fileID: 0}
-  _manapoints: {fileID: 523472384952850915}
-  _cardDescription: {fileID: 523472384244550186}
   _cardObj: {fileID: 523472384321030905}
   _canvasGroup: {fileID: 1559053627604293001}
   _cardObjClose: {fileID: 523472385052077976}
-  _bonusImageList:
-  - {fileID: 523472384685931111}
-  - {fileID: 523472384615691809}
-  _cardImage: {fileID: 523472384687225704}
 --- !u!1 &523472384122967931
 GameObject:
   m_ObjectHideFlags: 0

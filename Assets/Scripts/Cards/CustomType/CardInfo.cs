@@ -39,6 +39,6 @@ namespace Cards.CustomType
         [HideInInspector]
         public int CardBonusManacost;
 
-        public string СardActionId;
+        public CardActionType СardActionId;
     }
 }

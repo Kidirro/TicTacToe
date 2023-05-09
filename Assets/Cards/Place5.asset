@@ -27,6 +27,6 @@ MonoBehaviour:
   CardCount: 1
   IsNeedShowTip: 0
   TipText: 
-  CardManacost: 5
+  CardManacost: 4
   CardBonusManacost: 0
-  "\u0421ardActionId": Decrease2MaxMana
+  "\u0421ardActionId": 18

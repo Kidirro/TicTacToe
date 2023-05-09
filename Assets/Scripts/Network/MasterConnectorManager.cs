@@ -1,3 +1,4 @@
+using System;
 using System.Threading.Tasks;
 using Analytic.Interfaces;
 using Cards.Interfaces;
@@ -10,6 +11,7 @@ using Photon.Pun;
 using Photon.Realtime;
 using UIPages.Interfaces;
 using UnityEngine;
+using UnityEngine.PlayerLoop;
 using Vibration.Interfaces;
 using Zenject;
 using Random = UnityEngine.Random;
@@ -27,12 +29,12 @@ namespace Network
         private IMatchEventsAnalyticService _matchEventsAnalyticService;
         private IGameSceneService _gameSceneService;
         private IGameTypeService _gameTypeService;
-        private IMainMenuUIService _mainMenuUIService;
+        private IMainMenuState _mainMenuUIService;
 
         [Inject]
         private void Construct(ICardList cardList, IVibrationService vibrationService,
             IMatchEventsAnalyticService matchEventsAnalyticService, IGameSceneService gameSceneService,
-            IGameTypeService gameTypeService, IMainMenuUIService mainMenuUIService)
+            IGameTypeService gameTypeService, IMainMenuState mainMenuUIService)
         {
             _cardList = cardList;
             _vibrationService = vibrationService;
@@ -52,7 +54,7 @@ namespace Network
         private void ConnectToMaster()
         {
             isConnected = PhotonNetwork.IsConnectedAndReady;
-            _mainMenuUIService.UpdateNetworkUI(isConnected);
+            _mainMenuUIService.SetIsConnectedToMaster(isConnected);
             if (!isConnected && PhotonNetwork.NetworkClientState != ClientState.Leaving)
             {
                 PhotonNetwork.NickName = "Player" + Random.Range(1000, 9999);
@@ -62,7 +64,7 @@ namespace Network
                 //isConnected = PhotonNetwork.IsConnectedAndReady;
             }
         }
-
+        
         public void StartSearchRoom()
         {
             PhotonNetwork.JoinRandomOrCreateRoom(roomName: Random.Range(1000, 9999).ToString(),
@@ -75,7 +77,7 @@ namespace Network
             if (PhotonNetwork.InRoom) PhotonNetwork.LeaveRoom();
             else CancelJoinRoom();
             isConnected = PhotonNetwork.IsConnectedAndReady;
-            _mainMenuUIService.UpdateNetworkUI(isConnected);
+            _mainMenuUIService.SetIsConnectedToMaster(isConnected);
         }
 
         public override void OnPlayerEnteredRoom(Player newPlayer)
@@ -119,7 +121,7 @@ namespace Network
             base.OnConnectedToMaster();
             Debug.Log("Connected" + PhotonNetwork.NickName);
             isConnected = PhotonNetwork.IsConnectedAndReady;
-            _mainMenuUIService.UpdateNetworkUI(isConnected);
+            _mainMenuUIService.SetIsConnectedToMaster(isConnected);
         }
 
         private async void CancelJoinRoom()
@@ -134,7 +136,7 @@ namespace Network
             PhotonNetwork.LeaveRoom();
             Debug.Log("Async end");
             isConnected = PhotonNetwork.IsConnectedAndReady;
-            _mainMenuUIService.UpdateNetworkUI(isConnected);
+            _mainMenuUIService.SetIsConnectedToMaster(isConnected);
         }
 
         private void Update()

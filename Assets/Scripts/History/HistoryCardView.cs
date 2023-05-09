@@ -5,35 +5,20 @@ using Cards;
 using Cards.CustomType;
 using History.Interfaces;
 using TMPro;
+using UIElements;
 using UnityEngine;
 using UnityEngine.UI;
 
 namespace History
 {
-    public class HistoryCardView : MonoBehaviour, IHistoryViewService
+    public class HistoryCardView : CardViewBase, IHistoryViewService
     {
         private DateTime _startTimeTap = DateTime.MinValue;
         private const float TIME_TAP_VIEW = 0.5f;
         private const float ALPHA_PER_STEP = 0.05f;
 
         private IEnumerator _fadeInCoroutine;
-
-        [Header("Card view"), SerializeField]
-        private CanvasGroup _viewCardCanvas;
-
-        [SerializeField]
-        private TextMeshProUGUI _viewManapoints;
-
-        [SerializeField]
-        private TextMeshProUGUI _viewCardDescription;
-
-        [SerializeField]
-        private Image _viewCardImage;
-
-        [SerializeField]
-        private List<CardView.BonusImageType> _viewBonusImageList = new();
-
-
+        
         public void StartTap(CardInfo cardCollection, PlayerInfo player)
         {
             _startTimeTap = DateTime.Now;
@@ -49,22 +34,6 @@ namespace History
                 StartCoroutine(IEndTap());
             }
         }
-
-        private void UpdateCardViewImage(CardInfo info, PlayerInfo player)
-        {
-            string desc = "";
-            desc = I2.Loc.LocalizationManager.TryGetTranslation(info.CardDescription, out desc)
-                ? I2.Loc.LocalizationManager.GetTranslation(info.CardDescription)
-                : info.CardDescription;
-            _viewCardDescription.text = desc;
-            _viewCardImage.sprite = (player.SideId == 1) ? info.CardImageP1 : info.CardImageP2;
-            _viewManapoints.text = info.CardManacost.ToString();
-            foreach (CardView.BonusImageType bonus in _viewBonusImageList)
-            {
-                bonus.BonusImage.SetActive(bonus.BonusType == info.CardBonus);
-            }
-        }
-
         private IEnumerator IStartTap(CardInfo cardCollection, PlayerInfo player)
         {
             yield return new WaitForSeconds(TIME_TAP_VIEW);

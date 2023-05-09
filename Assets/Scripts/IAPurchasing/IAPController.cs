@@ -47,28 +47,6 @@ namespace IAPurchasing
         public void OnInitializeFailed(InitializationFailureReason error, string message)
         {
         }
-
-
-        public IEnumerator CheckSubscription()
-        {
-            while (!IsIAPInitialized())
-            {
-                IAPInitializate();
-                yield return new WaitForSeconds(0.5f);
-            }
-
-            foreach (var product in _storeController.products.all)
-            {
-                if (product.hasReceipt)
-                {
-                    _isSubscribeEnable = true;
-                    break;
-                }
-
-                _isSubscribeEnable = false;
-            }
-        }
-
         public PurchaseProcessingResult ProcessPurchase(PurchaseEventArgs purchaseEvent)
         {
             if (_purchased != null) _purchased();

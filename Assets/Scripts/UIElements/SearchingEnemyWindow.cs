@@ -12,9 +12,6 @@ public class SearchingEnemyWindow : MonoBehaviour
     [Header("Timer properties"), SerializeField]
     private TextMeshProUGUI _timerText;
 
-    [Header("Timer properties"), SerializeField]
-    private Transform _loadingBar;
-
     public static float TimePass;
 
     #region Dependency
@@ -50,7 +47,6 @@ public class SearchingEnemyWindow : MonoBehaviour
             TimeSpan timeSpan = DateTime.Now - beginTime;
             _timerText.text = timeSpan.ToString(@"mm\:ss");
             TimePass = (float) timeSpan.TotalSeconds;
-            _loadingBar.transform.rotation = Quaternion.Euler(0, 0, (_loadingBar.rotation.eulerAngles.z - Mathf.Sin(timeSpan.Seconds) - 2) % 360);
 
             yield return null;
         }

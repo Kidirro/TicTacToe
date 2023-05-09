@@ -3,13 +3,14 @@ using Cards;
 using Cards.CustomType;
 using Cards.Interfaces;
 using TMPro;
+using UIElements;
 using UnityEngine;
 using UnityEngine.UI;
 using Zenject;
 
 namespace CardCollection
 {
-    public class CardCollectionUIObject : MonoBehaviour
+    public class CardCollectionUIObject : CardViewBase
     {
         /// <summary>
         /// Открыта ли карта по умолчанию
@@ -20,18 +21,6 @@ namespace CardCollection
         /// Информация карты как информационной сущности
         /// </summary>
         public CardInfo Info;
-
-        /// <summary>
-        /// Текст манакоста
-        /// </summary>
-        [Header("Texts"),SerializeField]
-        private TextMeshProUGUI _manapoints;
-
-        /// <summary>
-        /// Текст описания карты
-        /// </summary>
-        [SerializeField]
-        private TextMeshProUGUI _cardDescription;
 
         /// <summary>
         /// Обьект карты
@@ -47,20 +36,7 @@ namespace CardCollection
         /// </summary>
         [SerializeField]
         private GameObject _cardObjClose;
-
-        /// <summary>
-        /// Изображение карты
-        /// </summary>
-        [SerializeField]
-        private List<GameObject> _bonusImageList = new List<GameObject>();
-
-        /// <summary>
-        /// Изображение карты
-        /// </summary>
-        [SerializeField]
-        private Image _cardImage;
-
-
+        
         #region Dependency
 
         private ICollectionUIService _collectionUIService;
@@ -72,8 +48,6 @@ namespace CardCollection
         }
 
         #endregion
- 
-        
         
         private void Awake()
         {
@@ -87,17 +61,7 @@ namespace CardCollection
             _cardObjClose.SetActive(!IsUnlock);
             if (IsUnlock)
             {            
-                _manapoints.text = (Info.CardManacost + Info.CardBonusManacost).ToString();
-                _cardImage.sprite = Info.CardImageP1;
-
-                string desc;
-                desc= I2.Loc.LocalizationManager.TryGetTranslation(Info.CardDescription, out desc) ? I2.Loc.LocalizationManager.GetTranslation(Info.CardDescription) : Info.CardDescription;
-                _cardDescription.text = desc;
-
-                for (int i = 0; i < _bonusImageList.Count; i++)
-                {
-                    _bonusImageList[i].SetActive(i== (int)Info.CardBonus);
-                }
+              base.UpdateCardViewImage(Info,new PlayerInfo());
             }
         }
 

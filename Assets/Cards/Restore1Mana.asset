@@ -29,4 +29,4 @@ MonoBehaviour:
   TipText: 
   CardManacost: 0
   CardBonusManacost: 0
-  "\u0421ardActionId": Decrease2MaxMana
+  "\u0421ardActionId": 20

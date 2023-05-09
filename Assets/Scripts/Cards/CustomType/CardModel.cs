@@ -77,6 +77,7 @@ namespace Cards.CustomType
             _cardView.SetCanvasOverrideSorting(true);
             _cardView.SetTransformScale(1, false);
             _cardView.SetTransformPositionWithFingerDistance(Input.mousePosition, false);
+            _lastAlphaState = true;
             _chosenCell = new Vector2Int(-1, -1);
             SetTransformRotation(0);
             _isSlotsReUpdatePositions = false;
@@ -222,7 +223,6 @@ namespace Cards.CustomType
 
         public void SetTransformParent(Transform parent, Vector2 position)
         {
-            Debug.Log($"SetParent {position}. {parent}");
             _cardView.SetTransformParent(parent, position);
         }
 

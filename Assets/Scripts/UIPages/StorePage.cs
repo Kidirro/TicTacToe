@@ -1,6 +1,9 @@
+using System;
 using Analytic.Interfaces;
 using Cards.Interfaces;
+using Coin.Interfaces;
 using IAPurchasing.Interfaces;
+using TMPro;
 using UIElements;
 using UnityEngine;
 using Zenject;
@@ -12,25 +15,38 @@ namespace UIPages
         [Header("Store properties"), SerializeField]
         private AnimationFading _warningPopup;
 
+        [SerializeField]
+        private TextMeshProUGUI _randomCardPrice;
+        
         #region Dependency
 
         private IStoreEventsAnalyticService _storeEventsAnalyticService;
         private IIAPService _iapService;
         private IAdEventsAnalyticService _adEventsAnalyticService;
         private ICollectionService _collectionService;
+        private ICoinService _coinService;
 
         [Inject]
-        private void Construct(IStoreEventsAnalyticService storeEventsAnalyticService, IIAPService iapService,
-            IAdEventsAnalyticService adEventsAnalyticService, ICollectionService collectionService)
+        private void Construct(
+            IStoreEventsAnalyticService storeEventsAnalyticService,
+            IIAPService iapService,
+            IAdEventsAnalyticService adEventsAnalyticService,
+            ICollectionService collectionService,
+            ICoinService coinService)
         {
             _storeEventsAnalyticService = storeEventsAnalyticService;
             _iapService = iapService;
             _adEventsAnalyticService = adEventsAnalyticService;
             _collectionService = collectionService;
+            _coinService = coinService;
         }
 
         #endregion
 
+        private void Start()
+        {
+            _randomCardPrice.text = _coinService.GetCoinPerUnlock().ToString();
+        }
 
         private bool _isWarningPopupShowed
         {

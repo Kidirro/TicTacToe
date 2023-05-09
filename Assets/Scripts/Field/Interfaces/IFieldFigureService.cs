@@ -23,8 +23,8 @@ namespace Field.Interfaces
         
         public void PlaceInCell(Vector2Int id, bool isNeedEvent = true, bool isQueue = true);
         public void PlaceInRandomCell(bool isNeedQueue = true);
-        public void FreezeCell(Vector2Int id, Sprite sprite, bool isNeedEvent = true);
-        public void FreezeCell(Vector2Int id, bool isNeedEvent = true);
+        public void FreezeCell(Vector2Int id, Sprite sprite, bool isNeedEvent = true, bool isQueue = true);
+        public void FreezeCell(Vector2Int id, bool isNeedEvent = true, bool isQueue = true);
         public void ResetSubStateWithPlaceFigure(Vector2Int position, bool isNeedEvent = true);
         public void ResetFigureWithPlaceSubState(Vector2Int position, Vector2Int areaSize, Sprite sprite, Color color,
             CellSubState cellSubState);

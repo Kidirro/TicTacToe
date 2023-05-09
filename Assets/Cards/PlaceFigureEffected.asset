@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 280c217edb247014c88a71e11514f438, type: 3}
-  m_Name: PlaceFigureRandom
+  m_Name: PlaceFigureEffected
   m_EditorClassIdentifier: 
   CardId: 8
   CardImageP1: {fileID: 21300000, guid: a060eb7106a5e9e419a08d92ce0aa5bd, type: 3}
@@ -27,6 +27,6 @@ MonoBehaviour:
   CardCount: 1
   IsNeedShowTip: 0
   TipText: 
-  CardManacost: 3
+  CardManacost: 1
   CardBonusManacost: 0
-  "\u0421ardActionId": Decrease2MaxMana
+  "\u0421ardActionId": 15

@@ -5,7 +5,10 @@ using Coroutine;
 using GameScene;
 using GameTypeService;
 using IAPurchasing;
+using IAPurchasing.Interfaces;
 using Network;
+using Settings;
+using Settings.Interfaces;
 using Tutorial;
 using UnityEngine;
 using Vibration.Interfaces;
@@ -27,9 +30,13 @@ public class BootstrapInstaller : MonoInstaller, IInitializable
         BindAnalyticEvents();
         BindTutorialData();
         BindIAPurchase();
-        
         BindCoroutineQueue();
-        SetApplicationSettings();
+        BindLanguage();
+    }
+
+    private void BindLanguage()
+    {
+        Container.BindInterfacesAndSelfTo<SettingsDataHolder>().AsSingle();
     }
 
     private void BindCoroutineQueue()
@@ -66,13 +73,7 @@ public class BootstrapInstaller : MonoInstaller, IInitializable
     {
         Container.BindInterfacesAndSelfTo<GameTypeController>().AsSingle();
     }
-
-    private void SetApplicationSettings()
-    {
-        QualitySettings.vSyncCount = 0;
-        Application.targetFrameRate = 60;
-    }
-
+    
     private void BindVibration()
     {
         Container.BindInterfacesAndSelfTo<VibrationService>().AsSingle().NonLazy();
@@ -90,6 +91,15 @@ public class BootstrapInstaller : MonoInstaller, IInitializable
 
     public void Initialize()
     {
+        SetApplicationSettings();
+    }
+    
+    private void SetApplicationSettings()
+    {
+        QualitySettings.vSyncCount = 0;
+        Application.targetFrameRate = 60;
         Container.Resolve<IVibrationService>().Init();
+        Container.Resolve<ISettingsDataService>().LoadLanguage();
+        Container.Resolve<IIAPService>().IAPInitializate();
     }
 }

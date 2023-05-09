@@ -5,6 +5,8 @@ namespace Cards.Interfaces
 {
     public interface IHandPoolManipulator
     {
+        public int MaxCardHand { get; }
+
         public void AddCard(PlayerInfo player);
         public void RemoveCard(PlayerInfo player, int id);
         public void RemoveCard(PlayerInfo player, CardModel cardModel);

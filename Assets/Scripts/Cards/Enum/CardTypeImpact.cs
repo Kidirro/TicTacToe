@@ -4,6 +4,7 @@
     {
         OnField,
         OnArea,
-        OnAreaWithCheck
+        OnAreaWithCheck,
+        OnAllyPiece
     }
 }
