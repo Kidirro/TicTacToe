@@ -4,6 +4,7 @@ using Cards;
 using Cards.CustomType;
 using Coroutine.Interfaces;
 using Effects.Interfaces;
+using Emotes.Interfaces;
 using ExitGames.Client.Photon;
 using Field.Interfaces;
 using FinishLine.Interfaces;
@@ -19,8 +20,10 @@ using Zenject;
 
 namespace Network
 {
-    public class NetworkEventManager :MonoBehaviour, IOnEventCallback, ICheckEventNetworkService, IManaEventNetworkService,
-        ICardEventNetworkService, IFigureEventNetworkService, IFreezeEventNetworkService, IEffectEventNetworkService, INetworkEventService
+    public class NetworkEventManager : MonoBehaviour, IOnEventCallback, ICheckEventNetworkService,
+        IManaEventNetworkService,
+        ICardEventNetworkService, IFigureEventNetworkService, IFreezeEventNetworkService, IEffectEventNetworkService,
+        INetworkEventService, IEmotesEventNetworkService
     {
         #region Dependecy
 
@@ -33,7 +36,7 @@ namespace Network
         private IManaService _manaService;
         private IManaUIService _manaUIService;
         private IFieldFigureService _fieldFigureService;
-
+        private IEmoteService _emoteService;
 
         [Inject]
         private void Construct(
@@ -45,7 +48,8 @@ namespace Network
             ICoroutineAwaitService coroutineService,
             IManaService manaService,
             IManaUIService manaUIService,
-            IFieldFigureService fieldFigureService)
+            IFieldFigureService fieldFigureService,
+            IEmoteService emoteService)
         {
             _serializableEffects = serializableEffects;
             _effectService = effectService;
@@ -56,13 +60,14 @@ namespace Network
             _manaService = manaService;
             _manaUIService = manaUIService;
             _fieldFigureService = fieldFigureService;
+            _emoteService = emoteService;
         }
 
         #endregion
 
         private bool _isOnline;
         private Action _newTurnAction;
-        
+
         #region Unity
 
         private void OnEnable()
@@ -250,6 +255,19 @@ namespace Network
 
         #endregion
 
+        #region Emote_Events
+
+        public void RaiseEventShowEmote(int id)
+        {
+            if (!_isOnline) return;
+
+            RaiseEventOptions ro = new RaiseEventOptions {Receivers = ReceiverGroup.Others};
+            SendOptions so = new SendOptions {Reliability = true};
+            PhotonNetwork.RaiseEvent(70, id, ro, so);
+        }
+
+        #endregion
+
         /*   public static void RaiseEventCellState(Vector2Int id)
        {
            if (!GameplayManager.IsOnline) return;
@@ -265,6 +283,7 @@ namespace Network
            SendOptions SO = new SendOptions { Reliability = true };
            PhotonNetwork.RaiseEvent(4, card.CardId, RO, SO);
        }*/
+
 
         void IOnEventCallback.OnEvent(EventData photonEvent)
         {
@@ -333,6 +352,10 @@ namespace Network
                 case 63:
                     Vector2Int data63 = (Vector2Int) photonEvent.CustomData;
                     _serializableEffects.FreezeCell_Effect(data63);
+                    break; 
+                case 70:
+                    int data70 = (int) photonEvent.CustomData;
+                    _emoteService.ShowEmote(data70);
                     break;
             }
         }
@@ -344,7 +367,7 @@ namespace Network
 
         public void SetNewTurnAction(Action action)
         {
-            _newTurnAction =action;
+            _newTurnAction = action;
         }
     }
 }

@@ -6,7 +6,6 @@ using UnityEngine;
 
 namespace Players
 {
-
     public class PlayerController : IPlayerService
     {
         private List<PlayerInfo> _players = new();
@@ -20,16 +19,15 @@ namespace Players
             PlayerInfo player = new PlayerInfo
             {
                 EntityType = type,
-                SideId = _players.Count +1,
+                SideId = _players.Count + 1,
                 FullDeckPool = deck
             };
 
             player.DeckPool = player.FullDeckPool;
             player.HandPool = new List<CardModel>();
             _players.Add(player);
-
         }
-        
+
         public void AddPlayer(PlayerType type, int side, List<CardModel> deck)
         {
             PlayerInfo player = new PlayerInfo
@@ -47,7 +45,7 @@ namespace Players
         {
             _gameType = gameType;
         }
-        
+
         public void SetOnlineId(int id)
         {
             _playerOnlineId = id;
@@ -85,18 +83,18 @@ namespace Players
 
         public int GetCurrentSideOnDevice()
         {
-            int result = (_gameType==GameType.MultiplayerHuman) ? _playerOnlineId :
+            int result = (_gameType == GameType.MultiplayerHuman) ? _playerOnlineId :
                 (_gameType == GameType.SingleHuman) ? GetCurrentPlayer().SideId : 1;
-            
+
             return result;
-        }      
-        
+        }
+
         public PlayerInfo GetCurrentPlayerOnDevice()
         {
-Debug.Log($"Current game type {_gameType}");
-            PlayerInfo result = (_gameType==GameType.MultiplayerHuman) ? _players[_playerOnlineId-1] :
-                (_gameType== GameType.SingleHuman) ? GetCurrentPlayer() : _players[0];
-            
+            Debug.Log($"Current game type {_gameType}");
+            PlayerInfo result = (_gameType == GameType.MultiplayerHuman) ? _players[_playerOnlineId - 1] :
+                (_gameType == GameType.SingleHuman) ? GetCurrentPlayer() : _players[0];
+
             return result;
         }
 

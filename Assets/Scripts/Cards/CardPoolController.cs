@@ -178,7 +178,8 @@ namespace Cards
             foreach (CardModel card in _currentPlayerView.HandPool)
             {
                 card.UpdateUI(card.Info, _currentPlayerView,
-                    _manaService.IsEnoughMana(card.Info.CardManacost + card.Info.CardBonusManacost));
+                    _manaService.IsEnoughMana(card.Info.CardManacost + card.Info.CardBonusManacost) &&
+                    _playerService.GetCurrentPlayerOnDevice() == _playerService.GetCurrentPlayer());
             }
         }
 

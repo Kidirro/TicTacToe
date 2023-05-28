@@ -4,6 +4,7 @@ using Area;
 using Cards;
 using Cards.CustomType;
 using Effects;
+using Emotes;
 using Field;
 using FinishLine;
 using GameState;
@@ -64,6 +65,9 @@ namespace Installers
         [SerializeField]
         private HistoryCardView _historyCardView;
         
+        [SerializeField]
+        private EmoteManager _emoteManager;
+        
         public override void InstallBindings()
         {
             BindManaManager();
@@ -90,6 +94,12 @@ namespace Installers
             BindLocationAction();
             BindFinishLineFactory();
             BindHistoryView();
+            BindEmoteManager();
+        }
+
+        private void BindEmoteManager()
+        {
+            Container.BindInterfacesTo<EmoteManager>().FromInstance(_emoteManager).AsSingle();
         }
 
         private void BindHistoryView()

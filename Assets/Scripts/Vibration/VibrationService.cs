@@ -133,7 +133,7 @@ public class VibrationService: IVibrationService
 #elif UNITY_IOS
         Handheld.Vibrate();
 #else
-        Handheld.Vibrate ();
+        //Handheld.Vibrate ();
 #endif
 #endif
         }
@@ -158,8 +158,8 @@ public class VibrationService: IVibrationService
             }
 #elif UNITY_IOS
         Handheld.Vibrate();
-#elif !UNITY_WEBGL
-        Handheld.Vibrate ();
+//#elif !UNITY_WEBGL
+//        Handheld.Vibrate ();
 #endif
         }
     }
@@ -204,7 +204,7 @@ public class VibrationService: IVibrationService
 
     public void Vibrate ()
     {
-        #if !UNITY_WEBGL
+#if UNITY_ANDROID || UNITY_IOS
         if ( Application.isMobilePlatform ) {
             Handheld.Vibrate ();
         }
