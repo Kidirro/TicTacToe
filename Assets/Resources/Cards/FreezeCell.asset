@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 280c217edb247014c88a71e11514f438, type: 3}
+  m_Name: FreezeCell
+  m_EditorClassIdentifier: 
+  CardId: 9
+  CardImageP1: {fileID: 21300000, guid: 363ed300f848f974db2b296db700282c, type: 3}
+  CardImageP2: {fileID: 21300000, guid: 363ed300f848f974db2b296db700282c, type: 3}
+  CardHighlightP1: {fileID: 21300000, guid: 141f96d606ffefa4ebb54873c2c2dd03, type: 3}
+  CardHighlightP2: {fileID: 21300000, guid: 141f96d606ffefa4ebb54873c2c2dd03, type: 3}
+  CardHighlightColor: {r: 0, g: 0, b: 0, a: 0.14901961}
+  CardName: Freeze Cell
+  CardDescription: Card/FreezeCell
+  IsDefaultUnlock: 0
+  CardType: 2
+  CardBonus: -1
+  CardAreaSize: {x: 1, y: 1}
+  CardCount: 1
+  IsNeedShowTip: 1
+  TipText: Tip/Freeze
+  CardManacost: 0
+  CardBonusManacost: 0
+  "\u0421ardActionId": 7

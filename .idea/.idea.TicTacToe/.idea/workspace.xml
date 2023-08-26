@@ -5,30 +5,14 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="da820169-58fd-4bff-9117-cc0e992a542f" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/Assets/Scripts/Cards/Enum/CardActionType.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Scripts/Cards/Enum/CardActionType.cs.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Scripts/Effects/Interfaces/IFreezeEffectService.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Scripts/Effects/Interfaces/IFreezeEffectService.cs.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Scripts/Settings.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Scripts/Settings/Interfaces.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Scripts/Settings/Interfaces/ISettingsDataService.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Scripts/Settings/Interfaces/ISettingsDataService.cs.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Scripts/Settings/SettingsDataHolder.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Scripts/Settings/SettingsDataHolder.cs.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Scripts/UIElements/BuyingAnimationController.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Scripts/UIElements/BuyingAnimationController.cs.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Scripts/UIElements/CardViewBase.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Scripts/UIElements/CardViewBase.cs.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Scripts/UIElements/Interfaces.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Scripts/UIElements/Interfaces/IBuyingAnimationController.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Scripts/UIElements/Interfaces/IBuyingAnimationController.cs.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Scripts/UIPages/Interfaces/IMainMenuState.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Scripts/UIPages/Interfaces/IMainMenuState.cs.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Scripts/Utilites/SizeSynchronization.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Scripts/Utilites/SizeSynchronization.cs.meta" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Assets/Scripts/SaveSystem.meta" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Assets/Scripts/SaveSystem/BinarySaveSystem.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Assets/Scripts/SaveSystem/BinarySaveSystem.cs.meta" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Assets/Scripts/SaveSystem/ISaveSystem.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Assets/Scripts/SaveSystem/ISaveSystem.cs.meta" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Assets/Scripts/SaveSystem/SaveData.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Assets/Scripts/SaveSystem/SaveData.cs.meta" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/.idea.TicTacToe/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.TicTacToe/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/AddressableAssetsData/Android/addressables_content_state.bin" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/AddressableAssetsData/Android/addressables_content_state.bin" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Animations/StoreAnimation.anim" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Animations/StoreAnimation.anim" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/Cards/BonusMana.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Cards/BonusMana.asset" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/Cards/Decrease2MaxMana.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Cards/Decrease2MaxMana.asset" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/Cards/DecreaseIncrease2Mana.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Cards/DecreaseIncrease2Mana.asset" afterDir="false" />
@@ -38,64 +22,41 @@
       <change beforePath="$PROJECT_DIR$/Assets/Cards/Freeze6Figure.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Cards/Freeze6Figure.asset" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/Cards/FreezeAllMana.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Cards/FreezeAllMana.asset" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/Cards/FreezeCell.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Cards/FreezeCell.asset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Cards/FullHouse.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Cards/FullHouse.asset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Cards/IceEncirclement.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Cards/IceEncirclement.asset" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/Cards/Increase2MaxMana.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Cards/Increase2MaxMana.asset" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/Cards/ManaPerIce.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Cards/ManaPerIce.asset" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/Cards/Place5.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Cards/Place5.asset" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/Cards/PlaceAroundFreeze.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Cards/PlaceAroundFreeze.asset" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/Cards/PlaceFigure.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Cards/PlaceFigure.asset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Cards/PlaceFigureRandom.asset" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Cards/PlaceFigureRandom.asset.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Cards/PlaceFigureEffected.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Cards/PlaceFigureEffected.asset" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/Cards/PlaceFigureWithCard.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Cards/PlaceFigureWithCard.asset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Cards/PlaceMore.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Cards/PlaceMore.asset" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/Cards/Random2Mana.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Cards/Random2Mana.asset" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/Cards/Restore1Mana.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Cards/Restore1Mana.asset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Cards/Restore3Mana.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Cards/Restore3Mana.asset" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/Cards/RestoreAllMana.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Cards/RestoreAllMana.asset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Resources/Card.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Resources/Card.prefab" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Resources/CollectionItem.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Resources/CollectionItem.prefab" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Resources/I2Languages.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Resources/I2Languages.asset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Cards/Shortage.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Cards/Shortage.asset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Cards/SurroundByIce.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Cards/SurroundByIce.asset" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/Scenes/GameplayScene.unity" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scenes/GameplayScene.unity" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/Scenes/MainMenu.unity" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scenes/MainMenu.unity" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scenes/TutorialScene.unity" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scenes/TutorialScene.unity" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/Scripts/CardCollection/CardCollectionUIObject.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/CardCollection/CardCollectionUIObject.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/Scripts/CardCollection/CollectionManager.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/CardCollection/CollectionManager.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Cards/CardActions.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Cards/CardActions.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Cards/CardPoolController.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Cards/CardPoolController.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/Scripts/Cards/CustomType/CardInfo.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Cards/CustomType/CardInfo.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Cards/CustomType/CardModel.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Cards/CustomType/CardModel.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Cards/CustomType/CardView.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Cards/CustomType/CardView.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Cards/Enum/CardTypeImpact.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Cards/Enum/CardTypeImpact.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Cards/Interfaces/IHandPoolManipulator.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Cards/Interfaces/IHandPoolManipulator.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Effects/EffectManager.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Effects/EffectManager.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Field/FieldController.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Field/FieldController.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Field/Interfaces/IFieldFigureService.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Field/Interfaces/IFieldFigureService.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Field/Interfaces/IFieldZoneService.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Field/Interfaces/IFieldZoneService.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/History/HistoryCardView.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/History/HistoryCardView.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/IAPurchasing/IAPController.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/IAPurchasing/IAPController.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Installers/BootstrapInstaller.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Installers/BootstrapInstaller.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Installers/MainMenuLocationInstaller.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Installers/MainMenuLocationInstaller.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Network/MasterConnectorManager.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Network/MasterConnectorManager.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Tutorial/TutorialManager.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Tutorial/TutorialManager.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/UIElements/SearchingEnemyWindow.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/UIElements/SearchingEnemyWindow.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/UIPages/Interfaces/IMainMenuUIService.cs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/UIPages/Interfaces/IMainMenuUIService.cs.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/UIPages/MainMenuUI.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/UIPages/MainMenuUI.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/UIPages/StorePage.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/UIPages/StorePage.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Vibration/VibrationService.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Vibration/VibrationService.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Sprites/UI/BTN_Fill.png.meta" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Sprites/UI/BTN_Fill.png.meta" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Sprites/UI/LoadingCircle_main.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Sprites/UI/LoadingCircle_main.png.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Sprites/UI/TutorialSprites.png.meta" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Sprites/UI/TutorialSprites.png.meta" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Cards/Interfaces/ICollectionService.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Cards/Interfaces/ICollectionService.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/TextMesh Pro/Examples &amp; Extras/Resources/Fonts &amp; Materials/Roboto-Bold SDF.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/TextMesh Pro/Examples &amp; Extras/Resources/Fonts &amp; Materials/Roboto-Bold SDF.asset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/TextMesh Pro/Examples &amp; Extras/Resources/Fonts &amp; Materials/Roboto-Medium SDF.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/TextMesh Pro/Examples &amp; Extras/Resources/Fonts &amp; Materials/Roboto-Medium SDF.asset" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/TextMesh Pro/Resources/Fonts &amp; Materials/LiberationSans SDF - Fallback.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/TextMesh Pro/Resources/Fonts &amp; Materials/LiberationSans SDF - Fallback.asset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Packages/manifest.json" beforeDir="false" afterPath="$PROJECT_DIR$/Packages/manifest.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Packages/packages-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/Packages/packages-lock.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/ProjectSettings/ProjectSettings.asset" beforeDir="false" afterPath="$PROJECT_DIR$/ProjectSettings/ProjectSettings.asset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ProjectSettings/ProjectVersion.txt" beforeDir="false" afterPath="$PROJECT_DIR$/ProjectSettings/ProjectVersion.txt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="ChangesViewManager">
+    <option name="groupingKeys">
+      <option value="directory" />
+    </option>
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -112,11 +73,15 @@
     <setting file="file://$PROJECT_DIR$/../Clicker Dungeon Online/Assets/Scripts/Managers/InGameUI.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/../Clicker Dungeon Online/Assets/Scripts/URLParse/URLJsonParser.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/Scripts/Ads/AdsController.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="mock://C:/UnityProjects/TicTacToe/Assets/Scripts/CardCollection/CardCollectionUIObject.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock://C:/UnityProjects/TicTacToe/Assets/Scripts/CardCollection/CollectionManager.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/Scripts/Cards/CardActions.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/Scripts/Cards/CustomType/CardInfo.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="mock://C:/UnityProjects/TicTacToe/Assets/Scripts/Cards/CustomType/CardInfo.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/Scripts/Cards/CustomType/CardModel.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/Scripts/Cards/Interfaces/ICardFactory.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/Scripts/Cards/Interfaces/ICardList.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="mock://C:/UnityProjects/TicTacToe/Assets/Scripts/Cards/Interfaces/ICollectionService.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/Scripts/Cards/Interfaces/ICollectionService.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/Scripts/Cards/Interfaces/ICollectionUIService.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/Scripts/Cards/Interfaces/IHandPoolManipulator.cs" root0="FORCE_HIGHLIGHTING" />
@@ -125,9 +90,18 @@
     <setting file="file://$PROJECT_DIR$/Assets/Scripts/IAPurchasing/IAPController.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/Scripts/Installers/BootstrapInstaller.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Assets/Scripts/Installers/TutorialLocationInstaller.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Assets/Scripts/Map/CustomMap.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Assets/Scripts/Map/MapGenerator.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="mock://C:/UnityProjects/TicTacToe/Assets/Scripts/Network/NetworkEventManager.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/5a41d6b7189842eca409fd0b1c3e3dcf17bf78/f1/61e468fd/Queue`1.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/685c48cf8f0b48abb797275c046dda6a158a00/19/813ce20e/Object.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/88e4733ac7bc4ae1b496735e6b83bbd346ac00/18/3359752d/WaitHandle.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/88e4733ac7bc4ae1b496735e6b83bbd346ac00/48/1589236a/List`1.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/964670f15c6b47f9b8f934073272047381e800/b2/d56d2c49/ConverterUtils.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/ba783288ca164d3099898a8819fcec1c159e00/0d/f72bfc49/Resources.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/ba783288ca164d3099898a8819fcec1c159e00/5b/193f538c/Random.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/ba783288ca164d3099898a8819fcec1c159e00/6e/8b8af65c/Renderer.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/ba783288ca164d3099898a8819fcec1c159e00/94/a7741d87/LineRenderer.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/c3c66fd2767c44a085aa0b03bbe98b2c7400/f5/d5428ca0/Input.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/e8a406da998549af9a2680936c7da25a159c00/38/f800bd75/MonoBehaviour.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/e8a406da998549af9a2680936c7da25a159c00/ad/14b01b0c/Transform.cs" root0="SKIP_HIGHLIGHTING" />
@@ -302,6 +276,19 @@
       <workItem from="1682943349311" duration="1784000" />
       <workItem from="1683562112190" duration="2486000" />
       <workItem from="1683630241594" duration="14828000" />
+      <workItem from="1684592197776" duration="600000" />
+      <workItem from="1685277479567" duration="6549000" />
+      <workItem from="1686481966248" duration="4690000" />
+      <workItem from="1686572844179" duration="8741000" />
+      <workItem from="1689023002065" duration="3797000" />
+      <workItem from="1689101661512" duration="695000" />
+      <workItem from="1689417203517" duration="3024000" />
+      <workItem from="1689705602836" duration="8400000" />
+      <workItem from="1690017817429" duration="12016000" />
+      <workItem from="1690043554237" duration="1231000" />
+      <workItem from="1691338091985" duration="603000" />
+      <workItem from="1692547977701" duration="3587000" />
+      <workItem from="1693047608640" duration="1407000" />
     </task>
     <servers />
   </component>
@@ -340,6 +327,19 @@
             </endOffsets>
           </properties>
           <option name="timeStamp" value="6" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="DotNet Breakpoints">
+          <url>file://$PROJECT_DIR$/Assets/Scripts/CardCollection/CollectionManager.cs</url>
+          <line>328</line>
+          <properties documentPath="C:\UnityProjects\TicTacToe\Assets\Scripts\CardCollection\CollectionManager.cs" initialLine="338" containingFunctionPresentation="method 'EndTap'">
+            <startOffsets>
+              <option value="11099" />
+            </startOffsets>
+            <endOffsets>
+              <option value="11166" />
+            </endOffsets>
+          </properties>
+          <option name="timeStamp" value="8" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

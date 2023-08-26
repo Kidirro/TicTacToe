@@ -6,9 +6,10 @@ namespace Cards.CustomType
     [CreateAssetMenu(fileName = "New card", menuName = "Card")]
     public class CardInfo : ScriptableObject
     {
-        [HideInInspector]
-        public int CardId;
+        private static int _currentId;
 
+        public int CardId = _currentId;
+        
         [Space, Header("Images")]
         public Sprite CardImageP1;
 
@@ -40,5 +41,22 @@ namespace Cards.CustomType
         public int CardBonusManacost;
 
         public CardActionType СardActionId;
+
+
+#if UNITY_EDITOR
+       
+        private void OnValidate()
+        {
+            if (CardId >= _currentId)
+            {
+                _currentId = CardId + 1;
+            }
+
+            if (CardId == 0)
+            {
+                CardId = _currentId;
+            }
+        }
+#endif
     }
 }

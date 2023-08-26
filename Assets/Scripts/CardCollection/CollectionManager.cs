@@ -1,13 +1,16 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using Analytic.Interfaces;
 using CardCollection.Interfaces;
 using Cards.CustomType;
 using Cards.Interfaces;
 using Coin.Interfaces;
+using SaveSystem;
 using TMPro;
 using UIElements.Interfaces;
+using UnityEditor.Localization.Plugins.XLIFF.V12;
 using UnityEngine;
 using UnityEngine.UI;
 using Zenject;
@@ -36,13 +39,9 @@ namespace CardCollection
         private const float TIME_TAP_VIEW = 0.5f;
         private const float ALPHA_PER_STEP = 0.05f;
 
-        [Header("Cards"), SerializeField]
-        private List<CardInfo> _cardsList = new List<CardInfo>();
+        private const string CARD_INFO_PATH = "Cards/";
 
-        private static List<CardInfo> _cardListStat = new List<CardInfo>();
-
-        [SerializeField]
-        private GameObject _cardPrefab;
+        private static Dictionary<int, CardInfo> _cardListStat = new Dictionary<int, CardInfo>();
 
         [Header("Deck properties"), SerializeField]
         private Transform _deckParent;
@@ -52,9 +51,15 @@ namespace CardCollection
 
         private List<CardCollectionUIObject> _cardDeck = new List<CardCollectionUIObject>();
 
-        private static BoolArray _currentDeck;
+        private List<int> _redactedDeck;
 
-        private static BoolArray _redactedDeck;
+        private static CardBoolData _cardBoolUnlockData;
+        private static BinarySaveSystem _cardUnlockSaveSystem;
+        private const string CARD_UNLOCK_PATH = "UnlockData";
+
+        private static CardListData _currentDeckData;
+        private static BinarySaveSystem _currentDeckSaveSystem;
+        private const string CARD_DECK_PATH = "DeckData";
 
         [Header("Collection properties"), SerializeField]
         private Transform _collectionParent;
@@ -81,7 +86,9 @@ namespace CardCollection
         private IBuyingAnimationController _buyingAnimationController;
 
         [Inject]
-        private void Construct(ICardList cardList, ICoinService coinService,
+        private void Construct(
+            ICardList cardList,
+            ICoinService coinService,
             ICollectionEventsAnalyticService collectionEventsAnalyticService,
             IStoreEventsAnalyticService storeEventsAnalyticService,
             ICardCollectionFactory cardCollectionFactory,
@@ -100,36 +107,26 @@ namespace CardCollection
         private void Start()
         {
             _viewCardCanvas.gameObject.SetActive(false);
-            _cardListStat = new List<CardInfo>(_cardsList);
-            for (int i = 0; i < _cardListStat.Count; i++)
+            _cardListStat = new Dictionary<int, CardInfo>();
+            var resourcesCard = Resources.LoadAll<CardInfo>(CARD_INFO_PATH);
+            foreach (var card in resourcesCard)
             {
-                _cardListStat[i].CardId = i;
+                _cardListStat[card.CardId] = card;
             }
+
 
             if (_cardCollections.Count == 0)
-                _cardCollections = _cardCollectionFactory.CreateCollectionUIList(_cardListStat, _collectionParent);
+                _cardCollections =
+                    _cardCollectionFactory.CreateCollectionUIList(_cardListStat.Values.ToList(), _collectionParent);
             if (_cardDeck.Count == 0)
-                _cardDeck = _cardCollectionFactory.CreateCollectionUIList(_cardListStat, _deckParent);
+                _cardDeck = _cardCollectionFactory.CreateCollectionUIList(_cardListStat.Values.ToList(), _deckParent);
 
+            LoadCardUnlockData();
 
-            _currentDeck = new BoolArray();
-            if (PlayerPrefs.HasKey("CurrentDeck"))
-            {
-                LoadCurrentDeck();
-                CheckCurrentDeck();
-                SaveCurrentDeck();
-            }
-            else
-            {
-                for (int i = 0; i < _cardCollections.Count; i++)
-                {
-                    _currentDeck.Array.Add(_cardCollections[i].IsUnlock);
-                }
+            LoadCurrentDeckData();
 
-                SaveCurrentDeck();
-            }
+            _redactedDeck = _currentDeckData.List;
 
-            _redactedDeck = _currentDeck;
             CreateCardPull();
 
             UpdateCollectionCardState();
@@ -139,23 +136,14 @@ namespace CardCollection
 
         public int CountCardInDeck()
         {
-            int countDeck = 0;
-            foreach (bool i in _redactedDeck.Array)
-            {
-                if (i)
-                {
-                    countDeck += 1;
-                }
-            }
-
-            return countDeck;
+            return _redactedDeck.Count;
         }
 
         public void UpdateCollectionCardState()
         {
             foreach (CardCollectionUIObject card in _cardCollections)
             {
-                card.UpdateUI();
+                card.UpdateUI(IsCardUnlock(card.Info));
                 card.SetDeckState(true);
             }
         }
@@ -164,9 +152,9 @@ namespace CardCollection
         {
             foreach (CardCollectionUIObject card in _cardDeck)
             {
-                card.UpdateUI();
-                card.gameObject.SetActive(card.IsUnlock);
-                card.SetDeckState(_currentDeck.Array[_cardListStat.IndexOf(card.Info)]);
+                card.UpdateUI(IsCardUnlock(card.Info));
+                card.gameObject.SetActive(IsCardUnlock(card.Info));
+                card.SetDeckState(IsOnDeck(card.Info));
             }
         }
 
@@ -179,24 +167,25 @@ namespace CardCollection
         private void CreateCardPull()
         {
             _cardList.CardListClear();
-            for (int i = 0; i < _cardsList.Count; i++)
+
+            foreach (var card in _currentDeckData.List)
             {
-                if (_currentDeck.Array[i]) _cardList.CardListAdd(_cardsList[i]);
+                _cardList.CardListAdd(_cardListStat[card]);
             }
         }
 
         public void UnlockRandomCard(bool isNeedUsekCoin = true)
         {
             if (isNeedUsekCoin && _coinService.GetCurrentMoney() < _coinService.GetCoinPerUnlock()) return;
-            List<CardCollectionUIObject> _lockedList = new List<CardCollectionUIObject>();
-            foreach (CardCollectionUIObject card in _cardCollections)
-                if (!card.IsUnlock)
-                    _lockedList.Add(card);
-            if (_lockedList.Count == 0) return;
-            int valuerand = UnityEngine.Random.Range(0, _lockedList.Count);
-            CardCollectionUIObject currentCard = _lockedList[valuerand];
-            currentCard.UnlockCard();
-            currentCard.UpdateUI();
+            var lockedList = _cardCollections.Where(card => !IsCardUnlock(card.Info)).ToList();
+            if (lockedList.Count == 0) return;
+            int valueRand = UnityEngine.Random.Range(0, lockedList.Count);
+            CardCollectionUIObject currentCard = lockedList[valueRand];
+
+            _cardBoolUnlockData.BoolData[currentCard.Info.CardId] = true;
+            SaveCardUnlockData();
+
+            currentCard.UpdateUI(true);
             _buyingAnimationController.ShowBuyingAnimation(currentCard.Info);
             if (isNeedUsekCoin)
             {
@@ -204,84 +193,127 @@ namespace CardCollection
                 _moneyValue.text = _coinService.GetCurrentMoney().ToString();
             }
 
-            _currentDeck.Array[_cardsList.IndexOf(currentCard.Info)] = true;
-            SaveCurrentDeck();
+            _currentDeckData.List.Add(currentCard.Info.CardId);
+            SaveCurrentDeckData();
             CreateCardPull();
         }
 
         public void UnlockAllCard()
         {
-            for (int i = 0; i < _cardCollections.Count; i++)
+            List<KeyValuePair<int, bool>> keyList = _cardBoolUnlockData.BoolData.Where(x => !x.Value).ToList();
+
+            for (int i = 0; i < keyList.Count; i++)
             {
-                _buyingAnimationController.ShowBuyingAnimation(_cardCollections[i].Info);
-                _cardCollections[i].UnlockCard();
-                _cardCollections[i].UpdateUI();
+                _buyingAnimationController.ShowBuyingAnimation(_cardListStat[keyList[i].Key]);
+                _cardBoolUnlockData.BoolData[keyList[i].Key] = true;
+                _currentDeckData.List.Add(keyList[i].Key);
             }
+
+            SaveCurrentDeckData();
+            SaveCardUnlockData();
+        }
+
+        private void LoadCardUnlockData()
+        {
+            _cardUnlockSaveSystem ??= new(CARD_UNLOCK_PATH);
+            _cardBoolUnlockData = (CardBoolData) _cardUnlockSaveSystem.Load();
+            if (_cardBoolUnlockData == null)
+            {
+                _cardBoolUnlockData = new CardBoolData();
+                foreach (var card in _cardListStat.Values)
+                {
+                    //Синхронизация со старыми сейвами
+                    if (PlayerPrefs.HasKey("IsCard" + card.CardName + "Unlocked"))
+                    {
+                        _cardBoolUnlockData.BoolData[card.CardId] =
+                            PlayerPrefs.GetInt("IsCard" + card.name + "Unlocked", 0) == 1;
+                        PlayerPrefs.DeleteKey("IsCard" + card.name + "Unlocked");
+                    }
+                    else
+                    {
+                        _cardBoolUnlockData.BoolData[card.CardId] = card.IsDefaultUnlock;
+                    }
+                }
+
+                SaveCardUnlockData();
+            }
+        }
+
+        private void SaveCardUnlockData()
+        {
+            _cardUnlockSaveSystem ??= new(CARD_UNLOCK_PATH);
+            _cardUnlockSaveSystem.Save(_cardBoolUnlockData);
+        }
+
+        private void LoadCurrentDeckData()
+        {
+            _currentDeckSaveSystem ??= new BinarySaveSystem(CARD_DECK_PATH);
+            _currentDeckData = (CardListData) _currentDeckSaveSystem.Load();
+
+            if (_currentDeckData != null) return;
+
+            _currentDeckData = new CardListData();
+            foreach (var card in _cardBoolUnlockData.BoolData.Where(card => card.Value))
+            {
+                _currentDeckData.List.Add(card.Key);
+            }
+            SaveCurrentDeckData();
+        }
+
+        private void SaveCurrentDeckData()
+        {
+            _currentDeckSaveSystem ??= new BinarySaveSystem(CARD_DECK_PATH);
+            _currentDeckSaveSystem.Save(_currentDeckData);
+        }
+
+        public bool IsCardUnlock(CardInfo cardInfo)
+        {
+            return _cardBoolUnlockData.BoolData[cardInfo.CardId];
         }
 
         public static CardInfo GetCardFromId(int id)
         {
-            return (id > 0 && id < _cardListStat.Count) ? _cardListStat[id] : null;
+            return _cardListStat[id];
         }
 
-        public static void PickCard(CardInfo card)
+        private void PickCard(CardInfo card)
         {
-            _redactedDeck.Array[_cardListStat.IndexOf(card)] = !_currentDeck.Array[_cardListStat.IndexOf(card)];
-        }
-
-        public static bool IsOnRedactedDeck(CardInfo card)
-        {
-            return _redactedDeck.Array[_cardListStat.IndexOf(card)];
-        }
-
-        private void LoadCurrentDeck()
-        {
-            _currentDeck = JsonUtility.FromJson<BoolArray>(PlayerPrefs.GetString("CurrentDeck"));
-        }
-
-        private void SaveCurrentDeck()
-        {
-            PlayerPrefs.SetString("CurrentDeck", JsonUtility.ToJson(_currentDeck));
-        }
-
-        private void CheckCurrentDeck()
-        {
-            for (int i = 0; i < _cardCollections.Count; i++)
+            if (_redactedDeck.Exists(x => x == card.CardId))
             {
-                if (i >= _currentDeck.Array.Count) _currentDeck.Array.Add(_cardCollections[i].IsUnlock);
-                else _currentDeck.Array[i] = _cardCollections[i].IsUnlock && _currentDeck.Array[i];
+                _redactedDeck.Remove(card.CardId);
             }
+            else
+            {
+                _redactedDeck.Add(card.CardId);
+            }
+        }
+
+        private bool IsOnRedactedDeck(CardInfo card)
+        {
+            return _redactedDeck.Exists(x => x == card.CardId);
+        }
+
+        private bool IsOnDeck(CardInfo card)
+        {
+            return _currentDeckData.List.Exists(x => x == card.CardId);
         }
 
         public void TrySaveDeck()
         {
-            bool flagEmpty = false;
-            foreach (bool i in _redactedDeck.Array)
+            if (CountCardInDeck() >= _minDeckPool)
             {
-                if (i)
-                {
-                    flagEmpty = true;
-                }
+                _isEdit = false;
+                _currentDeckData.List = _redactedDeck;
+                SaveCurrentDeckData();
+                CreateCardPull();
             }
-
-            if (flagEmpty)
-            {
-                if (CountCardInDeck() >= _minDeckPool)
-                {
-                    _isEdit = false;
-                    _currentDeck = _redactedDeck;
-                    SaveCurrentDeck();
-                    CreateCardPull();
-                }
-                else throw new Exception("Card count less minimum");
-            }
-            else throw new Exception("No one card in deck!");
+            else throw new Exception("Card count less minimum");
         }
 
         public void StartTap(CardCollectionUIObject cardCollectionUIObject)
         {
             _startTimeTap = DateTime.Now;
-            _fadeInCoroutine = IStartTap(cardCollectionUIObject);
+            _fadeInCoroutine = StartTapProcess(cardCollectionUIObject);
             StartCoroutine(_fadeInCoroutine);
         }
 
@@ -290,18 +322,22 @@ namespace CardCollection
             StopCoroutine(_fadeInCoroutine);
             if ((DateTime.Now - _startTimeTap).TotalSeconds > TIME_TAP_VIEW)
             {
-                StartCoroutine(IEndTap());
+                StartCoroutine(EndTapProcess());
             }
             else
             {
-                int value = (_redactedDeck.Array[_cardListStat.IndexOf(cardCollectionUIObject.Info)]) ? 1 : -1;
-                if (_isEdit && CountCardInDeck() - value >= _minDeckPool) cardCollectionUIObject.PickCard();
+                int value = IsOnRedactedDeck(cardCollectionUIObject.Info) ? 1 : -1;
+
+                if (!_isEdit || CountCardInDeck() - value < _minDeckPool) return;
+
+                PickCard(cardCollectionUIObject.Info);
+                cardCollectionUIObject.SetDeckState(IsOnRedactedDeck(cardCollectionUIObject.Info));
             }
         }
 
-        public void UpdateCardViewImage(CardInfo info)
+        private void UpdateCardViewImage(CardInfo info)
         {
-            string desc = "";
+            string desc;
             desc = I2.Loc.LocalizationManager.TryGetTranslation(info.CardDescription, out desc)
                 ? I2.Loc.LocalizationManager.GetTranslation(info.CardDescription)
                 : info.CardDescription;
@@ -327,7 +363,7 @@ namespace CardCollection
         public void Player_Bought_Random_Card()
         {
             if (_coinService.GetCurrentMoney() < _coinService.GetCoinPerUnlock()) return;
-            
+
             _storeEventsAnalyticService.Player_Bought_Random_Card();
         }
 
@@ -337,7 +373,7 @@ namespace CardCollection
         }
 
 
-        private IEnumerator IStartTap(CardCollectionUIObject cardCollectionUIObject)
+        private IEnumerator StartTapProcess(CardCollectionUIObject cardCollectionUIObject)
         {
             yield return new WaitForSeconds(TIME_TAP_VIEW);
 
@@ -351,7 +387,7 @@ namespace CardCollection
             }
         }
 
-        private IEnumerator IEndTap()
+        private IEnumerator EndTapProcess()
         {
             while (_viewCardCanvas.alpha > 0)
             {
@@ -361,17 +397,6 @@ namespace CardCollection
 
             _viewCardCanvas.alpha = 0;
             _viewCardCanvas.gameObject.SetActive(false);
-        }
-
-        [Serializable]
-        public class BoolArray
-        {
-            public List<bool> Array;
-
-            public BoolArray()
-            {
-                Array = new List<bool>();
-            }
         }
     }
 }

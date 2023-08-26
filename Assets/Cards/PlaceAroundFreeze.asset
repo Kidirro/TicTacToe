@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 280c217edb247014c88a71e11514f438, type: 3}
   m_Name: PlaceAroundFreeze
   m_EditorClassIdentifier: 
-  CardId: 18
+  CardId: 6
   CardImageP1: {fileID: 21300000, guid: 5f23b6e5333b6aa479322709d6382b90, type: 3}
   CardImageP2: {fileID: 21300000, guid: 5f23b6e5333b6aa479322709d6382b90, type: 3}
   CardHighlightP1: {fileID: 21300000, guid: cfb6d025372a2104d814c38534c1619b, type: 3}

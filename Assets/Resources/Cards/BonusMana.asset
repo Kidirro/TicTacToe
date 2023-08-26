@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 280c217edb247014c88a71e11514f438, type: 3}
+  m_Name: BonusMana
+  m_EditorClassIdentifier: 
+  CardId: 1
+  CardImageP1: {fileID: 21300000, guid: c06821d56243f074faf9f318fc9247ba, type: 3}
+  CardImageP2: {fileID: 21300000, guid: c06821d56243f074faf9f318fc9247ba, type: 3}
+  CardHighlightP1: {fileID: 0}
+  CardHighlightP2: {fileID: 0}
+  CardHighlightColor: {r: 0, g: 0, b: 0, a: 0}
+  CardName: Bonus Mana
+  CardDescription: Card/BonusMana
+  IsDefaultUnlock: 0
+  CardType: 0
+  CardBonus: -1
+  CardAreaSize: {x: 0, y: 0}
+  CardCount: 1
+  IsNeedShowTip: 0
+  TipText: 
+  CardManacost: 1
+  CardBonusManacost: 0
+  "\u0421ardActionId": 0

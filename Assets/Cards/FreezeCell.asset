@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 280c217edb247014c88a71e11514f438, type: 3}
   m_Name: FreezeCell
   m_EditorClassIdentifier: 
-  CardId: 5
+  CardId: 21
   CardImageP1: {fileID: 21300000, guid: 363ed300f848f974db2b296db700282c, type: 3}
   CardImageP2: {fileID: 21300000, guid: 363ed300f848f974db2b296db700282c, type: 3}
   CardHighlightP1: {fileID: 21300000, guid: 141f96d606ffefa4ebb54873c2c2dd03, type: 3}

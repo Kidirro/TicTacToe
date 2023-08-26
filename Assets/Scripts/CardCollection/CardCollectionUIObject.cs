@@ -1,22 +1,13 @@
-using System.Collections.Generic;
-using Cards;
 using Cards.CustomType;
 using Cards.Interfaces;
-using TMPro;
 using UIElements;
 using UnityEngine;
-using UnityEngine.UI;
 using Zenject;
 
 namespace CardCollection
 {
     public class CardCollectionUIObject : CardViewBase
     {
-        /// <summary>
-        /// Открыта ли карта по умолчанию
-        /// </summary>
-        public bool IsUnlock => Info!=null && (Info.IsDefaultUnlock || PlayerPrefs.GetInt("IsCard"+Info.name+"Unlocked",0)==1);
-
         /// <summary>
         /// Информация карты как информационной сущности
         /// </summary>
@@ -54,14 +45,14 @@ namespace CardCollection
             if (Info == null) Destroy(this.gameObject);
         }
 
-        public void UpdateUI()
+        public void UpdateUI(bool isUnlock)
         {
 
-            _cardObj.SetActive(IsUnlock);
-            _cardObjClose.SetActive(!IsUnlock);
-            if (IsUnlock)
+            _cardObj.SetActive(isUnlock);
+            _cardObjClose.SetActive(!isUnlock);
+            if (isUnlock)
             {            
-              base.UpdateCardViewImage(Info,new PlayerInfo());
+              base.UpdateCardViewImage(Info,new PlayerInfo(){SideId=1});
             }
         }
 
@@ -69,19 +60,7 @@ namespace CardCollection
         {
             _canvasGroup.alpha = (state) ? 1 : 0.2f;
         }
-
-        public void UnlockCard()
-        {
-            PlayerPrefs.SetInt("IsCard" + Info.name + "Unlocked", 1);
-            UpdateUI();
-        }   
     
-        public void PickCard()
-        {
-            CollectionManager.PickCard(Info);
-            SetDeckState(CollectionManager.IsOnRedactedDeck(Info));
-        }
-
         public void OnPointerDown()
         {
             _collectionUIService.StartTap(this);

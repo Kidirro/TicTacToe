@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 280c217edb247014c88a71e11514f438, type: 3}
   m_Name: Increase2MaxMana
   m_EditorClassIdentifier: 
-  CardId: 6
+  CardId: 10
   CardImageP1: {fileID: 21300000, guid: a8e5a91d6f7619748a22586f699d5b59, type: 3}
   CardImageP2: {fileID: 21300000, guid: a8e5a91d6f7619748a22586f699d5b59, type: 3}
   CardHighlightP1: {fileID: 0}
