@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 namespace Yodo1.MAS
 {
@@ -20,6 +21,8 @@ namespace Yodo1.MAS
     public class Yodo1U3dMas
     {
         public static readonly string TAG = "[Yodo1Mas] ";
+
+        private static Yodo1AdBuildConfig adBuildConfig = null;
 
         public delegate void InitializeDelegate(bool success, Yodo1U3dAdError error);
         [System.Obsolete("Please use `Yodo1U3dMasCallback.OnSdkInitializedEvent` instead.\n" +
@@ -67,8 +70,14 @@ namespace Yodo1.MAS
         /// <summary>
         /// Initialize the default instance of Yodo1 MAS SDK.
         /// </summary>
+        [Obsolete("InitializeSdk() is obsolete and will be deprecated soon. Use InitializeMasSdk()")]
         public static void InitializeSdk()
         {
+            if (adBuildConfig == null)
+            {
+                Yodo1AdBuildConfig buildConfig = new Yodo1AdBuildConfig();
+                SetAdBuildConfig(buildConfig);
+            }
             string appKey = _InitializeSdk();
             if (appKey != null)
             {
@@ -81,6 +90,11 @@ namespace Yodo1.MAS
         /// </summary>
         public static void InitializeMasSdk()
         {
+            if (adBuildConfig == null)
+            {
+                Yodo1AdBuildConfig buildConfig = new Yodo1AdBuildConfig();
+                SetAdBuildConfig(buildConfig);
+            }
             string appKey = _InitializeSdk();
             if (appKey != null)
             {
@@ -163,6 +177,39 @@ namespace Yodo1.MAS
             {
 #if UNITY_ANDROID
                 Yodo1U3dAdsAndroid.InitMasWithAppKey(appKey);
+#endif
+            }
+        }
+
+
+        public static void ShowPopupToReportAd()
+        {
+            if (Application.platform == RuntimePlatform.IPhonePlayer)
+            {
+#if UNITY_IPHONE
+                Yodo1U3dAdsIOS.ShowPopupToReportAd();
+#endif
+            }
+            else if (Application.platform == RuntimePlatform.Android)
+            {
+#if UNITY_ANDROID
+                Yodo1U3dAdsAndroid.ShowPopupToReportAd();
+#endif
+            }
+        }
+
+        public static void ShowDebugger()
+        {
+            if (Application.platform == RuntimePlatform.IPhonePlayer)
+            {
+#if UNITY_IPHONE
+                Yodo1U3dAdsIOS.ShowDebugger();
+#endif
+            }
+            else if (Application.platform == RuntimePlatform.Android)
+            {
+#if UNITY_ANDROID
+                Yodo1U3dAdsAndroid.ShowDebugger();
 #endif
             }
         }
@@ -293,6 +340,33 @@ namespace Yodo1.MAS
         }
         #endregion
 
+        #region Privacy Method China
+        /// <summary>
+        /// According to Chinese data protection laws, testimonial advertising and commercial marketing to Chinese users through automated decision-making methods should be accompanied by options that do not target their personal characteristics or provide Chinese users with a way to reject them.
+        /// Based on the above requirements, You must set the user's choice through the 'setPersonalizedState' API,
+        /// through which you will send MAS information about that user has refused to the option based on his personal characteristics through automated decision-making.
+        /// If set to 'Yes', MAS will no longer provide the user with personalized information based on its persistent identifiers.
+        ///
+        /// This method must be called before InitializeSdk method.
+        /// </summary>
+        /// <param name="disablePersonal"></param>
+        public static void SetPersonalizedState(bool disablePersonal)
+        {
+            if (Application.platform == RuntimePlatform.IPhonePlayer)
+            {
+#if UNITY_IPHONE
+
+#endif
+            }
+            else if (Application.platform == RuntimePlatform.Android)
+            {
+#if UNITY_ANDROID
+                Yodo1U3dAdsAndroid.SetPersonalizedState(disablePersonal);
+#endif
+            }
+        }
+        #endregion
+
         public static int GetUserAge()
         {
             int age = 0;
@@ -336,6 +410,9 @@ namespace Yodo1.MAS
             {
                 return;
             }
+
+            adBuildConfig = yodo1AdBuildConfig;
+
             string configStr = yodo1AdBuildConfig.toJson();
 
             if (Application.platform == RuntimePlatform.IPhonePlayer)
@@ -621,6 +698,8 @@ namespace Yodo1.MAS
         /// <summary>
         /// Shows the interstitial ad.
         /// </summary>
+        ///
+        [Obsolete("Yodo1U3dMas.ShowInterstitialAd() is obsolete and will be deprecated soon. Use Yodo1U3dInterstitialAd.GetInstance().ShowAd()")]
         public static void ShowInterstitialAd()
         {
 #if UNITY_EDITOR
@@ -645,6 +724,8 @@ namespace Yodo1.MAS
         /// Shows the interstitial ad with placement id.
         /// </summary>
         /// <param name="placementId"></param>
+        ///
+        [Obsolete("Yodo1U3dMas.ShowInterstitialAd(placementId) is obsolete and will be deprecated soon. Use Yodo1U3dInterstitialAd.GetInstance().ShowAd(placementId)")]
         public static void ShowInterstitialAd(string placementId)
         {
 #if UNITY_EDITOR
@@ -696,6 +777,8 @@ namespace Yodo1.MAS
         /// <summary>
         /// Shows the reward video ad.
         /// </summary>
+        ///
+        [Obsolete("Yodo1U3dMas.ShowRewardedAd() is obsolete and will be deprecated soon. Use Yodo1U3dRewardAd.GetInstance().ShowAd()")]
         public static void ShowRewardedAd()
         {
 
@@ -722,7 +805,9 @@ namespace Yodo1.MAS
         /// Shows the reward video ad.
         /// </summary>
         /// <param name="placementId"></param>
-        public static void ShowRewardedAd(string palcementId)
+        ///
+        [Obsolete("Yodo1U3dMas.ShowRewardedAd(placementId) is obsolete and will be deprecated soon. Use Yodo1U3dRewardAd.GetInstance().ShowAd()")]
+        public static void ShowRewardedAd(string placementId)
         {
 #if UNITY_EDITOR
             Yodo1EditorAds.ShowRewardedVideodsInEditor();
@@ -734,9 +819,9 @@ namespace Yodo1.MAS
             }
 
 #if UNITY_IPHONE
-            Yodo1U3dAdsIOS.ShowRewardedAd(palcementId);
+            Yodo1U3dAdsIOS.ShowRewardedAd(placementId);
 #elif UNITY_ANDROID
-            Yodo1U3dAdsAndroid.ShowRewardedAd(palcementId);
+            Yodo1U3dAdsAndroid.ShowRewardedAd(placementId);
 #endif
         }
         #endregion

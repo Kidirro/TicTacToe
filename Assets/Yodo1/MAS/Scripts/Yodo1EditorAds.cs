@@ -6,11 +6,13 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using Yodo1.MAS;
+using UnityEngine.SceneManagement;
 
 public class Yodo1EditorAds : MonoBehaviour
 {
     public static GameObject AdHolder;
     public static Canvas AdHolderCanvas;
+    public static int HighestOrder = 32767;
     private static Dictionary<string, GameObject> BannerSampleAdEditor;
     private static Dictionary<string, GameObject> NativeSampleAdEditor;
     private static GameObject InterstitialSampleAdEditor;
@@ -24,8 +26,7 @@ public class Yodo1EditorAds : MonoBehaviour
 
     private static GameObject BannerSampleAdEditorTemp;
     private static GameObject NativeSampleAdEditorTemp;
-
-
+    
     public static void InitializeAds()
     {
         BannerSampleAdEditor = new Dictionary<string, GameObject>();
@@ -36,7 +37,7 @@ public class Yodo1EditorAds : MonoBehaviour
             AdHolder = Instantiate(Resources.Load("SampleAds/AdHolder") as GameObject);
             AdHolder.name = "Yodo1AdCanvas";
             AdHolderCanvas = AdHolder.transform.GetChild(0).GetComponent<Canvas>();
-            AdHolderCanvas.sortingOrder = HighestOrderCanvas();
+            AdHolderCanvas.sortingOrder = HighestOrder;
         }
         AdHolder.SetActive(true);
         if (sceneEventSystem == null)
@@ -77,21 +78,6 @@ public class Yodo1EditorAds : MonoBehaviour
             }
         }
     }
-
-    public static int HighestOrderCanvas()
-    {
-        Canvas[] canvases = GameObject.FindObjectsOfType<Canvas>();
-        int length = canvases.Length;
-        int highestOrder = canvases[0].sortingOrder;
-        for (int i = 1; i < length; i++)
-        {
-            if (highestOrder < canvases[i].sortingOrder)
-            {
-                highestOrder = canvases[i].sortingOrder;
-            }
-        }
-        return highestOrder + 1;
-    }
     public static void ShowStamdardBannerAdsInEditor(string IndexId)
     {
         if (AdHolder == null)
@@ -99,7 +85,7 @@ public class Yodo1EditorAds : MonoBehaviour
             AdHolder = Instantiate(Resources.Load("SampleAds/AdHolder") as GameObject);
             AdHolder.name = "Yodo1AdCanvas";
             AdHolderCanvas = AdHolder.transform.GetChild(0).GetComponent<Canvas>();
-            AdHolderCanvas.sortingOrder = HighestOrderCanvas();
+            AdHolderCanvas.sortingOrder = HighestOrder;
         }
         if (BannerSampleAdEditor == null)
         {
@@ -400,7 +386,7 @@ public class Yodo1EditorAds : MonoBehaviour
             AdHolder = Instantiate(Resources.Load("SampleAds/AdHolder") as GameObject);
             AdHolder.name = "Yodo1AdCanvas";
             AdHolderCanvas = AdHolder.transform.GetChild(0).GetComponent<Canvas>();
-            AdHolderCanvas.sortingOrder = HighestOrderCanvas();
+            AdHolderCanvas.sortingOrder = HighestOrder;
 
         }
         if (BannerSampleAdEditor == null)
@@ -464,7 +450,7 @@ public class Yodo1EditorAds : MonoBehaviour
                     CalculateAnchoringForAdaptiveBanner(align, out anchorMinX, out anchorMinY, out anchorMaxX, out anchorMaxY, out pivotX, out pivotY, out anchoredPositionX, out anchoredPositionY);
                 }
             }
-            BannerSampleAdEditorTemp.transform.SetSiblingIndex(BannerSampleAdEditorTemp.transform.parent.childCount - 3);
+            BannerSampleAdEditorTemp.transform.SetSiblingIndex(BannerSampleAdEditorTemp.transform.parent.childCount - 5);
             BannerSampleAdEditorTemp.GetComponent<RectTransform>().anchorMin = new Vector2(anchorMinX, anchorMinY);
             BannerSampleAdEditorTemp.GetComponent<RectTransform>().anchorMax = new Vector2(anchorMaxX, anchorMaxY);
             BannerSampleAdEditorTemp.GetComponent<RectTransform>().pivot = new Vector2(pivotX, pivotY);
@@ -548,7 +534,7 @@ public class Yodo1EditorAds : MonoBehaviour
             AdHolder = Instantiate(Resources.Load("SampleAds/AdHolder") as GameObject);
             AdHolder.name = "Yodo1AdCanvas";
             AdHolderCanvas = AdHolder.transform.GetChild(0).GetComponent<Canvas>();
-            AdHolderCanvas.sortingOrder = HighestOrderCanvas();
+            AdHolderCanvas.sortingOrder = HighestOrder;
 
         }
         if (NativeSampleAdEditor == null)
@@ -611,7 +597,7 @@ public class Yodo1EditorAds : MonoBehaviour
             }
 
             //NativeSampleAdEditorTemp.transform.SetAsFirstSibling();
-            NativeSampleAdEditorTemp.transform.SetSiblingIndex(NativeSampleAdEditorTemp.transform.parent.childCount - 3);
+            NativeSampleAdEditorTemp.transform.SetSiblingIndex(NativeSampleAdEditorTemp.transform.parent.childCount - 5);
 
             NativeSampleAdEditorTemp.GetComponent<RectTransform>().anchorMin = new Vector2(0, 1);
             NativeSampleAdEditorTemp.GetComponent<RectTransform>().anchorMax = new Vector2(0, 1);
@@ -651,7 +637,7 @@ public class Yodo1EditorAds : MonoBehaviour
             AdHolder = Instantiate(Resources.Load("SampleAds/AdHolder") as GameObject);
             AdHolder.name = "Yodo1AdCanvas";
             AdHolderCanvas = AdHolder.transform.GetChild(0).GetComponent<Canvas>();
-            AdHolderCanvas.sortingOrder = HighestOrderCanvas();
+            AdHolderCanvas.sortingOrder = HighestOrder;
 
         }
         if (NativeSampleAdEditor == null)
@@ -708,7 +694,7 @@ public class Yodo1EditorAds : MonoBehaviour
                 }
             }
 
-            NativeSampleAdEditorTemp.transform.SetSiblingIndex(NativeSampleAdEditorTemp.transform.parent.childCount - 3);
+            NativeSampleAdEditorTemp.transform.SetSiblingIndex(NativeSampleAdEditorTemp.transform.parent.childCount - 5);
             NativeSampleAdEditorTemp.GetComponent<RectTransform>().anchorMin = new Vector2(anchorMinX, anchorMinY);
             NativeSampleAdEditorTemp.GetComponent<RectTransform>().anchorMax = new Vector2(anchorMaxX, anchorMaxY);
             NativeSampleAdEditorTemp.GetComponent<RectTransform>().pivot = new Vector2(pivotX, pivotY);

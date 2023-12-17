@@ -664,6 +664,14 @@ MonoBehaviour:
       - Buy new card
       Flags: 0000
       Languages_Touch: []
+    - Term: Campaign
+      TermType: 0
+      Description: 
+      Languages:
+      - "\u041A\u0430\u043C\u043F\u0430\u043D\u0438\u044F"
+      - Campaign
+      Flags: 0000
+      Languages_Touch: []
     CaseInsensitiveTerms: 0
     OnMissingTranslation: 1
     mTerm_AppName: 

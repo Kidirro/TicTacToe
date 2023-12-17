@@ -2,6 +2,7 @@
 using Cards.CustomType;
 using TMPro;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 namespace UIElements

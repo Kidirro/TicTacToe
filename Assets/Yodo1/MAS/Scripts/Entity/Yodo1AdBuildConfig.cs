@@ -2,13 +2,29 @@
 
 namespace Yodo1.MAS
 {
+
+    public enum Yodo1MasUMPState {DISABLE, ENABLE, NOT_SET}
     public class Yodo1AdBuildConfig
     {
+        private Yodo1MasUMPState _enableUserMessageingPlatform = Yodo1MasUMPState.NOT_SET;
         private bool _enableAdaptiveBanner;
         private bool _enableUserPrivacyDialog;
         private string _userAgreementUrl;
         private string _privacyPolicyUrl;
         public Yodo1MasUserPrivacyConfig _agePopBuildConfig;
+
+        /// <summary>
+        /// Enable adaptive banner method, 
+        /// <c>"true"</c>, if enable UserMessageingPlatform, <c>"false"</c> otherwise.
+        /// </summary>
+        /// <param name="userMessageingPlatform"><c>"true"</c>, if enable adaptive banner, <c>"false"</c> otherwise.</param>
+        /// <returns></returns>
+        public Yodo1AdBuildConfig enableUserMessageingPlatform(Yodo1MasUMPState userMessageingPlatform)
+        {
+            this._enableUserMessageingPlatform = userMessageingPlatform;
+            return this;
+        }
+
 
         /// <summary>
         /// Enable adaptive banner method, 
@@ -57,6 +73,25 @@ namespace Yodo1.MAS
             Dictionary<string, object> dic = new Dictionary<string, object>();
             dic.Add("enableAdaptiveBanner", _enableAdaptiveBanner);
             dic.Add("enableUserPrivacyDialog", _enableUserPrivacyDialog);
+            switch(_enableUserMessageingPlatform) 
+            {
+                case Yodo1MasUMPState.DISABLE: 
+                {
+                    dic.Add("enableUserMessageingPlatform", "DISABLE");
+                    break;
+                }
+                case Yodo1MasUMPState.ENABLE:
+                {
+                    dic.Add("enableUserMessageingPlatform", "ENABLE");
+                    break;
+                }
+                default:
+                 {
+                    dic.Add("enableUserMessageingPlatform", "NOT_SET");
+                    break;
+                }
+            }
+            
             if (string.IsNullOrEmpty(_userAgreementUrl))
             {
                 dic.Add("userAgreementUrl", string.Empty);

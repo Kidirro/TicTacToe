@@ -2,11 +2,12 @@ using Cards.CustomType;
 using Cards.Interfaces;
 using UIElements;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using Zenject;
 
 namespace CardCollection
 {
-    public class CardCollectionUIObject : CardViewBase
+    public class CardCollectionUIObject : CardViewBase, IDragHandler, IPointerDownHandler, IPointerUpHandler
     {
         /// <summary>
         /// Информация карты как информационной сущности
@@ -61,17 +62,20 @@ namespace CardCollection
             _canvasGroup.alpha = (state) ? 1 : 0.2f;
         }
     
-        public void OnPointerDown()
+        public void OnDrag(PointerEventData eventData)
         {
-            _collectionUIService.StartTap(this);
+            _collectionUIService.OnDrag(eventData);
         }
 
-        public void OnPointerUp() 
+        public void OnPointerDown(PointerEventData eventData)
         {
-            _collectionUIService.EndTap(this);
+            _collectionUIService.StartTap(this,eventData);
         }
-        
-        
 
+        public void OnPointerUp(PointerEventData eventData)
+        {
+            
+            _collectionUIService.EndTap(this,eventData);
+        }
     }
 }

@@ -1,5 +1,6 @@
 using System;
 using CardCollection;
+using CardCollection.Interfaces;
 using Cards;
 using Cards.CustomType;
 using Coroutine.Interfaces;
@@ -37,6 +38,7 @@ namespace Network
         private IManaUIService _manaUIService;
         private IFieldFigureService _fieldFigureService;
         private IEmoteService _emoteService;
+        private ICollectionData _collectionData;
 
         [Inject]
         private void Construct(
@@ -49,7 +51,8 @@ namespace Network
             IManaService manaService,
             IManaUIService manaUIService,
             IFieldFigureService fieldFigureService,
-            IEmoteService emoteService)
+            IEmoteService emoteService,
+            ICollectionData collectionData)
         {
             _serializableEffects = serializableEffects;
             _effectService = effectService;
@@ -61,6 +64,7 @@ namespace Network
             _manaUIService = manaUIService;
             _fieldFigureService = fieldFigureService;
             _emoteService = emoteService;
+            _collectionData = collectionData;
         }
 
         #endregion
@@ -322,7 +326,7 @@ namespace Network
                     _manaUIService.UpdateManaUI();
                     break;
                 case 30:
-                    CardInfo data30 = CollectionManager.GetCardFromId((int) photonEvent.CustomData);
+                    CardInfo data30 = _collectionData.GetCardFromId((int) photonEvent.CustomData);
                     _historyService.AddHistoryCard(_playerService.GetCurrentPlayer(), data30);
                     break;
                 case 40:

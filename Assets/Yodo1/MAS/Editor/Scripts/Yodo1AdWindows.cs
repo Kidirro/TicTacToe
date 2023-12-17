@@ -19,8 +19,9 @@
         private static string app_admob_key = string.Empty;
         private static string resultString = string.Empty;
         private bool IsIOSRunTime = false;
-        private bool IsAndroidRunTime = false;
+        private static bool IsAndroidRunTime = false;
         Yodo1AdSettings adSettings;
+        private bool isMasCN = false;
 
         delegate void ApiCallback(string response);
 
@@ -72,6 +73,7 @@
         public Yodo1AdWindows()
         {
             selectPlarformTab = PlatfromTab.iOS;
+            isMasCN = Yodo1AdUtils.IsMASCN();
         }
 
         public static void Initialize(PlatfromTab platfromTab)
@@ -198,6 +200,19 @@
 
             GUILayout.BeginHorizontal(gUIStyle2, new GUILayoutOption[0]);
 
+            if(selectPlarformTab == PlatfromTab.Android && isMasCN)
+            {
+                //GUILayout.Label("", GUILayout.Width(120));
+                //GUILayout.Space(20);
+                //GUILayout.Button("", GUILayout.Width(0));
+                GUILayout.EndHorizontal();
+
+                //GUILayout.Space(10);
+                GUILayout.EndVertical();
+                GUILayout.EndVertical();
+
+                return;
+            }
             //Set AdMob App ID
             GUILayout.Label("AdMob App ID", GUILayout.Width(120));
 
@@ -264,7 +279,7 @@
         {
             if (selectPlarformTab == PlatfromTab.Android)
             {
-
+#if UNITY_ANDROID
                 if (Yodo1PostProcessAndroid.CheckConfiguration_Android(this.adSettings))
                 {
 #if UNITY_2019_1_OR_NEWER
@@ -277,6 +292,7 @@
                 {
                     return;
                 }
+#endif
             }
             if (selectPlarformTab == PlatfromTab.iOS)
             {

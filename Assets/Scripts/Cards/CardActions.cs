@@ -165,7 +165,7 @@ namespace Cards
         {
             for (int i = 0; i < 2; i++) _handPoolManipulator.AddCard(_playerService.GetCurrentPlayer());
             _handPoolView.UpdateCardUI();
-            _handPoolView.UpdateCardPosition();
+            _handPoolView.UpdateCardPosition(instantly:false);
         }
 
         private void FullHouse(Vector2Int chosenCell, CardInfo info)
@@ -173,7 +173,7 @@ namespace Cards
             for (int i = 0; i < _handPoolManipulator.MaxCardHand; i++)
                 _handPoolManipulator.AddCard(_playerService.GetCurrentPlayer());
             _handPoolView.UpdateCardUI();
-            _handPoolView.UpdateCardPosition();
+            _handPoolView.UpdateCardPosition(instantly:false);
         }
 
         #region Mana

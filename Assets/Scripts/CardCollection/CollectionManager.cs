@@ -7,11 +7,12 @@ using CardCollection.Interfaces;
 using Cards.CustomType;
 using Cards.Interfaces;
 using Coin.Interfaces;
+using ExitGames.Client.Photon;
 using SaveSystem;
 using TMPro;
 using UIElements.Interfaces;
-using UnityEditor.Localization.Plugins.XLIFF.V12;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using Zenject;
 using ICollectionUIService = Cards.Interfaces.ICollectionUIService;
@@ -35,13 +36,17 @@ namespace CardCollection
         [SerializeField]
         private List<GameObject> _viewBonusImageList = new List<GameObject>();
 
+        [SerializeField]
+        private ScrollRectEx _collectionScrollRect;
+        
+        [SerializeField]
+        private ScrollRectEx _deckScrollRect;
+
         private DateTime _startTimeTap = DateTime.MinValue;
         private const float TIME_TAP_VIEW = 0.5f;
         private const float ALPHA_PER_STEP = 0.05f;
 
         private const string CARD_INFO_PATH = "Cards/";
-
-        private static Dictionary<int, CardInfo> _cardListStat = new Dictionary<int, CardInfo>();
 
         [Header("Deck properties"), SerializeField]
         private Transform _deckParent;
@@ -75,6 +80,7 @@ namespace CardCollection
         private IEnumerator _fadeInCoroutine;
 
         private bool _isEdit;
+        private bool _isDrag;
 
         #region Dependency
 
@@ -84,6 +90,7 @@ namespace CardCollection
         private IStoreEventsAnalyticService _storeEventsAnalyticService;
         private ICardCollectionFactory _cardCollectionFactory;
         private IBuyingAnimationController _buyingAnimationController;
+        private ICollectionData _collectionData;
 
         [Inject]
         private void Construct(
@@ -92,7 +99,8 @@ namespace CardCollection
             ICollectionEventsAnalyticService collectionEventsAnalyticService,
             IStoreEventsAnalyticService storeEventsAnalyticService,
             ICardCollectionFactory cardCollectionFactory,
-            IBuyingAnimationController buyingAnimationController)
+            IBuyingAnimationController buyingAnimationController,
+            ICollectionData collectionData)
         {
             _cardList = cardList;
             _coinService = coinService;
@@ -100,6 +108,7 @@ namespace CardCollection
             _storeEventsAnalyticService = storeEventsAnalyticService;
             _cardCollectionFactory = cardCollectionFactory;
             _buyingAnimationController = buyingAnimationController;
+            _collectionData = collectionData;
         }
 
         #endregion
@@ -107,19 +116,23 @@ namespace CardCollection
         private void Start()
         {
             _viewCardCanvas.gameObject.SetActive(false);
-            _cardListStat = new Dictionary<int, CardInfo>();
-            var resourcesCard = Resources.LoadAll<CardInfo>(CARD_INFO_PATH);
-            foreach (var card in resourcesCard)
+
+            if (_collectionData.IsInit() == false)
             {
-                _cardListStat[card.CardId] = card;
+                _collectionData.Initialize();
+                var resourcesCard = Resources.LoadAll<CardInfo>(CARD_INFO_PATH);
+                foreach (var card in resourcesCard)
+                {
+                    _collectionData.AddCard(card);
+                }
             }
 
 
             if (_cardCollections.Count == 0)
                 _cardCollections =
-                    _cardCollectionFactory.CreateCollectionUIList(_cardListStat.Values.ToList(), _collectionParent);
+                    _cardCollectionFactory.CreateCollectionUIList(_collectionData.GetCardList(), _collectionParent);
             if (_cardDeck.Count == 0)
-                _cardDeck = _cardCollectionFactory.CreateCollectionUIList(_cardListStat.Values.ToList(), _deckParent);
+                _cardDeck = _cardCollectionFactory.CreateCollectionUIList(_collectionData.GetCardList(), _deckParent);
 
             LoadCardUnlockData();
 
@@ -168,9 +181,9 @@ namespace CardCollection
         {
             _cardList.CardListClear();
 
-            foreach (var card in _currentDeckData.List)
+            foreach (int card in _currentDeckData.List)
             {
-                _cardList.CardListAdd(_cardListStat[card]);
+                _cardList.CardListAdd(_collectionData.GetCardFromId(card));
             }
         }
 
@@ -200,11 +213,11 @@ namespace CardCollection
 
         public void UnlockAllCard()
         {
-            List<KeyValuePair<int, bool>> keyList = _cardBoolUnlockData.BoolData.Where(x => !x.Value).ToList();
+            List<KeyValuePair<int, bool>> keyList = _cardBoolUnlockData.BoolData.Where(x => x.Value == false).ToList();
 
             for (int i = 0; i < keyList.Count; i++)
             {
-                _buyingAnimationController.ShowBuyingAnimation(_cardListStat[keyList[i].Key]);
+                _buyingAnimationController.ShowBuyingAnimation(_collectionData.GetCardFromId(keyList[i].Key));
                 _cardBoolUnlockData.BoolData[keyList[i].Key] = true;
                 _currentDeckData.List.Add(keyList[i].Key);
             }
@@ -220,7 +233,7 @@ namespace CardCollection
             if (_cardBoolUnlockData == null)
             {
                 _cardBoolUnlockData = new CardBoolData();
-                foreach (var card in _cardListStat.Values)
+                foreach (var card in _collectionData.GetCardList())
                 {
                     //Синхронизация со старыми сейвами
                     if (PlayerPrefs.HasKey("IsCard" + card.CardName + "Unlocked"))
@@ -271,11 +284,6 @@ namespace CardCollection
             return _cardBoolUnlockData.BoolData[cardInfo.CardId];
         }
 
-        public static CardInfo GetCardFromId(int id)
-        {
-            return _cardListStat[id];
-        }
-
         private void PickCard(CardInfo card)
         {
             if (_redactedDeck.Exists(x => x == card.CardId))
@@ -310,16 +318,43 @@ namespace CardCollection
             else throw new Exception("Card count less minimum");
         }
 
-        public void StartTap(CardCollectionUIObject cardCollectionUIObject)
+        public void StartTap(CardCollectionUIObject cardCollectionUIObject, PointerEventData eventData)
         {
+            _collectionScrollRect.OnBeginDrag(eventData);
+            _deckScrollRect.OnBeginDrag(eventData);
+            
             _startTimeTap = DateTime.Now;
             _fadeInCoroutine = StartTapProcess(cardCollectionUIObject);
+            _isDrag = false;
             StartCoroutine(_fadeInCoroutine);
         }
 
-        public void EndTap(CardCollectionUIObject cardCollectionUIObject)
+        public void OnDrag(PointerEventData eventData)
         {
+            _collectionScrollRect.OnDrag(eventData);
+            _deckScrollRect.OnDrag(eventData);
+
+            if (_isDrag == false)
+            {
+                StopCoroutine(_fadeInCoroutine);
+                if ((DateTime.Now - _startTimeTap).TotalSeconds > TIME_TAP_VIEW)
+                {
+                    StartCoroutine(EndTapProcess());
+                }
+            }
+
+            _isDrag = true;
+        }
+
+        public void EndTap(CardCollectionUIObject cardCollectionUIObject, PointerEventData eventData)
+        {
+            _collectionScrollRect.OnEndDrag(eventData);
+            _deckScrollRect.OnEndDrag(eventData);
             StopCoroutine(_fadeInCoroutine);
+            
+            if (_isDrag) 
+                return;
+            
             if ((DateTime.Now - _startTimeTap).TotalSeconds > TIME_TAP_VIEW)
             {
                 StartCoroutine(EndTapProcess());
@@ -398,5 +433,7 @@ namespace CardCollection
             _viewCardCanvas.alpha = 0;
             _viewCardCanvas.gameObject.SetActive(false);
         }
+        
+        
     }
 }

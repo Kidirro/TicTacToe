@@ -3,14 +3,19 @@
     using UnityEngine;
     using System;
     using System.Collections.Generic;
+    using UnityEngine.SceneManagement;
+    using UnityEngine.EventSystems;
 
     public class Yodo1U3dMasCallback : MonoBehaviour
     {
         private const int FLAG_INITIALIZE = 0;
         private const int FLAG_AD_EVENT = 1;
+        private const int FLAG_APP_EVENT = 2;
 
         private const int EVENT_INITIALIZE_FAILURE = 0;
         private const int EVENT_INITIALIZE_SUCCESS = 1;
+
+        private const int EVENT_APP_FOREGROUND = 1;
 
         static bool _initialized = false;
 
@@ -129,6 +134,19 @@
             }
         }
 
+        private static System.Action _onAppEnterForegroundEvent;
+        public static event System.Action OnAppEnterForegroundEvent
+        {
+            add
+            {
+                _onAppEnterForegroundEvent += value;
+            }
+            remove
+            {
+                _onAppEnterForegroundEvent -= value;
+            }
+        }
+
         private static System.Action _onBannerAdOpenedEvent;
         private static System.Action<Yodo1U3dAdError> _onBannerAdErrorEvent;
         private static System.Action _onBannerAdClosedEvent;
@@ -172,15 +190,29 @@
             }
         }
 
+        private static System.Action _onInterstitialAdOpeningEvent;
         private static System.Action _onInterstitialAdOpenedEvent;
         private static System.Action _onInterstitialAdClosedEvent;
         private static System.Action<Yodo1U3dAdError> _onInterstitialAdErrorEvent;
 
         public class Interstitial
         {
+            public static event System.Action OnAdOpeningEvent
+            {
+                add
+                {
+                    _onInterstitialAdOpeningEvent += value;
+                }
+                remove
+                {
+                    _onInterstitialAdOpeningEvent -= value;
+                }
+            }
+
             /**
              * Fired when an interstitial ad is displayed (may not be received by Unity until the interstitial ad closes).
              */
+            [Obsolete("Yodo1U3dMasCallback.Interstitial.OnAdOpenedEvent is obsolete and will be deprecated soon. Use Yodo1U3dInterstitialAd.GetInstance().OnAdOpenedEvent")]
             public static event System.Action OnAdOpenedEvent
             {
                 add
@@ -192,7 +224,7 @@
                     _onInterstitialAdOpenedEvent -= value;
                 }
             }
-
+            [Obsolete("Yodo1U3dMasCallback.Interstitial.OnAdClosedEvent is obsolete and will be deprecated soon. Use Yodo1U3dInterstitialAd.GetInstance().OnAdClosedEvent")]
             public static event System.Action OnAdClosedEvent
             {
                 add
@@ -205,9 +237,7 @@
                 }
             }
 
-            //[System.Obsolete("Please use `Yodo1U3dMasCallback.Interstitial` instead.\n" +
-            //"Yodo1U3dMasCallback.Interstitial.OnAdLoadFailedEvent += OnInterstitialAdLoadFailedEvent;\n" +
-            //"Yodo1U3dMasCallback.Interstitial.OnAdOpenFailedEvent += OnInterstitialAdOpenFailedEvent;", false)]
+            [Obsolete("Yodo1U3dMasCallback.Interstitial.OnAdErrorEvent is obsolete and will be deprecated soon. Use Yodo1U3dInterstitialAd.GetInstance().OnAdOpenFailedEvent")]
             public static event System.Action<Yodo1U3dAdError> OnAdErrorEvent
             {
                 add
@@ -231,6 +261,7 @@
             /**
              * Fired when an rewarded ad is displayed (may not be received by Unity until the rewarded ad closes).
              */
+            [Obsolete("Yodo1U3dMasCallback.Rewarded.OnAdOpenedEvent is obsolete and will be deprecated soon. Use Yodo1U3dRewardAd.GetInstance().OnAdOpenedEvent")]
             public static event System.Action OnAdOpenedEvent
             {
                 add
@@ -242,7 +273,7 @@
                     _onRewardedAdOpenedEvent -= value;
                 }
             }
-
+            [Obsolete("Yodo1U3dMasCallback.Rewarded.OnAdClosedEvent is obsolete and will be deprecated soon. Use Yodo1U3dRewardAd.GetInstance().OnAdClosedEvent")]
             public static event System.Action OnAdClosedEvent
             {
                 add
@@ -254,7 +285,7 @@
                     _onRewardedAdClosedEvent -= value;
                 }
             }
-
+            [Obsolete("Yodo1U3dMasCallback.Rewarded.OnAdReceivedRewardEvent is obsolete and will be deprecated soon. Use Yodo1U3dRewardAd.GetInstance().OnAdEarnedEvent")]
             public static event System.Action OnAdReceivedRewardEvent
             {
                 add
@@ -267,9 +298,7 @@
                 }
             }
 
-            //[System.Obsolete("Please use `Yodo1U3dMasCallback.Rewarded` instead.\n" +
-            //"Yodo1U3dMasCallback.Rewarded.OnAdLoadFailedEvent += OnRewardedAdLoadFailedEvent;\n" +
-            //"Yodo1U3dMasCallback.Rewarded.OnAdOpenFailedEvent += OnRewardedAdOpenFailedEvent;", false)]
+            [Obsolete("Yodo1U3dMasCallback.Rewarded.OnAdErrorEvent is obsolete and will be deprecated soon. Use Yodo1U3dRewardAd.GetInstance().OnAdOpenFailedEvent")]
             public static event System.Action<Yodo1U3dAdError> OnAdErrorEvent
             {
                 add
@@ -291,7 +320,33 @@
                 DontDestroyOnLoad(gameObject);
             }
         }
+#if UNITY_EDITOR
+        private void OnEnable()
+        {
+            SceneManager.sceneLoaded += OnSceneLoaded;
+        }
+        private void OnDisable()
+        {
+            SceneManager.sceneLoaded -= OnSceneLoaded;
+        }
+        void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+        {
+            EventSystem sceneEventSystem = FindObjectOfType<EventSystem>();
+            if (GameObject.Find("Yodo1AdCanvas") == null)
+            {
+                Yodo1EditorAds.AdHolder = Instantiate(Resources.Load("SampleAds/AdHolder") as GameObject);
+                Yodo1EditorAds.AdHolder.name = "Yodo1AdCanvas";
+                Yodo1EditorAds.AdHolderCanvas = Yodo1EditorAds.AdHolder.transform.GetChild(0).GetComponent<Canvas>();
+                Yodo1EditorAds.AdHolderCanvas.sortingOrder = Yodo1EditorAds.HighestOrder;
+            }
+            if (sceneEventSystem == null)
+            {
+                var eventSystem = new GameObject("EventSystem", typeof(EventSystem), typeof(StandaloneInputModule));
+            }
+            Yodo1EditorAds.InitializeAds();
 
+        }
+#endif
         #region Pause game
 
         private static bool _autoPauseGame = true;
@@ -477,6 +532,16 @@
                     default:
                         break;
                 }
+            } else if (flag == FLAG_APP_EVENT)
+            {
+                if (dataDic.ContainsKey("status"))
+                {
+                    int status = int.Parse(dataDic["status"].ToString());
+                    if (status == EVENT_APP_FOREGROUND)
+                    {
+                        InvokeEvent(_onAppEnterForegroundEvent);
+                    }
+                }
             }
         }
 
@@ -506,6 +571,9 @@
                         UnPause();
                     }
                     InvokeEvent(_onInterstitialAdErrorEvent, adError);
+                    break;
+                case Yodo1U3dAdEvent.AdOpening:
+                    InvokeEvent(_onInterstitialAdOpeningEvent);
                     break;
                 case Yodo1U3dAdEvent.AdOpened:
                     Pause();

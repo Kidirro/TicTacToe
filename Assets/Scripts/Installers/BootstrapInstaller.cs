@@ -1,4 +1,5 @@
 using Analytic;
+using CardCollection;
 using Cards;
 using Coin;
 using Coroutine;
@@ -32,6 +33,12 @@ public class BootstrapInstaller : MonoInstaller, IInitializable
         BindIAPurchase();
         BindCoroutineQueue();
         BindLanguage();
+        BindCollectionData();
+    }
+
+    private void BindCollectionData()
+    {
+        Container.BindInterfacesAndSelfTo<CollectionData>().AsSingle();
     }
 
     private void BindLanguage()
